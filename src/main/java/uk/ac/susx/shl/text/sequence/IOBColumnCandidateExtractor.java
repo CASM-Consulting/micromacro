@@ -126,10 +126,16 @@ public class IOBColumnCandidateExtractor {
                             candidate = optional.get();
                             return true;
                         } else {
+                            try {
+                                reader.close();
+                            } catch (IOException e) { }
                             return false;
                         }
 
                     } catch (IOException e) {
+                        try {
+                            reader.close();
+                        } catch (IOException ee) { }
                         return false;
                     }
 

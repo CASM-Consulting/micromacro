@@ -8,6 +8,8 @@ import java.util.Map;
 public class Match {
     private final String match;
     private final Candidate candidate;
+
+
     private final double score;
     private final Map<String, String> metadata;
 
@@ -26,4 +28,20 @@ public class Match {
     public String toString() {
         return String.format("%s %.2f", match, score);
     }
+    public String getText() {
+        return match;
+    }
+
+    public Candidate getCandidate() {
+        return candidate;
+    }
+
+    public double getScore() {
+        return score;
+    }
+
+    public Map<String, String> getMetadata() {
+        return metadata;
+    }
+
 }

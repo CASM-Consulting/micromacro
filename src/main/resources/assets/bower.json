@@ -1,0 +1,14 @@
+{
+  "name": "micromacro",
+  "version": "0.1.0",
+  "dependencies": {
+    "angular": "latest",
+    "angular-route": "latest",
+    "angular-bootstrap": "latest",
+    "ui-leaflet":"latest",
+    "bootstrap": "3.3.7",
+    "angular-nvd3": "latest",
+    "flot": "latest"
+  },
+  "private": true
+}

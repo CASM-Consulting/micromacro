@@ -1,6 +1,7 @@
 package uk.ac.susx.shl.text.sequence;
 
-import java.io.IOException;
+import java.io.BufferedWriter;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.List;
@@ -18,23 +19,41 @@ public class Sandbox {
 
         Iterator<Candidate> itr = extractor.iterator();
 
+        BufferedWriter writer = Files.newBufferedWriter(Paths.get("ob-places.csv"));
+
+        writer.write("candidate,match,score");
+        writer.newLine();
+
         while(itr.hasNext()) {
 
             Candidate candidate = itr.next();
 
             List<Match> matches = knowledgeBase.getMatches(candidate);
 
-            System.out.println(candidate.getText());
+//            System.out.println(candidate.getText());
 
             for(Match match : matches) {
 
+                double score = match.getScore();
+                String text = match.getText();
 
-                System.out.println(match.toString());
+                writer.write(match.getCandidate().getText().replaceAll(",", " "));
+                writer.write(",");
+                writer.write(text.replaceAll(",", " "));
+                writer.write(",");
+                writer.write(Double.toString(score));
+                writer.newLine();
+
+//                System.out.println(match.toString());
             }
 
-            System.out.println("================================================");
+//            System.out.println("================================================");
+
+
 
         }
+
+        writer.close();
 
     }
 
