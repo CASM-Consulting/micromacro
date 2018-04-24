@@ -1,0 +1,5 @@
+server:
+  rootPath: /api/*
+assets:
+  overrides:
+    /: src/main/resources/assets/
