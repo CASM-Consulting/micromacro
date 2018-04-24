@@ -58,8 +58,6 @@ public class GeoJsonKnowledgeBase implements KnowledegeBase {
 
         GeometryFactory gf = new GeometryFactory();
 
-
-
         MathTransform transform = CRS.findMathTransform(crs, CRS.decode("EPSG:4326"));
 
         FeatureIterator itr = fc.features();
@@ -73,7 +71,6 @@ public class GeoJsonKnowledgeBase implements KnowledegeBase {
             BoundingBox bb = f.getBounds();
 
             Point target = (Point)JTS.transform(gf.createPoint(new Coordinate(bb.getMedian(0), bb.getMedian(1))), transform );
-
 
             Map<String, String> datum = new HashMap<>();
 

@@ -1,4 +1,4 @@
-package uk.ac.susx.shl.health;
+package uk.ac.susx.shl.webapp.health;
 
 import com.codahale.metrics.health.HealthCheck;
 

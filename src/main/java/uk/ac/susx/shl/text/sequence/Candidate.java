@@ -13,6 +13,15 @@ public class Candidate {
 
     private Candidate(String t) {
         text = t;
+
+//        StringBuilder sb = new StringBuilder();
+//
+//        for(int i = fromI; i < toI; ++i) {
+//            for(int j = fromJ; j < toJ; ++j) {
+//                String token = sentences.get(i).get(j);
+//                sb.append(token);
+//            }
+//        }
     }
 
 

@@ -1,4 +1,4 @@
-package uk.ac.susx.shl.resources;
+package uk.ac.susx.shl.webapp.resources;
 
 import com.codahale.metrics.annotation.Timed;
 

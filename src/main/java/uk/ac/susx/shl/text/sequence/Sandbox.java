@@ -15,7 +15,7 @@ public class Sandbox {
 
         GeoJsonKnowledgeBase knowledgeBase = new GeoJsonKnowledgeBase(Paths.get("LL_PL_PA_WA_POINTS_FeaturesT.json"));
 
-        IOBColumnCandidateExtractor extractor = new IOBColumnCandidateExtractor(Paths.get("placeName.out"));
+        IOBColumn2Document extractor = new IOBColumn2Document(Paths.get("placeName.out"));
 
         Iterator<Candidate> itr = extractor.iterator();
 

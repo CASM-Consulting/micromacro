@@ -1,11 +1,11 @@
-package uk.ac.susx.shl;
+package uk.ac.susx.shl.webapp;
 
 import io.dropwizard.Application;
 import io.dropwizard.bundles.assets.ConfiguredAssetsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
-import uk.ac.susx.shl.health.DefaultHealthCheck;
-import uk.ac.susx.shl.resources.HelloWorldResource;
+import uk.ac.susx.shl.webapp.health.DefaultHealthCheck;
+import uk.ac.susx.shl.webapp.resources.HelloWorldResource;
 
 public class MicroMacroApplication extends Application<MicroMacroConfiguration> {
 

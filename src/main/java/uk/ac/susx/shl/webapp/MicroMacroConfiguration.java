@@ -1,4 +1,4 @@
-package uk.ac.susx.shl;
+package uk.ac.susx.shl.webapp;
 
 import io.dropwizard.Configuration;
 import com.fasterxml.jackson.annotation.JsonProperty;

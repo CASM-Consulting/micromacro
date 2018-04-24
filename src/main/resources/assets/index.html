@@ -11,7 +11,15 @@
 
 <div ng-controller="OBMapController">
 
-    <leaflet width="900" height="800px" center="center" tiles="tiles" defaults="defaults"></leaflet>
+    <leaflet
+            width="900"
+            height="800px"
+            center="center"
+            tiles="tiles"
+            defaults="defaults"
+            markers="markers"
+            geojson="geojson"
+    ></leaflet>
     <button ng-click="changeTiles('oldlondon')" class="btn btn-default">Old London</button>
     <button ng-click="changeTiles('openstreetmap')" class="btn btn-default">Open Street Maps</button>
 </div>
@@ -21,7 +29,7 @@
 <script src="bower_components/bootstrap/dist/js/bootstrap.min.js" charset="utf-8"></script>
 <script src="bower_components/angular/angular.min.js" charset="utf-8"></script>
 <script src="bower_components/angular-route/angular-route.min.js" charset="utf-8"></script>
-<script src="bower_components/angular-ui/build/angular-ui.min.js" charset="utf-8"></script>
+<!--<script src="bower_components/angular-ui/build/angular-ui.min.js" charset="utf-8"></script>-->
 <script src="bower_components/angular-bootstrap/ui-bootstrap.min.js" charset="utf-8"></script>
 
 <script src="bower_components/angular-simple-logger/dist/angular-simple-logger.js"></script>
