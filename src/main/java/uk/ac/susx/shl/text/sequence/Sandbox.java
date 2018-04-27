@@ -17,7 +17,7 @@ public class Sandbox {
 
         IOBColumn2Document extractor = new IOBColumn2Document(Paths.get("placeName.out"));
 
-        Iterator<Candidate> itr = extractor.iterator();
+        Iterator<Document> itr = extractor.iterator();
 
         BufferedWriter writer = Files.newBufferedWriter(Paths.get("ob-places.csv"));
 
@@ -26,26 +26,32 @@ public class Sandbox {
 
         while(itr.hasNext()) {
 
-            Candidate candidate = itr.next();
+            Document document = itr.next();
 
-            List<Match> matches = knowledgeBase.getMatches(candidate);
+            for(List<Candidate> candidates : document.getCandidates("planeName")) {
+                for(Candidate candidate : candidates) {
+
+                    List<Match> matches = knowledgeBase.getMatches(candidate);
 
 //            System.out.println(candidate.getText());
 
-            for(Match match : matches) {
+                    for(Match match : matches) {
 
-                double score = match.getScore();
-                String text = match.getText();
+                        double score = match.getScore();
+                        String text = match.getText();
 
-                writer.write(match.getCandidate().getText().replaceAll(",", " "));
-                writer.write(",");
-                writer.write(text.replaceAll(",", " "));
-                writer.write(",");
-                writer.write(Double.toString(score));
-                writer.newLine();
+                        writer.write(match.getCandidate().getText().replaceAll(",", " "));
+                        writer.write(",");
+                        writer.write(text.replaceAll(",", " "));
+                        writer.write(",");
+                        writer.write(Double.toString(score));
+                        writer.newLine();
 
 //                System.out.println(match.toString());
+                    }
+                }
             }
+
 
 //            System.out.println("================================================");
 

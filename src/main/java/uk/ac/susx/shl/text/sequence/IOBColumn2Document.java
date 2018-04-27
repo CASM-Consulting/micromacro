@@ -1,6 +1,7 @@
 package uk.ac.susx.shl.text.sequence;
 
-import javax.print.Doc;
+import uk.ac.susx.tag.method51.core.collections.ImmutableMap;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -74,15 +75,15 @@ public class IOBColumn2Document {
     }
 
 
-    private List<Document.Builder.Span> getSpans(List<String> lines) {
-        List<Document.Builder.Span> spans = new ArrayList<>();
+    private List<Document.Span> getSpans(List<String> lines) {
+        List<Document.Span> spans = new ArrayList<>();
         int from = 0;
         int to = 0;
         int i = 0;
         String wasTag = null;
         for(String line : lines) {
             String token = getToken(line);
-            String tag = getToken(line);
+            String tag = getTag(line);
             switch (getIOB(tag)) {
                 case B: {
                     from = i;
@@ -94,12 +95,14 @@ public class IOBColumn2Document {
                 }
                 case O: {
                     to = i;
-                    spans.add(new Document.Builder.Span(from, to, wasTag));
+                    if(wasTag != null) {
+                        spans.add(new Document.Span(from, to, wasTag));
+                        wasTag = null;
+                    }
                     break;
                 }
                 default: {
                     throw new NotIOB(line);
-                    break;
                 }
 
             }
@@ -124,43 +127,36 @@ public class IOBColumn2Document {
 
     private Optional<Document> getDocument(BufferedReader reader) throws IOException {
 
-        Document.Builder builder = new Document.Builder();
+        Document document = new Document("ob-trial", "placeName");
 
         List<String> lines = null;
         int i = 0;
         try {
             while( (lines = getLines(reader)) != null) {
-                ++i;
-                builder.sentence(getTokens(lines));
-                builder.spans(getSpans(lines));
 
+                List<String> tokens = new ArrayList<>();
+
+                for(String line : lines) {
+                    tokens.add(getToken(line));
+                }
+
+                List<Document.Span> spans = getSpans(lines);
+
+                document = document.with(tokens, ImmutableMap.of("placeName", spans));
+
+                ++i;
             }
         } catch (ArrayIndexOutOfBoundsException e) {
-            System.err.println(line);
+            System.err.println(lines);
             throw e;
         }
 
-        if(line == null || line.equals("")) {
+        if(document.size()==0) {
             return Optional.empty();
-        }
-//        else if (!isB(line)) {
-//            throw new RuntimeException("Not IOB? " + line + " " + n);
-//        }
-
-
-        sb.append(getToken(line));
-
-        try {
-            while(isI(line = reader.readLine())) {
-                sb.append(" ").append(getToken(line));
-                ++i;
-            }
-        } catch (ArrayIndexOutOfBoundsException e) {
-            System.err.println(line);
-            throw e;
+        } else {
+            return Optional.of(document);
         }
 
-        return Optional.of(Candidate.of(sb.toString()));
     }
 
     private String getToken(String line) {
@@ -179,31 +175,22 @@ public class IOBColumn2Document {
         if(line == null) {
             return false;
         }
-        String[] bits = line.split(split);
-        if(bits.length != 2) {
-            return true;
-        } else {
-            return bits[1].equals(o);
-        }
+        return getIOB(line).equals(IOB.O);
     }
 
     private boolean isB(String line) {
         if(line == null) {
             return false;
         }
-        return line.split(split)[1].equals(b);
+        return getIOB(line).equals(IOB.B);
     }
 
     private boolean isI(String line) {
         if(line == null) {
             return false;
         }
-        String[] bits = line.split(split);
-        if(bits.length != 2) {
-            return false;
-        } else {
-            return bits[1].equals(i);
-        }
+        return getIOB(line).equals(IOB.B);
+
     }
 
     public Iterator<Document> iterator() throws IOException {

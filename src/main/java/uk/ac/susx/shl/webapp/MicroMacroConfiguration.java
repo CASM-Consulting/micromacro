@@ -10,6 +10,11 @@ import javax.validation.Valid;
 import javax.validation.constraints.*;
 
 public class MicroMacroConfiguration extends Configuration implements AssetsBundleConfiguration {
+
+    @NotNull
+    @JsonProperty
+    String geoJsonPath;
+
     @Valid
     @NotNull
     @JsonProperty
@@ -18,4 +23,9 @@ public class MicroMacroConfiguration extends Configuration implements AssetsBund
     @Override
     public AssetsConfiguration getAssetsConfiguration() {
         return assets;
-    }}
+    }
+
+
+
+
+}

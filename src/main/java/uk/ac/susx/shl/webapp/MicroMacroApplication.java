@@ -6,6 +6,9 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import uk.ac.susx.shl.webapp.health.DefaultHealthCheck;
 import uk.ac.susx.shl.webapp.resources.HelloWorldResource;
+import uk.ac.susx.shl.webapp.resources.PlacesResource;
+
+import java.io.IOException;
 
 public class MicroMacroApplication extends Application<MicroMacroConfiguration> {
 
@@ -26,8 +29,10 @@ public class MicroMacroApplication extends Application<MicroMacroConfiguration> 
 
     @Override
     public void run(final MicroMacroConfiguration configuration,
-                    final Environment environment) {
-        final HelloWorldResource resource = new HelloWorldResource();
+                    final Environment environment) throws IOException {
+
+        final PlacesResource resource = new PlacesResource(configuration.geoJsonPath);
+
         environment.jersey().register(resource);
 
         final DefaultHealthCheck healthCheck =

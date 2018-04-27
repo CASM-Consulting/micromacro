@@ -6,10 +6,9 @@ import java.util.Map;
  * Created by sw206 on 16/04/2018.
  */
 public class Match {
+
     private final String match;
     private final Candidate candidate;
-
-
     private final double score;
     private final Map<String, String> metadata;
 
