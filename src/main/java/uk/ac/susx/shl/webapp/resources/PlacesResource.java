@@ -1,9 +1,8 @@
 package uk.ac.susx.shl.webapp.resources;
 
 
-import com.codahale.metrics.annotation.Timed;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import uk.ac.susx.shl.text.sequence.*;
+import uk.ac.susx.shl.data.Match;
+import uk.ac.susx.shl.data.geo.GeoJsonKnowledgeBase;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;

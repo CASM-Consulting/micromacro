@@ -1,4 +1,6 @@
-package uk.ac.susx.shl.text.sequence;
+package uk.ac.susx.shl.data;
+
+import uk.ac.susx.shl.data.text.sequence.Candidate;
 
 import java.util.List;
 

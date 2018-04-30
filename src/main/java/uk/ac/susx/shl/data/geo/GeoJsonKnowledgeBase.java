@@ -1,4 +1,4 @@
-package uk.ac.susx.shl.text.sequence;
+package uk.ac.susx.shl.data.geo;
 
 
 import com.google.common.collect.Sets;
@@ -6,6 +6,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import me.xdrop.fuzzywuzzy.FuzzySearch;
+import me.xdrop.fuzzywuzzy.algorithms.WeightedRatio;
 import me.xdrop.fuzzywuzzy.model.ExtractedResult;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
@@ -20,6 +21,9 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
+import uk.ac.susx.shl.data.text.sequence.Candidate;
+import uk.ac.susx.shl.data.KnowledegeBase;
+import uk.ac.susx.shl.data.Match;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -109,8 +113,7 @@ public class GeoJsonKnowledgeBase implements KnowledegeBase {
         for(String key : keyList) {
             Set<String> keyLetters = this.keyLetters.get(key);
             Set<String> intersection = Sets.intersection(targetLetters, keyLetters);
-            Set<String> union = Sets.union(targetLetters, keyLetters);
-            double sim = intersection.size()/(double)union.size();
+            double sim = intersection.size()/(double)targetLetters.size();
             if(sim > 0.5){
                 keys.add(key);
             }
@@ -126,7 +129,8 @@ public class GeoJsonKnowledgeBase implements KnowledegeBase {
 
         List<String> keys = filterKeys(text);
 
-        List<ExtractedResult> top = FuzzySearch.extractTop(text, keys, 1);
+        List<ExtractedResult> top = FuzzySearch.extractTop(text, keys, new WeightedRatio(),1);
+//        List<ExtractedResult> top = FuzzySearch.extractTop(text, keys, new WeightedRatio(),10);
 
         List<Match> matches = new ArrayList<>();
 

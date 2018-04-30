@@ -1,4 +1,4 @@
-package uk.ac.susx.shl.text.sequence;
+package uk.ac.susx.shl.data.text;
 
 import uk.ac.susx.tag.method51.core.collections.ImmutableMap;
 

@@ -1,4 +1,4 @@
-package uk.ac.susx.shl.text.sequence;
+package uk.ac.susx.shl.data.text;
 
 import java.util.List;
 

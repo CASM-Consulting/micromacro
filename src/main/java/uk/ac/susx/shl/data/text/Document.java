@@ -1,10 +1,9 @@
-package uk.ac.susx.shl.text.sequence;
+package uk.ac.susx.shl.data.text;
 
 import com.google.common.collect.ImmutableList;
 import uk.ac.susx.tag.method51.core.collections.ImmutableMap;
 import uk.ac.susx.tag.method51.core.meta.Datum;
 import uk.ac.susx.tag.method51.core.meta.Key;
-import uk.ac.susx.tag.method51.core.meta.span.Span;
 import uk.ac.susx.tag.method51.core.meta.span.Spans;
 import uk.ac.susx.tag.method51.core.meta.types.RuntimeType;
 

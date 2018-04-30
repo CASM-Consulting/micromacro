@@ -1,4 +1,4 @@
-package uk.ac.susx.shl.text.sequence;
+package uk.ac.susx.shl.data.text;
 
 /**
  * Created by sw206 on 16/04/2018.

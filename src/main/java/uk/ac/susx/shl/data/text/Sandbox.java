@@ -1,4 +1,7 @@
-package uk.ac.susx.shl.text.sequence;
+package uk.ac.susx.shl.data.text;
+
+import uk.ac.susx.shl.data.Match;
+import uk.ac.susx.shl.data.geo.GeoJsonKnowledgeBase;
 
 import java.io.BufferedWriter;
 import java.nio.file.Files;
