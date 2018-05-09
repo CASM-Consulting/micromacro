@@ -1,6 +1,6 @@
 package uk.ac.susx.shl.text.sequence;
 
-import uk.ac.susx.tag.method51.core.collections.ImmutableMap;
+import com.google.common.collect.ImmutableMap;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -126,8 +126,8 @@ public class IOBColumn2Document {
     }
 
     private Optional<Document> getDocument(BufferedReader reader) throws IOException {
-
         Document document = new Document("ob-trial", "placeName");
+
 
         List<String> lines = null;
         int i = 0;
