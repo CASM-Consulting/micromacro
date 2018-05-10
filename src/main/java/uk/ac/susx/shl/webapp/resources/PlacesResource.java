@@ -3,6 +3,9 @@ package uk.ac.susx.shl.webapp.resources;
 
 import uk.ac.susx.shl.data.Match;
 import uk.ac.susx.shl.data.geo.GeoJsonKnowledgeBase;
+import uk.ac.susx.shl.data.text.Candidate;
+import uk.ac.susx.shl.data.text.Document;
+import uk.ac.susx.shl.data.text.IOBColumn2Document;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;

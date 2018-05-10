@@ -21,7 +21,7 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
-import uk.ac.susx.shl.data.text.sequence.Candidate;
+import uk.ac.susx.shl.data.text.Candidate;
 import uk.ac.susx.shl.data.KnowledegeBase;
 import uk.ac.susx.shl.data.Match;
 
