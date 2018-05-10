@@ -1,5 +1,6 @@
-package uk.ac.susx.shl.text.sequence;
+package uk.ac.susx.shl.data.text;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -111,7 +112,7 @@ public class OBTEI2Datum extends DefaultHandler {
 
     private ArrayDeque<AbstractMap.SimpleImmutableEntry<Integer,Optional<Element>>> stack;
 
-    private Datum data;
+    private Datum datum;
 
     private StringBuilder text;
 
@@ -127,7 +128,7 @@ public class OBTEI2Datum extends DefaultHandler {
         i = 0;
         enabled = false;
         stack = new ArrayDeque<>();
-        data = new Datum();
+        datum = new Datum();
         text = new StringBuilder();
 
         textKey = Key.of("text", RuntimeType.STRING);
@@ -136,10 +137,21 @@ public class OBTEI2Datum extends DefaultHandler {
 
         interestingElements.add(new Element("div0", ImmutableMap.of("type", "sessionsPaper"), "sessionsPaper").isContainer(true));
         interestingElements.add(new Element("div1", ImmutableMap.of("type", "frontMatter"), "frontMatter"));
+
         interestingElements.add(new Element("div1", ImmutableMap.of("type", "trialAccount"), "trialAccount").valueAttribute("id"));
+
         interestingElements.add(new Element("placeName", ImmutableMap.of(), "placeName"));
         interestingElements.add(new Element("persName", ImmutableMap.of(), "persName"));
         interestingElements.add(new Element("interp", ImmutableMap.of("type", "gender"), "gender").valueAttribute("value").selfClosing(true));
+        interestingElements.add(new Element("p", ImmutableMap.of(), "p"));
+
+        interestingElements.add(new Element("rs", ImmutableMap.of("type", "verdictDescription"), "verdictDescription"));
+        interestingElements.add(new Element("interp", ImmutableMap.of("type", "verdictCategory"), "verdict").valueAttribute("value").selfClosing(true));
+
+        interestingElements.add(new Element("rs", ImmutableMap.of("type", "offenceDescription"), "offenceDescription"));
+        interestingElements.add(new Element("interp", ImmutableMap.of("type", "offenceCategory"), "offenceCategory").valueAttribute("value").selfClosing(true));
+        interestingElements.add(new Element("interp", ImmutableMap.of("type", "offenceSubcategory"), "offenceSubcategory").valueAttribute("value").selfClosing(true));
+
     }
 
     private void startCheck(Element element) {
@@ -150,7 +162,7 @@ public class OBTEI2Datum extends DefaultHandler {
 
     private void endCheck(Element element) {
         if(element.isContainer) {
-            data = data.with(textKey, text.toString());
+            datum = datum.with(textKey, text.toString());
         }
     }
 
@@ -206,8 +218,8 @@ public class OBTEI2Datum extends DefaultHandler {
 
             Spans<String, String> spans;
 
-            if(data.get().containsKey(key)) {
-                spans = data.get(key);
+            if(datum.get().containsKey(key)) {
+                spans = datum.get(key);
             } else {
                 spans = Spans.annotate(textKey, String.class);
             }
@@ -217,9 +229,9 @@ public class OBTEI2Datum extends DefaultHandler {
                 value = element.attributes.get(element.valueAttribute);
             }
 
-            String span = text.toString().substring(start, end);
+//            String span = text.toString().substring(start, end);
 
-            data = data.with(key, spans.with(start, end, value));
+            datum = datum.with(key, spans.with(start, end, value));
 
             endCheck(element);
         }
@@ -238,8 +250,13 @@ public class OBTEI2Datum extends DefaultHandler {
     }
 
     private String clean(String dirty) {
-        String cleaner =dirty.replaceAll("\\s+", " ");
+        dirty = " " + dirty + " ";
+        String cleaner = dirty.replaceAll("\\s+", " ");
         return cleaner.equals(" ") ? "" : cleaner;
+    }
+
+    public Datum getDatum() {
+        return datum;
     }
 
     public static void main (String argv []) {
@@ -253,6 +270,9 @@ public class OBTEI2Datum extends DefaultHandler {
                 SAXParser saxParser = factory.newSAXParser();
                 OBTEI2Datum handler = new OBTEI2Datum();
                 saxParser.parse(xmlInput, handler);
+
+                new Datum2Column(handler.getDatum(), "text", ImmutableList.of("trialAccount"), ImmutableList.of("placeName"));
+
             }
 
 
