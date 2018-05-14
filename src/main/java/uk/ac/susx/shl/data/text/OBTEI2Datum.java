@@ -7,6 +7,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 import uk.ac.susx.tag.method51.core.meta.Datum;
 import uk.ac.susx.tag.method51.core.meta.Key;
+import uk.ac.susx.tag.method51.core.meta.KeySet;
 import uk.ac.susx.tag.method51.core.meta.span.Spans;
 import uk.ac.susx.tag.method51.core.meta.types.RuntimeType;
 
@@ -96,15 +97,15 @@ public class OBTEI2Datum extends DefaultHandler {
             return new Element(name, attributes, label, valueAttribute, selfClosing, isContainer);
         }
 
+        private Element valueAttribute(String valueAttribute) {
+            return new Element(name, attributes, label, valueAttribute, selfClosing, isContainer);
+        }
+
         private Element selfClosing(boolean selfClosing) {
             return new Element(name, attributes, label, valueAttribute, selfClosing, isContainer);
         }
 
         private Element isContainer(boolean isContainer) {
-            return new Element(name, attributes, label, valueAttribute, selfClosing, isContainer);
-        }
-
-        private Element valueAttribute(String valueAttribute) {
             return new Element(name, attributes, label, valueAttribute, selfClosing, isContainer);
         }
 
@@ -124,6 +125,8 @@ public class OBTEI2Datum extends DefaultHandler {
 
     private final Key<String> textKey;
 
+    private final KeySet keys;
+
     public OBTEI2Datum() {
         i = 0;
         enabled = false;
@@ -140,10 +143,11 @@ public class OBTEI2Datum extends DefaultHandler {
 
         interestingElements.add(new Element("div1", ImmutableMap.of("type", "trialAccount"), "trialAccount").valueAttribute("id"));
 
+        interestingElements.add(new Element("p", ImmutableMap.of(), "p"));
+
         interestingElements.add(new Element("placeName", ImmutableMap.of(), "placeName"));
         interestingElements.add(new Element("persName", ImmutableMap.of(), "persName"));
         interestingElements.add(new Element("interp", ImmutableMap.of("type", "gender"), "gender").valueAttribute("value").selfClosing(true));
-        interestingElements.add(new Element("p", ImmutableMap.of(), "p"));
 
         interestingElements.add(new Element("rs", ImmutableMap.of("type", "verdictDescription"), "verdictDescription"));
         interestingElements.add(new Element("interp", ImmutableMap.of("type", "verdictCategory"), "verdict").valueAttribute("value").selfClosing(true));
@@ -152,6 +156,17 @@ public class OBTEI2Datum extends DefaultHandler {
         interestingElements.add(new Element("interp", ImmutableMap.of("type", "offenceCategory"), "offenceCategory").valueAttribute("value").selfClosing(true));
         interestingElements.add(new Element("interp", ImmutableMap.of("type", "offenceSubcategory"), "offenceSubcategory").valueAttribute("value").selfClosing(true));
 
+        KeySet ks = KeySet.of();
+
+        for(Element e : interestingElements) {
+            ks = ks.with(Key.of(e.label, RuntimeType.stringSpans(String.class)));
+        }
+
+        keys = ks;
+    }
+
+    public KeySet getKeys() {
+        return keys;
     }
 
     private void startCheck(Element element) {
@@ -270,6 +285,14 @@ public class OBTEI2Datum extends DefaultHandler {
                 SAXParser saxParser = factory.newSAXParser();
                 OBTEI2Datum handler = new OBTEI2Datum();
                 saxParser.parse(xmlInput, handler);
+
+                KeySet keys = handler.getKeys();
+
+                Key trialAccount = keys.get(Key.of("trialAccoutn", RuntimeType.ANY));
+
+                for(Datum trials : handler.getDatum().getSpannedData(trialAccount, keys.without(trialAccount))) {
+
+                }
 
                 new Datum2Column(handler.getDatum(), "text", ImmutableList.of("trialAccount"), ImmutableList.of("placeName"));
 

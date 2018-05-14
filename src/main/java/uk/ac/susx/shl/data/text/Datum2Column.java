@@ -39,7 +39,6 @@ public class Datum2Column {
 //        TokenizerModel tokenModel = new TokenizerModel(Files.newInputStream(Paths.get("en-token.bin")));
         tokenizer = WhitespaceTokenizer.INSTANCE;
 
-
 //        sentences();
 //        tokens();
 
