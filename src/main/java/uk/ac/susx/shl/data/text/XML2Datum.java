@@ -55,7 +55,7 @@ public class XML2Datum extends DefaultHandler {
             selfClosing = false;
         }
 
-        private Element(String name, Map<String, String> attributes, String label) {
+        public Element(String name, Map<String, String> attributes, String label) {
             this(name, attributes, label, null, false, false);
         }
 
@@ -89,22 +89,22 @@ public class XML2Datum extends DefaultHandler {
         }
 
         private boolean selfClosing() {
-            return valueAttribute != null;
+            return selfClosing;
         }
 
-        private Element attributes(Map<String, String> attributes) {
+        public Element attributes(Map<String, String> attributes) {
             return new Element(name, attributes, label, valueAttribute, selfClosing, isContainer);
         }
 
-        private Element valueAttribute(String valueAttribute) {
+        public Element valueAttribute(String valueAttribute) {
             return new Element(name, attributes, label, valueAttribute, selfClosing, isContainer);
         }
 
-        private Element selfClosing(boolean selfClosing) {
+        public Element selfClosing(boolean selfClosing) {
             return new Element(name, attributes, label, valueAttribute, selfClosing, isContainer);
         }
 
-        private Element isContainer(boolean isContainer) {
+        public Element isContainer(boolean isContainer) {
             return new Element(name, attributes, label, valueAttribute, selfClosing, isContainer);
         }
     }
@@ -125,7 +125,7 @@ public class XML2Datum extends DefaultHandler {
 
     private final KeySet keys;
 
-    public XML2Datum() {
+    public XML2Datum(List<Element> interestingElements) {
         i = 0;
         enabled = false;
         stack = new ArrayDeque<>();
@@ -134,25 +134,8 @@ public class XML2Datum extends DefaultHandler {
 
         textKey = Key.of("text", RuntimeType.STRING);
 
-        interestingElements = new ArrayList<>();
+        this.interestingElements = ImmutableList.copyOf(interestingElements);
 
-        interestingElements.add(new Element("div0", ImmutableMap.of("type", "sessionsPaper"), "sessionsPaper").isContainer(true));
-        interestingElements.add(new Element("div1", ImmutableMap.of("type", "frontMatter"), "frontMatter"));
-
-        interestingElements.add(new Element("div1", ImmutableMap.of("type", "trialAccount"), "trialAccount").valueAttribute("id"));
-
-        interestingElements.add(new Element("p", ImmutableMap.of(), "statement"));
-
-        interestingElements.add(new Element("placeName", ImmutableMap.of(), "placeName"));
-        interestingElements.add(new Element("persName", ImmutableMap.of(), "persName"));
-        interestingElements.add(new Element("interp", ImmutableMap.of("type", "gender"), "gender").valueAttribute("value").selfClosing(true));
-
-        interestingElements.add(new Element("rs", ImmutableMap.of("type", "verdictDescription"), "verdictDescription"));
-        interestingElements.add(new Element("interp", ImmutableMap.of("type", "verdictCategory"), "verdict").valueAttribute("value").selfClosing(true));
-
-        interestingElements.add(new Element("rs", ImmutableMap.of("type", "offenceDescription"), "offenceDescription"));
-        interestingElements.add(new Element("interp", ImmutableMap.of("type", "offenceCategory"), "offenceCategory").valueAttribute("value").selfClosing(true));
-        interestingElements.add(new Element("interp", ImmutableMap.of("type", "offenceSubcategory"), "offenceSubcategory").valueAttribute("value").selfClosing(true));
 
         KeySet ks = KeySet.of();
 
@@ -277,39 +260,7 @@ public class XML2Datum extends DefaultHandler {
     }
 
     public static void main (String argv []) {
-        Path start = Paths.get("sessionsPapers/16821206.xml");
-        SAXParserFactory factory = SAXParserFactory.newInstance();
-        try {
-            for(Path path : Files.walk(start).filter(path->path.toString().endsWith("xml")).collect(Collectors.toList()) ) {
 
-                System.out.println(path.toString());
-                InputStream xmlInput = Files.newInputStream(path);
-                SAXParser saxParser = factory.newSAXParser();
-                XML2Datum handler = new XML2Datum();
-                saxParser.parse(xmlInput, handler);
-
-                Datum datum = handler.getDatum();
-                KeySet keys = handler.getKeys();
-                Key<String> textKey = handler.getTextKey();
-
-                Key<Spans<String, String>> trials = keys.get(Key.of("trialAccount", RuntimeType.ANY));
-                Key<Spans<String, String>> statements = keys.get(Key.of("statement", RuntimeType.ANY));
-
-                for(Datum trial : datum.getSpannedData(statements, keys)) {
-
-                    for(Datum statement : trial.getSpannedData(statements, keys)) {
-
-                        new Datum2Column(trial, textKey, keys.get("placeName"));
-                    }
-                }
-
-
-            }
-
-
-        } catch (Throwable err) {
-            err.printStackTrace ();
-        }
     }
 
 }

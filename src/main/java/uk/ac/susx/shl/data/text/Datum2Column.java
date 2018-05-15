@@ -36,12 +36,11 @@ public class Datum2Column<T> {
 //        SentenceModel sentModel = new SentenceModel(Files.newInputStream(Paths.get("en-sent.bin")));
 //        sentenceDetector = new SentenceDetectorME(sentModel);
 
-        TokenizerModel tokenModel = new TokenizerModel(Files.newInputStream(Paths.get("en-token.bin")));
-        tokenizer = new TokenizerME(tokenModel);
+        tokenizer = TokenizerProvider.get();
 //        tokenizer = WhitespaceTokenizer.INSTANCE;
 
 //        sentences();
-        columnise();
+//        columnise();
 
     }
 
@@ -63,7 +62,7 @@ public class Datum2Column<T> {
 //        }
 //    }
 
-    private void columnise() {
+    public String columnise() {
 
         String text = datum.get(textKey);
         opennlp.tools.util.Span[] tokeniserSpans = tokenizer.tokenizePos(text);
@@ -113,6 +112,6 @@ public class Datum2Column<T> {
             sb.append("\n");
         }
 
-        System.out.println(sb.toString());
+        return sb.toString();
     }
 }
