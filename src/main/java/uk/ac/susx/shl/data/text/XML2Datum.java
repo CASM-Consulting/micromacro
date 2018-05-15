@@ -24,10 +24,9 @@ import java.util.stream.Collectors;
 /**
  * Created by sw206 on 09/05/2018.
  */
-public class OBTEI2Datum extends DefaultHandler {
+public class XML2Datum extends DefaultHandler {
 
-
-    private class Element {
+    public static class Element {
 
         private final String name;
 
@@ -108,7 +107,6 @@ public class OBTEI2Datum extends DefaultHandler {
         private Element isContainer(boolean isContainer) {
             return new Element(name, attributes, label, valueAttribute, selfClosing, isContainer);
         }
-
     }
 
     private ArrayDeque<AbstractMap.SimpleImmutableEntry<Integer,Optional<Element>>> stack;
@@ -127,7 +125,7 @@ public class OBTEI2Datum extends DefaultHandler {
 
     private final KeySet keys;
 
-    public OBTEI2Datum() {
+    public XML2Datum() {
         i = 0;
         enabled = false;
         stack = new ArrayDeque<>();
@@ -143,7 +141,7 @@ public class OBTEI2Datum extends DefaultHandler {
 
         interestingElements.add(new Element("div1", ImmutableMap.of("type", "trialAccount"), "trialAccount").valueAttribute("id"));
 
-        interestingElements.add(new Element("p", ImmutableMap.of(), "p"));
+        interestingElements.add(new Element("p", ImmutableMap.of(), "statement"));
 
         interestingElements.add(new Element("placeName", ImmutableMap.of(), "placeName"));
         interestingElements.add(new Element("persName", ImmutableMap.of(), "persName"));
@@ -167,6 +165,10 @@ public class OBTEI2Datum extends DefaultHandler {
 
     public KeySet getKeys() {
         return keys;
+    }
+
+    public Key<String> getTextKey() {
+        return textKey;
     }
 
     private void startCheck(Element element) {
@@ -275,7 +277,7 @@ public class OBTEI2Datum extends DefaultHandler {
     }
 
     public static void main (String argv []) {
-        Path start = Paths.get("sessionsPapers");
+        Path start = Paths.get("sessionsPapers/16821206.xml");
         SAXParserFactory factory = SAXParserFactory.newInstance();
         try {
             for(Path path : Files.walk(start).filter(path->path.toString().endsWith("xml")).collect(Collectors.toList()) ) {
@@ -283,18 +285,24 @@ public class OBTEI2Datum extends DefaultHandler {
                 System.out.println(path.toString());
                 InputStream xmlInput = Files.newInputStream(path);
                 SAXParser saxParser = factory.newSAXParser();
-                OBTEI2Datum handler = new OBTEI2Datum();
+                XML2Datum handler = new XML2Datum();
                 saxParser.parse(xmlInput, handler);
 
+                Datum datum = handler.getDatum();
                 KeySet keys = handler.getKeys();
+                Key<String> textKey = handler.getTextKey();
 
-                Key trialAccount = keys.get(Key.of("trialAccoutn", RuntimeType.ANY));
+                Key<Spans<String, String>> trials = keys.get(Key.of("trialAccount", RuntimeType.ANY));
+                Key<Spans<String, String>> statements = keys.get(Key.of("statement", RuntimeType.ANY));
 
-                for(Datum trials : handler.getDatum().getSpannedData(trialAccount, keys.without(trialAccount))) {
+                for(Datum trial : datum.getSpannedData(statements, keys)) {
 
+                    for(Datum statement : trial.getSpannedData(statements, keys)) {
+
+                        new Datum2Column(trial, textKey, keys.get("placeName"));
+                    }
                 }
 
-                new Datum2Column(handler.getDatum(), "text", ImmutableList.of("trialAccount"), ImmutableList.of("placeName"));
 
             }
 

@@ -1,16 +1,13 @@
 package uk.ac.susx.shl.data.text;
 
-import opennlp.tools.sentdetect.SentenceDetector;
-import opennlp.tools.sentdetect.SentenceDetectorME;
-import opennlp.tools.sentdetect.SentenceModel;
 import opennlp.tools.tokenize.Tokenizer;
 import opennlp.tools.tokenize.TokenizerME;
 import opennlp.tools.tokenize.TokenizerModel;
-import opennlp.tools.tokenize.WhitespaceTokenizer;
-import opennlp.tools.util.Span;
 
 import uk.ac.susx.tag.method51.core.meta.Datum;
 import uk.ac.susx.tag.method51.core.meta.Key;
+import uk.ac.susx.tag.method51.core.meta.KeySet;
+import uk.ac.susx.tag.method51.core.meta.span.Span;
 import uk.ac.susx.tag.method51.core.meta.span.Spans;
 import uk.ac.susx.tag.method51.core.meta.types.RuntimeType;
 
@@ -18,29 +15,33 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Optional;
 
-public class Datum2Column {
+public class Datum2Column<T> {
 
     private Datum datum;
     private final Key<String> textKey;
+    private final Key<Spans<String,String>> tokenKey;
 //    private final SentenceDetector sentenceDetector;
     private final Tokenizer tokenizer;
 
-    private final Key<Spans<String, String>> sentenceKey;
+    private final Key<Spans<String,T>> extractKey;
 
-    public Datum2Column(Datum datum, String textKey, List<String> contentkeys, List<String> spanKeys) throws IOException {
+    public Datum2Column(Datum datum, Key<String> textKey, Key<Spans<String,T>> extractKey) throws IOException {
         this.datum = datum;
-        this.textKey = Key.of(textKey, RuntimeType.STRING);
-        sentenceKey = Key.of("sentence", RuntimeType.stringSpans(String.class));
+        this.textKey = textKey;
+        this.extractKey = extractKey;
+        tokenKey = Key.of("tokens", RuntimeType.stringSpans(String.class));
 
 //        SentenceModel sentModel = new SentenceModel(Files.newInputStream(Paths.get("en-sent.bin")));
 //        sentenceDetector = new SentenceDetectorME(sentModel);
 
-//        TokenizerModel tokenModel = new TokenizerModel(Files.newInputStream(Paths.get("en-token.bin")));
-        tokenizer = WhitespaceTokenizer.INSTANCE;
+        TokenizerModel tokenModel = new TokenizerModel(Files.newInputStream(Paths.get("en-token.bin")));
+        tokenizer = new TokenizerME(tokenModel);
+//        tokenizer = WhitespaceTokenizer.INSTANCE;
 
 //        sentences();
-//        tokens();
+        columnise();
 
     }
 
@@ -62,21 +63,56 @@ public class Datum2Column {
 //        }
 //    }
 
-    private void tokens() {
+    private void columnise() {
 
         String text = datum.get(textKey);
-        Span[] sents = tokenizer.tokenizePos(text);
+        opennlp.tools.util.Span[] tokeniserSpans = tokenizer.tokenizePos(text);
 
-        Spans<String, String> spans = Spans.annotate(textKey, String.class);
+        Spans<String, String> tokenSpans = Spans.annotate(textKey, String.class);
 
-        for(Span sent : sents) {
+        for(opennlp.tools.util.Span token : tokeniserSpans) {
 
-            int start = sent.getStart();
-            int end = sent.getEnd();
+            int start = token.getStart();
+            int end = token.getEnd();
 
             String t = text.substring(start, end);
 
-            spans = spans.with(start, end, "token");
+
+
+            tokenSpans = tokenSpans.with(start, end, "token");
         }
+
+        datum = datum.with(tokenKey, tokenSpans);
+
+        Datum listVersion = datum.stringSpans2List(tokenKey, KeySet.of(extractKey) );
+
+        KeySet listKeys = listVersion.getKeys();
+
+        Key<List<String>> listKey = listKeys.get(textKey.name()+"-list");
+        Key<Spans<List<String>,T>> listExtractKey = listKeys.get(extractKey.name()+"-list");
+
+        List<String> tokens = listVersion.get(listKey);
+
+        StringBuilder sb = new StringBuilder();
+
+        for(int i = 0; i < tokens.size(); ++i) {
+            sb.append(tokens.get(i));
+            sb.append("\t");
+            Optional<Span<List<String>,T>> maybeSpan = listVersion.get(listExtractKey).getAt(i);
+            if(maybeSpan.isPresent()) {
+                Span<List<String>, T> span = maybeSpan.get();
+                sb.append(span.get());
+                if(span.from() == i) {
+                    sb.append("-B");
+                } else {
+                    sb.append("-I");
+                }
+            } else {
+                sb.append("O");
+            }
+            sb.append("\n");
+        }
+
+        System.out.println(sb.toString());
     }
 }
