@@ -2,12 +2,15 @@ package uk.ac.susx.shl.webapp;
 
 import io.dropwizard.Application;
 import io.dropwizard.bundles.assets.ConfiguredAssetsBundle;
+import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+
 import uk.ac.susx.shl.webapp.health.DefaultHealthCheck;
 import uk.ac.susx.shl.webapp.resources.HelloWorldResource;
 import uk.ac.susx.shl.webapp.resources.PlacesResource;
 
+import javax.ws.rs.client.Client;
 import java.io.IOException;
 
 public class MicroMacroApplication extends Application<MicroMacroConfiguration> {
@@ -35,9 +38,15 @@ public class MicroMacroApplication extends Application<MicroMacroConfiguration> 
 
         environment.jersey().register(resource);
 
-        final DefaultHealthCheck healthCheck =
-                new DefaultHealthCheck();
+        final DefaultHealthCheck healthCheck = new DefaultHealthCheck();
         environment.healthChecks().register("default", healthCheck);
+
+
+        final Client client = new JerseyClientBuilder(environment).using(configuration.getJerseyClientConfiguration())
+                .build(getName());
+
+//        environment.jersey().register(new ExternalServiceResourace(client));
+
     }
 
 }

@@ -7,6 +7,7 @@ import uk.ac.susx.tag.method51.core.meta.Datum;
 import uk.ac.susx.tag.method51.core.meta.Key;
 import uk.ac.susx.tag.method51.core.meta.KeySet;
 import uk.ac.susx.tag.method51.core.meta.span.Spans;
+import uk.ac.susx.tag.method51.core.meta.types.RuntimeType;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -50,11 +51,15 @@ public class XML2Column {
 //        interestingElements.add(new XML2Datum.Element("interp", ImmutableMap.of("type", "offenceSubcategory"), "offenceSubcategory").valueAttribute("value").selfClosing(true));
 
 
-        Path start = Paths.get("sessionsPapers");
+        Path start = Paths.get("data", "sessionsPapers");
         SAXParserFactory factory = SAXParserFactory.newInstance();
 
+        Key<Spans<String, String>> trials = Key.of("trialAccount", RuntimeType.stringSpans(String.class));
+        Key<Spans<String, String>> statements = Key.of("statement", RuntimeType.stringSpans(String.class));
+        Key<Spans<String, String>> placeNames = Key.of("placeName", RuntimeType.stringSpans(String.class));
+
         try {
-            Files.createDirectory(Paths.get("placeName"));
+            Files.createDirectory(Paths.get("data","placeName"));
         } catch (FileAlreadyExistsException e) {
             //pass
         }
@@ -76,32 +81,25 @@ public class XML2Column {
                 KeySet keys = handler.getKeys();
                 Key<String> textKey = handler.getTextKey();
 
-                Key<Spans<String, String>> trials = keys.get("trialAccount");
-                Key<Spans<String, String>> statements = keys.get("statement");
-                Key<Spans<String, String>> placeNames = keys.get("placeName");
-
                 for(Datum trial : datum.getSpannedData(trials, keys)) {
 
                     StringBuilder sb = new StringBuilder();
 
                     for(Datum statement : trial.getSpannedData(statements, keys)) {
 
-                        Optional<Spans<String,String>> places = statement.maybeGet(placeNames);
+                        //Optional<Spans<String,String>> places = statement.maybeGet(placeNames);
 
-                        if(places.isPresent() && places.get().get().size()>0) {
+                        Datum2Column<String> columns = new Datum2Column<>(statement, textKey, placeNames);
 
-                            Datum2Column<String> columns = new Datum2Column<>(statement, textKey, placeNames);
-
-                            String s = columns.columnise();
-    //                        System.out.println(s);
-                            sb.append(s);
-                        }
+                        String s = columns.columnise();
+//                        System.out.println(s);
+                        sb.append(s);
                     }
 
                     if(sb.length() > 0) {
                         String trialId = trial.get(trials).get(0).get();
 
-                        Files.write(Paths.get("placeName",trialId+".col"), ImmutableList.of(sb));
+                        Files.write(Paths.get("data", "placeName", trialId+".col"), ImmutableList.of(sb));
                     }
                 }
 
