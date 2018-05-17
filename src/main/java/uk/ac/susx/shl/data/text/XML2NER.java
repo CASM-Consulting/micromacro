@@ -3,10 +3,12 @@ package uk.ac.susx.shl.data.text;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import uk.ac.susx.tag.method51.core.meta.Datum;
 import uk.ac.susx.tag.method51.core.meta.Key;
 import uk.ac.susx.tag.method51.core.meta.KeySet;
 import uk.ac.susx.tag.method51.core.meta.span.Spans;
+import uk.ac.susx.tag.method51.core.meta.types.RuntimeType;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -36,50 +38,57 @@ public class XML2NER {
 
         interestingElements.add(new XML2Datum.Element("p", ImmutableMap.of(), "statement"));
 
-
         Path start = Paths.get("data", "sessionsPapers");
-        SAXParserFactory factory = SAXParserFactory.newInstance();
-
 
         try {
-            for(Path path : Files.walk(start).filter(path->path.toString().endsWith("xml")).collect(Collectors.toList()) ) {
 
-                System.out.println(path.toString());
+            for(Datum trial : XML2Datum.getData(start, interestingElements, "trialAccount") ) {
 
-                InputStream xmlInput = Files.newInputStream(path);
+                KeySet keys = trial.getKeys();
+                Key<Spans<String, String>> sentenceKey = keys.get("statement");
+                Key<String> textKey = keys.get("text");
 
-                SAXParser saxParser = factory.newSAXParser();
+                for(Datum statement : trial.getSpannedData(sentenceKey, keys)) {
 
-                XML2Datum handler = new XML2Datum(interestingElements);
+                    Datum tokenized = Tokenizer.tokenize(statement, textKey, KeySet.of());
 
-                saxParser.parse(xmlInput, handler);
+                    KeySet tokenizedKeys = tokenized.getKeys();
 
-                Datum datum = handler.getDatum();
-                KeySet keys = handler.getKeys();
-                Key<String> textKey = handler.getTextKey();
+                    Key<List<String>> tokenKey = tokenizedKeys.get(textKey+Tokenizer.SUFFIX);
+                    Key<Spans<List<String>, String>> spansKey = Key.of("placeName", RuntimeType.listSpans(String.class));
 
-                Key<Spans<String, String>> trials = keys.get("trialAccount");
-                Key<Spans<String, String>> statements = keys.get("statement");
 
-                for(Datum trial : datum.getSpannedData(trials, keys)) {
+                    NER2Datum ner2Datum = new NER2Datum (
+                        tokenKey,
+                        ImmutableSet.of("placeName"),
+                        spansKey,
+                        true
+                    );
 
-                    for(Datum statement : trial.getSpannedData(statements, keys)) {
+                    String text = String.join(" ", tokenized.get(tokenKey));
 
-                        Datum tokenized = Tokenizer.tokenize(statement, textKey, KeySet.of());
+                    String ner = NERSocket.get(text);
 
-                        Key<List<String>> tokenKey = tokenized.getKeys().get(textKey+Tokenizer.SUFFIX);
+                    Datum nerd = ner2Datum.toDatum(ner);
 
-                        String text = String.join(" ", tokenized.get(tokenKey));
+                    if(tokenized.get(tokenKey).size() != nerd.get(tokenKey).size()) {
+                        System.err.println("tokenised mismatch!");
+                    } else {
 
-                        String ner = NERSocket.get(text);
+                        tokenized = tokenized.with(nerd.getKeys().get("placeName"), nerd.get(spansKey));
 
-                        System.out.println(ner);
+                        Spans<List<String>, String> t = trial.get("trialAccount");
+
+                        System.out.println(t.get(0).get());
                     }
-
 
                 }
 
+
+
             }
+
+
 
 
         } catch (Throwable err) {

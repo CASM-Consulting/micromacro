@@ -11,13 +11,16 @@ import uk.ac.susx.tag.method51.core.meta.KeySet;
 import uk.ac.susx.tag.method51.core.meta.span.Spans;
 import uk.ac.susx.tag.method51.core.meta.types.RuntimeType;
 
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 
@@ -259,8 +262,66 @@ public class XML2Datum extends DefaultHandler {
         return datum;
     }
 
-    public static void main (String argv []) {
 
+    public static Iterable<Datum> getData(Path start, List<XML2Datum.Element> interestingElements, String document)  {
+
+        try {
+
+//        interestingElements.add(new XML2Datum.Element("div0", ImmutableMap.of("type", "sessionsPaper"), "sessionsPaper").isContainer(true))
+
+//        interestingElements.add(new XML2Datum.Element("div1", ImmutableMap.of("type", "trialAccount"), "trialAccount").valueAttribute("id"));
+//
+//        interestingElements.add(new XML2Datum.Element("p", ImmutableMap.of(), "statement"));
+
+            SAXParserFactory factory = SAXParserFactory.newInstance();
+
+            SAXParser saxParser = factory.newSAXParser();
+
+            XML2Datum handler = new XML2Datum(interestingElements);
+
+            Deque<Path> paths = new ArrayDeque<>(Files.walk(start).filter(path -> path.toString().endsWith("xml")).collect(Collectors.toList()));
+
+            return new Iterable<Datum>() {
+                @Override
+                public Iterator<Datum> iterator() {
+                    return new Iterator<Datum>() {
+                        Deque<Datum> buffer = new ArrayDeque<>();
+
+                        @Override
+                        public boolean hasNext() {
+                            return !buffer.isEmpty() || !paths.isEmpty();
+                        }
+
+                        @Override
+                        public Datum next() {
+                            if(buffer.isEmpty() && !paths.isEmpty()) {
+                                try {
+
+                                    InputStream xmlInput = Files.newInputStream(paths.pop());
+                                    saxParser.parse(xmlInput, handler);
+                                    Datum datum = handler.getDatum();
+                                    KeySet keys = handler.getKeys();
+                                    Key<Spans<String, String>> documentKey = keys.get(document);
+
+                                    for (Datum doc : datum.getSpannedData(documentKey, keys)) {
+                                        buffer.add(doc);
+                                    }
+
+                                    return buffer.pop();
+                                } catch (IOException | SAXException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            } else if(!buffer.isEmpty()) {
+                                return buffer.pop();
+                            }
+                            return null;
+                        }
+                    };
+                }
+            };
+
+        } catch (IOException | SAXException | ParserConfigurationException e) {
+            throw new RuntimeException(e);
+        }
     }
-
 }
