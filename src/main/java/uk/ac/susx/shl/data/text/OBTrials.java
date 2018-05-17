@@ -24,11 +24,14 @@ import java.util.stream.Collectors;
 /**
  * Created by sw206 on 15/05/2018.
  */
-public class XML2NER {
+public class OBTrials {
 
 
+    public OBTrials() {
 
-    public static void main(String[] args) throws Exception {
+    }
+
+    public void load() {
 
         List<XML2Datum.Element> interestingElements = new ArrayList<>();
 
@@ -49,6 +52,8 @@ public class XML2NER {
                 Key<String> textKey = keys.get("text");
 
                 for(Datum statement : trial.getSpannedData(sentenceKey, keys)) {
+
+                    Document document = new Document();
 
                     Datum tokenized = Tokenizer.tokenize(statement, textKey, KeySet.of());
 
@@ -81,15 +86,8 @@ public class XML2NER {
 
                         System.out.println(t.get(0).get());
                     }
-
                 }
-
-
-
             }
-
-
-
 
         } catch (Throwable err) {
             err.printStackTrace ();

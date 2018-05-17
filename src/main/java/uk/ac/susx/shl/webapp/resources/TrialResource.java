@@ -28,41 +28,23 @@ public class TrialResource {
 
     private static final Logger LOG = Logger.getLogger(TrialResource.class.getName());
 
-    private final GeoJsonKnowledgeBase lookup;
 
     public TrialResource(String geoJsonPath) throws IOException {
-        lookup = new GeoJsonKnowledgeBase(Paths.get(geoJsonPath));
+
+
     }
 
     @GET
     @Path("trials")
     public List<Match> getTrials(@QueryParam("from") Optional<LocalDateParam> fromParam, @QueryParam("to") Optional<LocalDateParam> toParam) {
 
-        final LocalDateParam actualDateTimeParam = toParam.get();
+        final LocalDateParam to = toParam.get();
+        final LocalDateParam from = fromParam.get();
+
+
 
 
         return null;
     }
 
-
-    @GET
-    @Path("ob")
-    public List<Match> getOldBaileyPlaces(@QueryParam("name") Optional<String> name) throws IOException {
-        IOBColumn2Document extractor = new IOBColumn2Document(Paths.get(name.get()));
-
-        Iterator<Document> itr = extractor.iterator();
-        List<Match> matches = new ArrayList<>();
-        while(itr.hasNext()) {
-
-            Document document = itr.next();
-
-            for(List<Candidate> candidates : document.getCandidates("placeName")) {
-                for (Candidate candidate : candidates) {
-
-                    matches.addAll(lookup.getMatches(candidate));
-                }
-            }
-        }
-        return matches;
-    }
 }
