@@ -27,7 +27,6 @@ public class NER2Datum {
         this.iob = iob;
     }
 
-
     public Datum toDatum(String ner) {
 
         Datum datum = new Datum();
@@ -43,24 +42,27 @@ public class NER2Datum {
         int i = 0;
         for(String chunk : chunks) {
 
-            String[] bits = chunk.split("/");
-            if(bits.length ==1 && bits[0].equals("\n")) {
-                continue;
-            } else if(bits.length != 2) {
+            int idx = chunk.lastIndexOf("/");
 
-                System.err.println("Wrong number of chunk bits!");
+            if(idx == -1 && chunk.contains("\n")) {
+                continue;
+            } else if(idx == -1) {
+
+                System.err.println("Wrong number of chunk bits! " + chunk);
                 continue;
             }
 
-            String token = bits[0];
-            String label = bits[1];
+            String token = chunk.substring(0,idx);
+            String label = chunk.substring(idx+1);
 
             String l = (iob ? label.replace("-B", "") : label);
 
             if(from.isPresent()) {
+                l = (iob ? label.replace("-I", "") : label);
                 if(!labels.contains(l)) {
                     Span<List<String>, String> span = Span.annotate(textKey, from.get(), i, l);
                     spans = spans.with(span);
+                    from = Optional.empty();
                 }
             } else if(labels.contains(l) ) {
                 from = Optional.of(i);

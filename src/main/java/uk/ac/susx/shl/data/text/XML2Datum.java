@@ -263,15 +263,9 @@ public class XML2Datum extends DefaultHandler {
     }
 
 
-    public static Iterable<Datum> getData(Path start, List<XML2Datum.Element> interestingElements, String document)  {
+    public static Iterable<Datum> getData(Path start, List<XML2Datum.Element> interestingElements, String document, String suffix)  {
 
         try {
-
-//        interestingElements.add(new XML2Datum.Element("div0", ImmutableMap.of("type", "sessionsPaper"), "sessionsPaper").isContainer(true))
-
-//        interestingElements.add(new XML2Datum.Element("div1", ImmutableMap.of("type", "trialAccount"), "trialAccount").valueAttribute("id"));
-//
-//        interestingElements.add(new XML2Datum.Element("p", ImmutableMap.of(), "statement"));
 
             SAXParserFactory factory = SAXParserFactory.newInstance();
 
@@ -289,32 +283,37 @@ public class XML2Datum extends DefaultHandler {
 
                         @Override
                         public boolean hasNext() {
-                            return !buffer.isEmpty() || !paths.isEmpty();
-                        }
-
-                        @Override
-                        public Datum next() {
                             if(buffer.isEmpty() && !paths.isEmpty()) {
                                 try {
-
-                                    InputStream xmlInput = Files.newInputStream(paths.pop());
+                                    Path path = paths.pop();
+                                    InputStream xmlInput = Files.newInputStream(path);
                                     saxParser.parse(xmlInput, handler);
                                     Datum datum = handler.getDatum();
                                     KeySet keys = handler.getKeys();
                                     Key<Spans<String, String>> documentKey = keys.get(document);
 
-                                    for (Datum doc : datum.getSpannedData(documentKey, keys)) {
+                                    for (Datum doc : datum.getSpannedData(documentKey, keys, suffix)) {
                                         buffer.add(doc);
                                     }
 
-                                    return buffer.pop();
+                                    if(buffer.isEmpty()) {
+                                        return hasNext();
+                                    } else {
+                                        return true;
+                                    }
+
                                 } catch (IOException | SAXException e) {
                                     throw new RuntimeException(e);
                                 }
                             } else if(!buffer.isEmpty()) {
-                                return buffer.pop();
+                                return true;
                             }
-                            return null;
+                            return false;
+                        }
+
+                        @Override
+                        public Datum next() {
+                            return buffer.pop();
                         }
                     };
                 }

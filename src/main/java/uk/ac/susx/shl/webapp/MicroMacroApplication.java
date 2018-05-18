@@ -8,6 +8,7 @@ import io.dropwizard.setup.Environment;
 
 import uk.ac.susx.shl.webapp.health.DefaultHealthCheck;
 import uk.ac.susx.shl.webapp.resources.HelloWorldResource;
+import uk.ac.susx.shl.webapp.resources.OBResource;
 import uk.ac.susx.shl.webapp.resources.PlacesResource;
 
 import javax.ws.rs.client.Client;
@@ -34,9 +35,12 @@ public class MicroMacroApplication extends Application<MicroMacroConfiguration> 
     public void run(final MicroMacroConfiguration configuration,
                     final Environment environment) throws IOException {
 
-        final PlacesResource resource = new PlacesResource(configuration.geoJsonPath);
+        final PlacesResource places = new PlacesResource(configuration.geoJsonPath);
+        environment.jersey().register(places);
 
-        environment.jersey().register(resource);
+        final OBResource ob = new OBResource(configuration.geoJsonPath);
+        environment.jersey().register(ob);
+
 
         final DefaultHealthCheck healthCheck = new DefaultHealthCheck();
         environment.healthChecks().register("default", healthCheck);

@@ -123,6 +123,9 @@ public class GeoJsonKnowledgeBase implements KnowledegeBase {
 
 
     //https://github.com/tdebatty/java-string-similarity maybe this?
+    public List<Match> getMatches(String candidate) {
+        return getMatches(Candidate.of(candidate));
+    }
     public List<Match> getMatches(Candidate candidate) {
 
         String text = candidate.getText();
