@@ -30,7 +30,7 @@ import static java.time.temporal.ChronoField.YEAR;
  */
 public class OBTrials {
 
-    private final Map<LocalDate, List<Document>> documents;
+    private final Map<LocalDate, List<SimpleDocument>> documents;
 
     private final GeoJsonKnowledgeBase lookup;
 
@@ -57,6 +57,8 @@ public class OBTrials {
         interestingElements.add(new XML2Datum.Element("p", ImmutableMap.of(), "statement"));
 
         Path start = Paths.get("data", "sessionsPapersSample2");
+
+
 
         try {
 
@@ -118,7 +120,7 @@ public class OBTrials {
                     String id = trial.get("trialAccount-id");
 
                     System.out.println(id);
-                    Document document = new Document(tokenKey, idKey, spansKey);
+
                     ListIterator<Datum> itr = statements.listIterator();
                     while( itr.hasNext() ) {
                         Datum statement = itr.next();
@@ -149,8 +151,9 @@ public class OBTrials {
                         itr.set(statement);
                     }
 
-                    document = document.with(statements);
+                    Datum2SimpleDocument<?> datum2SimpleDocument = new Datum2SimpleDocument(tokenKey, ImmutableList.of(spansKey));
 
+                    SimpleDocument document = datum2SimpleDocument.toDocument(id, statements);
 
                     LocalDate date = getDate(trial.get("trialAccount-id"));
 
@@ -166,7 +169,7 @@ public class OBTrials {
         }
     }
 
-    public Map<LocalDate, List<Document>> getDocumentsByTime() {
+    public Map<LocalDate, List<SimpleDocument>> getDocumentsByTime() {
         return documents;
     }
 

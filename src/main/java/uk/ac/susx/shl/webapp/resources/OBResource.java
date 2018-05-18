@@ -8,6 +8,7 @@ import uk.ac.susx.shl.data.geo.GeoJsonKnowledgeBase;
 import uk.ac.susx.shl.data.text.Candidate;
 import uk.ac.susx.shl.data.text.Document;
 import uk.ac.susx.shl.data.text.OBTrials;
+import uk.ac.susx.shl.data.text.SimpleDocument;
 import uk.ac.susx.tag.method51.core.gson.GsonBuilderFactory;
 import uk.ac.susx.tag.method51.core.meta.KeySet;
 
@@ -29,7 +30,7 @@ public class OBResource {
 
     private static final Logger LOG = Logger.getLogger(OBResource.class.getName());
 
-    private final Map<LocalDate, List<Document>> trialsByDate;
+    private final Map<LocalDate, List<SimpleDocument>> trialsByDate;
 
     private final OBTrials obTrials;
 
@@ -53,7 +54,7 @@ public class OBResource {
         if(dateParam.isPresent()) {
             final LocalDate date = LocalDate.of(dateParam.get().get().getYear(),dateParam.get().get().getMonthOfYear(), dateParam.get().get().getDayOfMonth());
 
-            List<Document> trials = trialsByDate.get(date);
+            List<SimpleDocument> trials = trialsByDate.get(date);
 
             return Response.status(Response.Status.OK).entity(
                 gson.toJson(trials)

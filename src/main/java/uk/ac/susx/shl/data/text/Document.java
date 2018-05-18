@@ -80,12 +80,11 @@ public class Document {
     }
 
     public Document with(Datum datum) {
-        //check for required keys?
+        //check for required
         return new Document(idKey, new ImmutableList.Builder<Datum>().addAll(data).add(datum).build(), textKey, spansKeys);
     }
 
     public Document with(List<Datum> data) {
-        //check for required keys?
         return new Document(idKey, new ImmutableList.Builder<Datum>().addAll(this.data).addAll(data).build(), textKey, spansKeys);
     }
 
@@ -104,10 +103,6 @@ public class Document {
         }
 
         return candidatess;
-    }
-
-    public List<Datum> getData() {
-        return data;
     }
 
     public int size() {
