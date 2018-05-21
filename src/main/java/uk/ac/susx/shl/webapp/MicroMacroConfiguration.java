@@ -12,6 +12,16 @@ import javax.validation.constraints.*;
 
 public class MicroMacroConfiguration extends Configuration implements AssetsBundleConfiguration {
 
+
+    @NotNull
+    @JsonProperty
+    String obMapPath;
+
+
+    @NotNull
+    @JsonProperty
+    String sessionsPath;
+
     @NotNull
     @JsonProperty
     String geoJsonPath;

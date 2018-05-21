@@ -88,7 +88,7 @@ public class GeoJsonKnowledgeBase implements KnowledegeBase {
                     Map<String, String> datum = new HashMap<>();
 
                     datum.put("lat", Double.toString(target.getX()));
-                    datum.put("long", Double.toString(target.getY()));
+                    datum.put("lng", Double.toString(target.getY()));
 
                     if(!data.containsKey(name)) {
                         data.put(name, new ArrayList<>());

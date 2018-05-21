@@ -34,6 +34,7 @@
         <datum.version>1.3.4-SNAPSHOT</datum.version>
         <!--<stanford.version>3.9.1</stanford.version>-->
         <opennlp.version>1.8.4</opennlp.version>
+        <mapdb.version>3.0.6</mapdb.version>
     </properties>
 
     <dependencyManagement>
@@ -164,6 +165,14 @@
             <artifactId>opennlp-tools</artifactId>
             <version>${opennlp.version}</version>
         </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.mapdb/mapdb -->
+        <dependency>
+            <groupId>org.mapdb</groupId>
+            <artifactId>mapdb</artifactId>
+            <version>${mapdb.version}</version>
+        </dependency>
+
 
     </dependencies>
 

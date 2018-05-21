@@ -38,6 +38,7 @@ public class NER2Datum {
         List<String> tokens = new ArrayList<>();
 
         Optional<Integer> from = Optional.empty();
+        String chunkLabel = null;
 
         int i = 0;
         for(String chunk : chunks) {
@@ -57,15 +58,17 @@ public class NER2Datum {
 
             String l = (iob ? label.replace("-B", "") : label);
 
+
             if(from.isPresent()) {
                 l = (iob ? label.replace("-I", "") : label);
                 if(!labels.contains(l)) {
-                    Span<List<String>, String> span = Span.annotate(textKey, from.get(), i, l);
+                    Span<List<String>, String> span = Span.annotate(textKey, from.get(), i, chunkLabel);
                     spans = spans.with(span);
                     from = Optional.empty();
                 }
             } else if(labels.contains(l) ) {
                 from = Optional.of(i);
+                chunkLabel = l;
             }
 
             tokens.add(token);

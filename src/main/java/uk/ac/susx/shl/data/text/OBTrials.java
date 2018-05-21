@@ -3,6 +3,8 @@ package uk.ac.susx.shl.data.text;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import org.mapdb.DB;
+import org.mapdb.DBMaker;
 import uk.ac.susx.shl.data.Match;
 import uk.ac.susx.shl.data.geo.GeoJsonKnowledgeBase;
 import uk.ac.susx.tag.method51.core.meta.Datum;
@@ -16,9 +18,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
-import java.time.format.SignStyle;
 import java.util.*;
 
 import static java.time.temporal.ChronoField.DAY_OF_MONTH;
@@ -30,20 +30,37 @@ import static java.time.temporal.ChronoField.YEAR;
  */
 public class OBTrials {
 
-    private final Map<LocalDate, List<SimpleDocument>> documents;
+    private final Map<LocalDate, List<SimpleDocument>> trialsByDate;
+    private final Map<String, SimpleDocument> trialsById;
+    private final List<Map<String, String>> matches;
 
     private final GeoJsonKnowledgeBase lookup;
 
     private final Key<Spans<List<String>, Map>> placeMatchKey;
 
+    private final Path start;
+
     private KeySet keys;
 
 
-    public OBTrials(String geoJsonPath) throws IOException {
-        documents = new HashMap<>();
+    public OBTrials(String sessionsPath, String geoJsonPath, String obMapPath) throws IOException {
         lookup = new GeoJsonKnowledgeBase(Paths.get(geoJsonPath));
         placeMatchKey = Key.of("placeNameMatch", RuntimeType.listSpans(Map.class));
         keys = KeySet.of(placeMatchKey);
+        start = Paths.get(sessionsPath);
+
+        DB db = DBMaker
+                .fileDB(obMapPath)
+                .fileMmapEnable()
+                .closeOnJvmShutdown()
+//                .readOnly()
+                .make();
+
+        trialsByDate =  (Map<LocalDate, List<SimpleDocument>>) db.hashMap("trials-by-date").createOrOpen();
+        trialsById = (Map<String, SimpleDocument>) db.hashMap("trials-by-id").createOrOpen();
+        matches = (List) db.indexTreeList("matches").createOrOpen();
+        matches.clear();
+
     }
 
     public void load() {
@@ -55,10 +72,6 @@ public class OBTrials {
         interestingElements.add(new XML2Datum.Element("div1", ImmutableMap.of("type", "trialAccount"), "trialAccount").valueAttribute("id"));
 
         interestingElements.add(new XML2Datum.Element("p", ImmutableMap.of(), "statement"));
-
-        Path start = Paths.get("data", "sessionsPapersSample2");
-
-
 
         try {
 
@@ -98,6 +111,7 @@ public class OBTrials {
 
                     String ner = NERSocket.get(text);
 
+//                    System.out.println(ner);
                     Datum nerd = ner2Datum.toDatum(ner);
 
                     if(tokenized.get(tokenKey).size() != nerd.get(tokenKey).size()) {
@@ -121,12 +135,16 @@ public class OBTrials {
 
                     System.out.println(id);
 
+                    int i = 0;
+
                     ListIterator<Datum> itr = statements.listIterator();
                     while( itr.hasNext() ) {
                         Datum statement = itr.next();
                         Spans<List<String>, String> spans = statement.get(spansKey);
 
                         Spans<List<String>, Map> matchSpans = Spans.annotate(tokenKey, Map.class);
+
+                        int j = 0;
 
                         for (Span<List<String>, String> span : spans) {
 
@@ -138,29 +156,51 @@ public class OBTrials {
 
                             if(!matches.isEmpty()) {
 
+                                String spanId = id + "-" + i + "-" + j;
+
                                 Match match = matches.get(0);
 
-                                Span<List<String>, Map> matchSpan = Span.annotate(tokenKey, span.from(), span.to(), match.getMetadata());
+                                Map<String, String> metadata = match.getMetadata();
+                                String spanned = String.join(" ", span.getSpanned(statement));
+
+                                metadata.put("trial-id", id);
+                                metadata.put("id", spanId);
+                                metadata.put("spanned", spanned);
+                                metadata.put("text", match.getText());
+
+                                Span<List<String>, Map> matchSpan = Span.annotate(tokenKey, span.from(), span.to(), metadata);
+
+                                this.matches.add(metadata);
 
                                 matchSpans = matchSpans.with(matchSpan);
                             }
+                            ++j;
                         }
 
                         statement = statement.with(placeMatchKey, matchSpans);
 
                         itr.set(statement);
+
+                        ++i;
                     }
 
-                    Datum2SimpleDocument<?> datum2SimpleDocument = new Datum2SimpleDocument(tokenKey, ImmutableList.of(spansKey));
+                    Datum2SimpleDocument<?> datum2SimpleDocument = new Datum2SimpleDocument(tokenKey, ImmutableList.of(spansKey, placeMatchKey  ));
 
                     SimpleDocument document = datum2SimpleDocument.toDocument(id, statements);
 
                     LocalDate date = getDate(trial.get("trialAccount-id"));
 
-                    if(!documents.containsKey(date)) {
-                        documents.put(date, new ArrayList<>());
+                    if(!trialsByDate.containsKey(date)) {
+                        trialsByDate.put(date, new ArrayList<>());
                     }
-                    documents.get(date).add(document);
+
+                    List<SimpleDocument> trialsForDate = trialsByDate.get(date);
+                    trialsForDate.add(document);
+                    trialsByDate.put(date, trialsForDate);
+                    if(trialsById.containsKey(id)) {
+                        System.err.println(id + " already exists");
+                    }
+                    trialsById.put(id, document);
                 }
             }
 
@@ -169,8 +209,16 @@ public class OBTrials {
         }
     }
 
-    public Map<LocalDate, List<SimpleDocument>> getDocumentsByTime() {
-        return documents;
+    public Map<LocalDate, List<SimpleDocument>> getDocumentsByDate() {
+        return trialsByDate;
+    }
+
+    public Map<String, SimpleDocument> getDocumentsById() {
+        return trialsById;
+    }
+
+    public List<Map<String, String>> getMatches() {
+        return matches;
     }
 
     public KeySet keys() {

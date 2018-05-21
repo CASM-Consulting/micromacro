@@ -28,7 +28,6 @@ public class MicroMacroApplication extends Application<MicroMacroConfiguration> 
     @Override
     public void initialize(final Bootstrap<MicroMacroConfiguration> bootstrap) {
         bootstrap.addBundle(new ConfiguredAssetsBundle("/assets/", "/"));
-
     }
 
     @Override
@@ -38,7 +37,7 @@ public class MicroMacroApplication extends Application<MicroMacroConfiguration> 
         final PlacesResource places = new PlacesResource(configuration.geoJsonPath);
         environment.jersey().register(places);
 
-        final OBResource ob = new OBResource(configuration.geoJsonPath);
+        final OBResource ob = new OBResource(configuration.sessionsPath, configuration.geoJsonPath, configuration.obMapPath);
         environment.jersey().register(ob);
 
 

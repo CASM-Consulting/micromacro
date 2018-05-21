@@ -26,14 +26,15 @@
     <input ng-model="query" type="text" />
     <button ng-click="search(query)" class="btn btn-default">Search</button>
     <button ng-click="extract(query)" class="btn btn-default">Extract</button>
+    <button ng-click="getAll()" class="btn btn-default">Get All</button>
 
 
     <script type="text/ng-template" id="marker">
         <ul>
             <li>Match: {{match.text}}</li>
-            <li>Original: {{match.candidate.text}}</li>
-            <li>Lat: {{match.metadata.lat}}</li>
-            <li>Long: {{match.metadata.long}}</li>
+            <li>Original: {{match.spanned}}</li>
+            <li>Lat: {{match.lat}}</li>
+            <li>Long: {{match.long}}</li>
         </ul>
     </script>
 </div>

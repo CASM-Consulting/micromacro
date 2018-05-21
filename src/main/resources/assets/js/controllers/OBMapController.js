@@ -52,12 +52,22 @@ app.controller('OBMapController', function($scope, $http, $compile) {
         });
     };
 
+    $scope.getAll = function() {
+        $http.get("/api/ob/matches", {
+            params : {
+            }
+        }).then(function(response){
+
+            drawMatches(response.data);
+        });
+    };
+
     var drawMatches = function(matches) {
         $scope.markers = {};
         for(var i = 0; i < matches.length; ++i) {
             var match = matches[i];
-            var lat = parseFloat(match.metadata.lat);
-            var lng = parseFloat(match.metadata.long);
+            var lat = parseFloat(match.lat);
+            var lng = parseFloat(match.lng);
             $scope.markers[match.text.replace("-", " ") + " #" + (i+1)] = {
                 lat : lat,
                 lng : lng,
@@ -86,7 +96,7 @@ app.controller('OBMapController', function($scope, $http, $compile) {
       }
 
       function eqfeed_callback(data){
-        var getInterval = function(quake) {
+        var getInterval = function(t) {
           // earthquake data only has a time, so we'll use that as a "start"
           // and the "end" will be that + some value based on magnitude
           // 18000000 = 30 minutes, so a quake of magnitude 5 would show on the
@@ -98,7 +108,7 @@ app.controller('OBMapController', function($scope, $http, $compile) {
         };
         var timelineControl = L.timelineSliderControl({
           formatOutput: function(date){
-            return moment(date).format("YYYY-MM-DD HH:MM:SS");
+            return moment(date).format("YYYY-MM-DD");
           }
         });
         var timeline = L.timeline(data, {
@@ -121,6 +131,7 @@ app.controller('OBMapController', function($scope, $http, $compile) {
           updateList(e.target);
         });
         updateList(timeline);
+        }
 //
 //    $http.get("geo/LL_PL_PA_WA_POINTS_FeaturesT.json").then(function(response) {
 //            angular.extend($scope, {

@@ -7,17 +7,21 @@ import uk.ac.susx.tag.method51.core.meta.Key;
 import uk.ac.susx.tag.method51.core.meta.span.Spans;
 import uk.ac.susx.tag.method51.core.meta.types.RuntimeType;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class SimpleDocument {
+public class SimpleDocument implements Serializable {
+    static final long serialVersionUID = 42L;
 
     private final String id;
     private final ImmutableList<Sentence> data;
 
-    public static class Sentence {
+    public static class Sentence implements Serializable {
+        static final long serialVersionUID = 42L;
+
         public final List<String> tokens;
         public final Map<String, List<Span>> spans;
         public Sentence(List<String> tokens, Map<String, List<Span>> spans) {
@@ -27,7 +31,9 @@ public class SimpleDocument {
 
     }
 
-    public static class Span<T> {
+    public static class Span<T> implements Serializable {
+        static final long serialVersionUID = 42L;
+
         public final int from;
         public final int to;
         public final T value;
