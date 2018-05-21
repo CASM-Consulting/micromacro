@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.*;
 
@@ -41,6 +42,21 @@ public class OBTrials {
     private final Path start;
 
     private KeySet keys;
+
+    private final DateTimeFormatter id2Date = new DateTimeFormatterBuilder()
+                .appendLiteral('t')
+                .appendValue(YEAR, 4)
+                .appendValue(MONTH_OF_YEAR, 2)
+                .appendValue(DAY_OF_MONTH, 2)
+                .toFormatter();
+
+    private final DateTimeFormatter date2JS = new DateTimeFormatterBuilder()
+            .appendValue(YEAR, 4)
+            .appendLiteral('-')
+            .appendValue(MONTH_OF_YEAR, 2)
+            .appendLiteral('-')
+            .appendValue(DAY_OF_MONTH, 2)
+            .toFormatter();
 
 
     public OBTrials(String sessionsPath, String geoJsonPath, String obMapPath) throws IOException {
@@ -133,6 +149,8 @@ public class OBTrials {
 
                     String id = trial.get("trialAccount-id");
 
+                    LocalDate date = getDate(id);
+
                     System.out.println(id);
 
                     int i = 0;
@@ -163,10 +181,11 @@ public class OBTrials {
                                 Map<String, String> metadata = match.getMetadata();
                                 String spanned = String.join(" ", span.getSpanned(statement));
 
-                                metadata.put("trial-id", id);
+                                metadata.put("trialId", id);
                                 metadata.put("id", spanId);
                                 metadata.put("spanned", spanned);
                                 metadata.put("text", match.getText());
+                                metadata.put("date", date.format(date2JS));
 
                                 Span<List<String>, Map> matchSpan = Span.annotate(tokenKey, span.from(), span.to(), metadata);
 
@@ -188,7 +207,6 @@ public class OBTrials {
 
                     SimpleDocument document = datum2SimpleDocument.toDocument(id, statements);
 
-                    LocalDate date = getDate(trial.get("trialAccount-id"));
 
                     if(!trialsByDate.containsKey(date)) {
                         trialsByDate.put(date, new ArrayList<>());
@@ -226,12 +244,7 @@ public class OBTrials {
     }
 
     private LocalDate getDate(String id) {
-        LocalDate date = LocalDate.parse(id.split("-")[0], new DateTimeFormatterBuilder()
-                .appendLiteral('t')
-                .appendValue(YEAR, 4)
-                .appendValue(MONTH_OF_YEAR, 2)
-                .appendValue(DAY_OF_MONTH, 2)
-                .toFormatter());
+        LocalDate date = LocalDate.parse(id.split("-")[0], id2Date);
         return date;
     }
 

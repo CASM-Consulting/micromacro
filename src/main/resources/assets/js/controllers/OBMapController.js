@@ -1,6 +1,6 @@
 'use strict';
 
-app.controller('OBMapController', function($scope, $http, $compile) {
+app.controller('OBMapController', function($scope, $http, $compile, leafletData) {
 
     var tilesDict = {
         openstreetmap: {
@@ -58,7 +58,21 @@ app.controller('OBMapController', function($scope, $http, $compile) {
             }
         }).then(function(response){
 
-            drawMatches(response.data);
+            var features = [];
+
+            for(var i = 0; i < response.data.length; ++i) {
+                var match = response.data[i];
+                features.push({
+                    geometry: {
+                        type : "Point",
+                        coordinates : [match.lng, match.lat]
+                    },
+                    type : "Feature",
+                    properties : match
+                });
+            }
+
+            timeline({features : features});
         });
     };
 
@@ -95,43 +109,37 @@ app.controller('OBMapController', function($scope, $http, $compile) {
         });
       }
 
-      function eqfeed_callback(data){
-        var getInterval = function(t) {
-          // earthquake data only has a time, so we'll use that as a "start"
-          // and the "end" will be that + some value based on magnitude
-          // 18000000 = 30 minutes, so a quake of magnitude 5 would show on the
-          // map for 150 minutes or 2.5 hours
-          return {
-            start: quake.properties.time,
-            end:   quake.properties.time + quake.properties.mag * 1800000
-          };
+      function timeline(data){
+        var map = leafletData.getMap().then(function(map) {
+
+            var getInterval = function(trial) {
+              return {
+                start: moment(trial.properties.date).toDate(),
+                end:   moment(trial.properties.date).toDate()
+              };
+            };
+            var timelineControl = L.timelineSliderControl({
+              formatOutput: function(date){
+                return moment(date).format("YYYY-MM-DD");
+              }
+            });
+            var timeline = L.timeline(data, {
+                start : moment("1674-04-29").toDate(),
+                end: moment("1913-04-01").toDate(),
+              getInterval: getInterval,
+              pointToLayer: function(data, latlng){
+                return L.marker(latlng);
+              }
+            });
+            timelineControl.addTo(map);
+            timelineControl.addTimelines(timeline);
+            timeline.addTo(map);
+            timeline.on('change', function(e){
+    //          updateList(e.target);
+            });
+    //        updateList(timeline);
+        });
         };
-        var timelineControl = L.timelineSliderControl({
-          formatOutput: function(date){
-            return moment(date).format("YYYY-MM-DD");
-          }
-        });
-        var timeline = L.timeline(data, {
-          getInterval: getInterval,
-          pointToLayer: function(data, latlng){
-            var hue_min = 120;
-            var hue_max = 0;
-            var hue = data.properties.mag / 10 * (hue_max - hue_min) + hue_min;
-            return L.circleMarker(latlng, {
-              radius: data.properties.mag * 3,
-              color: "hsl("+hue+", 100%, 50%)",
-              fillColor: "hsl("+hue+", 100%, 50%)"
-            }).bindPopup('<a href="' + data.properties.url + '">click for more info</a>');
-          }
-        });
-        timelineControl.addTo(map);
-        timelineControl.addTimelines(timeline);
-        timeline.addTo(map);
-        timeline.on('change', function(e){
-          updateList(e.target);
-        });
-        updateList(timeline);
-        }
 //
 //    $http.get("geo/LL_PL_PA_WA_POINTS_FeaturesT.json").then(function(response) {
 //            angular.extend($scope, {
