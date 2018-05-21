@@ -72,7 +72,10 @@ app.controller('OBMapController', function($scope, $http, $compile, leafletData)
                 });
             }
 
-            timeline({features : features});
+            drawTimeline({
+                type : "FeatureCollection",
+                features : features
+            });
         });
     };
 
@@ -109,23 +112,23 @@ app.controller('OBMapController', function($scope, $http, $compile, leafletData)
         });
       }
 
-      function timeline(data){
+      function drawTimeline(data){
         var map = leafletData.getMap().then(function(map) {
 
             var getInterval = function(trial) {
               return {
-                start: moment(trial.properties.date).toDate(),
-                end:   moment(trial.properties.date).toDate()
+                start: moment(trial.properties.date).add(1000, "y").toDate().getTime(),
+                end:   moment(trial.properties.date).add(1000, "y").toDate().getTime()
               };
             };
             var timelineControl = L.timelineSliderControl({
               formatOutput: function(date){
-                return moment(date).format("YYYY-MM-DD");
+                return moment(date).subtract(1000, "y").format("YYYY-MM-DD");
               }
             });
             var timeline = L.timeline(data, {
-                start : moment("1674-04-29").toDate(),
-                end: moment("1913-04-01").toDate(),
+                start : moment("1674-04-29").add(1000, "y").toDate().getTime(),
+                end: moment("1913-04-01").add(1000, "y").toDate().getTime(),
               getInterval: getInterval,
               pointToLayer: function(data, latlng){
                 return L.marker(latlng);
@@ -135,38 +138,10 @@ app.controller('OBMapController', function($scope, $http, $compile, leafletData)
             timelineControl.addTimelines(timeline);
             timeline.addTo(map);
             timeline.on('change', function(e){
-    //          updateList(e.target);
+            //          updateList(e.target);
             });
-    //        updateList(timeline);
+        //        updateList(timeline);
         });
-        };
-//
-//    $http.get("geo/LL_PL_PA_WA_POINTS_FeaturesT.json").then(function(response) {
-//            angular.extend($scope, {
-//                geojson: {
-//                    data: response.data,
-//                    style: {
-//                        fillColor: "green",
-//                        weight: 2,
-//                        opacity: 1,
-//                        color: 'white',
-//                        dashArray: '3',
-//                        fillOpacity: 0.7
-//                    }
-//                }
-//            });
-//        });
-//    var map = new L.Map("map", {center: [37.8, -96.9], zoom: 4})
-//            .addLayer(new L.TileLayer("https://nls-2.tileserver.com/fpsUZba7ERPD/{z}/{x}/{y}.png"));
-//    //    .addLayer(new L.TileLayer("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"));
-//
-//
-//
-//
-//    var svg = d3.select(map.getPanes().overlayPane).append("svg"),
-//        g = svg.append("g").attr("class", "leaflet-zoom-hide");
-
-
-
+    };
 
 });

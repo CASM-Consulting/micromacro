@@ -73,7 +73,9 @@ public class OBTrials {
                 .make();
 
         trialsByDate =  (Map<LocalDate, List<SimpleDocument>>) db.hashMap("trials-by-date").createOrOpen();
+        trialsByDate.clear();
         trialsById = (Map<String, SimpleDocument>) db.hashMap("trials-by-id").createOrOpen();
+        trialsById.clear();
         matches = (List) db.indexTreeList("matches").createOrOpen();
         matches.clear();
 
@@ -168,7 +170,7 @@ public class OBTrials {
 
                             String candidate = String.join(" ", span.getSpanned(statement) );
 
-                            System.out.println(candidate);
+//                            System.out.println(candidate);
 
                             List<Match> matches = lookup.getMatches(candidate);
 

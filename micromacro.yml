@@ -4,6 +4,6 @@ assets:
   overrides:
     /: src/main/resources/assets/
 
-sessionsPath: data/sessionsPapersSample
+sessionsPath: data/sessionsPapersSample2
 obMapPath: dbmap
 geoJsonPath: data/LL_PL_PA_WA_POINTS_FeaturesT.json

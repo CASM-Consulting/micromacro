@@ -271,8 +271,6 @@ public class XML2Datum extends DefaultHandler {
 
             SAXParser saxParser = factory.newSAXParser();
 
-            XML2Datum handler = new XML2Datum(interestingElements);
-
             Deque<Path> paths = new ArrayDeque<>(Files.walk(start).filter(path -> path.toString().endsWith("xml")).collect(Collectors.toList()));
 
             return new Iterable<Datum>() {
@@ -286,6 +284,7 @@ public class XML2Datum extends DefaultHandler {
                             if(buffer.isEmpty() && !paths.isEmpty()) {
                                 try {
                                     Path path = paths.pop();
+                                    XML2Datum handler = new XML2Datum(interestingElements);
                                     InputStream xmlInput = Files.newInputStream(path);
                                     saxParser.parse(xmlInput, handler);
                                     Datum datum = handler.getDatum();
