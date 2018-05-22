@@ -53,46 +53,68 @@
 <body>
 
 <div ng-controller="OBMapController">
+    <div class="container">
 
-    <div class="row" >
+        <div class="row" >
 
-        <div class="map col-md-9">
+            <div class="map col-md-8">
 
-            <leaflet
-                    width="900px"
-                    height="800px"
-                    center="center"
-                    tiles="tiles"
-                    defaults="defaults"
-                    markers="markers"
-                    geojson="geojson"
-            ></leaflet>
-            <button ng-click="changeTiles('oldlondon')" class="btn btn-default">Old London</button>
-            <button ng-click="changeTiles('openstreetmap')" class="btn btn-default">Open Street Maps</button>
+                <leaflet
+                        width="600px"
+                        height="800px"
+                        center="center"
+                        tiles="tiles"
+                        defaults="defaults"
+                        markers="markers"
+                        geojson="geojson"
+                ></leaflet>
+                <button ng-click="changeTiles('oldlondon')" class="btn btn-default">Old London</button>
+                <button ng-click="changeTiles('openstreetmap')" class="btn btn-default">Open Street Maps</button>
 
-            <input ng-model="query" type="text" />
-            <button ng-click="search(query)" class="btn btn-default">Search</button>
-            <button ng-click="extract(query)" class="btn btn-default">Extract</button>
-            <button ng-click="getAll()" class="btn btn-default">Get All</button>
+                <input ng-model="query" type="text" />
+                <button ng-click="search(query)" class="btn btn-default">Search</button>
+                <button ng-click="extract(query)" class="btn btn-default">Extract</button>
+                <button ng-click="getAll()" class="btn btn-default">Get All</button>
 
-        </div>
+            </div>
 
 
-        <!--<div>-->
+            <!--<div>-->
             <!--{{selectedMarker}}-->
-        <!--</div>-->
+            <!--</div>-->
 
-        <div class="trial col-md-3">
-            <p ng-repeat="sentence in currentTrial.data track by $index">
-                <span ng-repeat="token in sentence.tokens track by $index" ng-class="{matched: currentTrial.matchedMap[$parent.$index][$index], unmatched: currentTrial.unmatchedMap[$parent.$index][$index]}">
+            <div class="trial col-md-4">
+                <p ng-repeat="sentence in currentTrial.data track by $index">
+                <span
+                    ng-repeat="token in sentence.tokens track by $index"
+                    ng-class="{matched: currentTrial.matchedMap[$parent.$index][$index], unmatched: currentTrial.unmatchedMap[$parent.$index][$index]}"
+
+                >
                     {{token}}
                 </span>
-            </p>
-        </div>
+                </p>
+            </div>
 
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div ng-repeat="match in matches">
+                    {{match}}
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
+
+
+<script type="text/ng-template" id="marker">
+    <ul>
+        <li>Match: {{match.text}}</li>
+        <li>Lat: {{match.metadata.lat}}</li>
+        <li>Lng: {{match.metadata.lng}}</li>
+    </ul>
+</script>
 
 <script src="bower_components/jquery/dist/jquery.min.js" charset="utf-8"></script>
 <script src="bower_components/bootstrap/dist/js/bootstrap.min.js" charset="utf-8"></script>

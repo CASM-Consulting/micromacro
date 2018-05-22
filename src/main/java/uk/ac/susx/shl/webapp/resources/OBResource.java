@@ -35,6 +35,7 @@ public class OBResource {
     public OBResource(String sessionsPath, String geoJsonPath, String obMapPath) throws IOException {
 
         obTrials = new OBTrials(sessionsPath, geoJsonPath, obMapPath);
+        obTrials.clear();
         obTrials.load();
 
         trialsByDate = obTrials.getDocumentsByDate();

@@ -15,7 +15,7 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
         if(val) {
             $http.get("api/ob/trials-by-id", {
                 params : {
-                    id : val.properties.trialId
+                    id : val.metadata.trialId
                 }
             }).then(function(response) {
                 var matchedMap = {};
@@ -94,18 +94,29 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
             }
         }).then(function(response){
 
+            $scope.matchesByTrial = {};
+
             var features = [];
 
             for(var i = 0; i < response.data.length; ++i) {
                 var match = response.data[i];
-                features.push({
+                var feature = {
                     geometry: {
                         type : "Point",
                         coordinates : [match.lng, match.lat]
                     },
                     type : "Feature",
-                    properties : match
-                });
+                    metadata : match
+                }
+
+                var trialId = feature.metadata.trialId;
+
+                if(!(trialId in $scope.matchesByTrial)) {
+                    $scope.matchesByTrial[trialId] = [];
+                }
+                $scope.matchesByTrial[trialId].push(feature);
+
+                features.push(feature);
             }
 
             drawTimeline({
@@ -119,76 +130,78 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
         $scope.markers = {};
         for(var i = 0; i < matches.length; ++i) {
             var match = matches[i];
-            var lat = parseFloat(match.lat);
-            var lng = parseFloat(match.lng);
-            $scope.markers[match.text.replace("-", " ") + " #" + (i+1)] = {
+            var lat = parseFloat(match.metadata.lat);
+            var lng = parseFloat(match.metadata.lng);
+            $scope.markers[match.metadata.text.replace("-", " ") + " #" + (i+1)] = {
                 lat : lat,
                 lng : lng,
-                message : "<div ng-include=\"'marker'\"></div>",
-                getMessageScope : function(match) {
-                    return function() {
-                        var scope = $scope.$new(true);
-                        scope.match = match;
-                        return scope;
-                    }
-                }(match)
+                message : "<ul>"+
+                  "<li>Match: " + match.metadata.text + "</li>"+
+                  "<li>Original: " + match.metadata.spanned + "</li>"+
+                  "<li>Lat: " + match.metadata.lat + "</li>"+
+                  "<li>Lng: " + match.metadata.lng + "</li>"+
+                  "<li>Date: " + match.metadata.date + "</li>"+
+                  "<li>Trial: " + match.metadata.trialId + "</li>"+
+                "</ul>",
+//                message : "<div ng-include=\"'marker'\"></div>",
+                icon: {
+                    iconUrl: 'node_modules/leaflet/dist/images/marker-icon.png',
+                    iconSize:     [25, 41],
+                    iconAnchor:   [12, 41],
+                },
+//                getMessageScope : function(match) {
+//                    return function() {
+//                        var scope = $scope.$new(true);
+//                        scope.match = match;
+//                        return scope;
+//                    }
+//                }(match)
             };
         }
     };
 
 
-    function updateList(timeline){
-        var displayed = timeline.getLayers();
-        var list = document.getElementById('displayed-list');
-        list.innerHTML = "";
-        displayed.forEach(function(quake){
-          var li = document.createElement('li');
-          li.innerHTML = quake.feature.properties.title;
-          list.appendChild(li);
-        });
-      }
-
-      function drawTimeline(data){
+    function drawTimeline(data){
         var map = leafletData.getMap().then(function(map) {
 
             var getInterval = function(trial) {
-              return {
-                start: moment(trial.properties.date).add(1000, "y").toDate().getTime(),
-                end:   moment(trial.properties.date).add(1000, "y").toDate().getTime()
-              };
+                return {
+                    start: moment(trial.metadata.date).add(1000, "y").toDate().getTime(),
+                    end:   moment(trial.metadata.date).add(1000, "y").toDate().getTime()
+                };
             };
             var timelineControl = L.timelineSliderControl({
-              formatOutput: function(date){
-                return moment(date).subtract(1000, "y").format("YYYY-MM-DD");
-              }
+                formatOutput: function(date){
+                    return moment(date).subtract(1000, "y").format("YYYY-MM-DD");
+                }
             });
             var timeline = L.timeline(data, {
 //                start : moment("1674-04-29").add(1000, "y").toDate().getTime(),
                 start : moment("1830-01-01").add(1000, "y").toDate().getTime(),
 //                end: moment("1913-04-01").add(1000, "y").toDate().getTime(),
-                end: moment("1839-12-31").add(1000, "y").toDate().getTime(),
-              getInterval: getInterval,
-              pointToLayer: function(data, latlng){
-                return L.circleMarker(latlng,{radius:5}).bindPopup(function(l) {
-                    $scope.selectedMarker = data;
-                    return "<ul>"+
-                        "<li>Match: " + data.properties.text + "</li>"+
-                        "<li>Original: " + data.properties.spanned + "</li>"+
-                        "<li>Lat: " + data.properties.lat + "</li>"+
-                        "<li>Lng: " + data.properties.lng + "</li>"+
-                        "<li>Date: " + data.properties.date + "</li>"+
-                        "<li>Trial: " + data.properties.trialId + "</li>"+
-                    "</ul>";
-                });
-              }
+                end: moment("1830-12-31").add(1000, "y").toDate().getTime(),
+                getInterval: getInterval,
+                pointToLayer: function(data, latlng) {
+                    return L.circleMarker(latlng,{radius:5}).bindPopup(function(l) {
+                        $scope.selectedMarker = data;
+                        drawMatches($scope.matchesByTrial[data.metadata.trialId]);
+                        return "<ul>"+
+                        "<li>Match: " + data.metadata.text + "</li>"+
+                        "<li>Original: " + data.metadata.spanned + "</li>"+
+                        "<li>Lat: " + data.metadata.lat + "</li>"+
+                        "<li>Lng: " + data.metadata.lng + "</li>"+
+                        "<li>Date: " + data.metadata.date + "</li>"+
+                        "<li>Trial: " + data.metadata.trialId + "</li>"+
+                        "</ul>";
+                    });
+                }
             });
             timelineControl.addTo(map);
             timelineControl.addTimelines(timeline);
             timeline.addTo(map);
-            timeline.on('change', function(e){
-            //          updateList(e.target);
-            });
-        //        updateList(timeline);
+//            timeline.on('change', function(e){
+//
+//            });
         });
     };
     $scope.getAll();

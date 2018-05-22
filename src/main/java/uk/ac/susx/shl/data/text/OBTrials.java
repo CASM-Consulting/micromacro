@@ -76,12 +76,14 @@ public class OBTrials {
                 .make();
 
         trialsByDate =  (Map<LocalDate, List<SimpleDocument>>) db.hashMap("trials-by-date").createOrOpen();
-        trialsByDate.clear();
         trialsById = (Map<String, SimpleDocument>) db.hashMap("trials-by-id").createOrOpen();
-        trialsById.clear();
         matches = (List) db.indexTreeList("matches").createOrOpen();
-        matches.clear();
+    }
 
+    public void clear() {
+        trialsByDate.clear();
+        trialsById.clear();
+        matches.clear();
     }
 
     public void load() {
@@ -98,145 +100,152 @@ public class OBTrials {
 
             Iterator<Datum> itr = XML2Datum.getData(start, interestingElements, "trialAccount", "-id").iterator();
 
+//
+//            ForkJoinPool forkJoinPool = new ForkJoinPool(4);
+//
+//            forkJoinPool.submit(() -> {
+//                Iterable<Datum> iterable = () -> itr;
+            while(itr.hasNext()) {
+                Datum trial = itr.next();
 
-            ForkJoinPool forkJoinPool = new ForkJoinPool(4);
+                String id = trial.get("trialAccount-id");
 
-            forkJoinPool.submit(() -> {
-                Iterable<Datum> iterable = () -> itr;
+                LocalDate date = getDate(id);
+//                if(trialsByDate.containsKey(date)) {
+//                    continue;
+//                }
 
-                Stream<Datum> stream = StreamSupport.stream(iterable.spliterator(),true);
+//                Stream<Datum> stream = StreamSupport.stream(iterable.spliterator(),true);
 
-                stream.forEach(trial -> {
+//                stream.forEach(trial -> {
 
-                    KeySet keys = trial.getKeys();
-                    Key<Spans<String, String>> sentenceKey = keys.get("statement");
-                    Key<String> textKey = keys.get("text");
+                KeySet keys = trial.getKeys();
+                Key<Spans<String, String>> sentenceKey = keys.get("statement");
+                Key<String> textKey = keys.get("text");
 
-                    Key<String> idKey = trial.getKeys().get("trialAccount-id");
+                Key<String> idKey = trial.getKeys().get("trialAccount-id");
 
-                    List<Datum> statements = new ArrayList<>();
+                List<Datum> statements = new ArrayList<>();
 
-                    KeySet retain = keys.with(idKey);
+                KeySet retain = keys.with(idKey);
 
-                    Key<List<String>> tokenKey = null;
-                    Key<Spans<List<String>, String>> spansKey = null;
+                Key<List<String>> tokenKey = null;
+                Key<Spans<List<String>, String>> spansKey = null;
 
-                    for(Datum statement : trial.getSpannedData(sentenceKey, retain)) {
+                for (Datum statement : trial.getSpannedData(sentenceKey, retain)) {
 
-                        Datum tokenized = Tokenizer.tokenize(statement, textKey, retain);
+                    Datum tokenized = Tokenizer.tokenize(statement, textKey, retain);
 
-                        KeySet tokenizedKeys = tokenized.getKeys();
+                    KeySet tokenizedKeys = tokenized.getKeys();
 
-                        tokenKey = tokenizedKeys.get(textKey+Tokenizer.SUFFIX);
+                    tokenKey = tokenizedKeys.get(textKey + Tokenizer.SUFFIX);
 
-                        spansKey = Key.of("placeName", RuntimeType.listSpans(String.class));
+                    spansKey = Key.of("placeName", RuntimeType.listSpans(String.class));
 
-                        NER2Datum ner2Datum = new NER2Datum (
-                                tokenKey,
-                                ImmutableSet.of("placeName"),
-                                spansKey,
-                                true
-                        );
+                    NER2Datum ner2Datum = new NER2Datum(
+                            tokenKey,
+                            ImmutableSet.of("placeName"),
+                            spansKey,
+                            true
+                    );
 
-                        String text = String.join(" ", tokenized.get(tokenKey));
+                    String text = String.join(" ", tokenized.get(tokenKey));
 
-                        String ner = NERSocket.get(text);
+                    String ner = NERSocket.get(text);
 
 //                    System.out.println(ner);
-                        Datum nerd = ner2Datum.toDatum(ner);
+                    Datum nerd = ner2Datum.toDatum(ner);
 
-                        if(tokenized.get(tokenKey).size() != nerd.get(tokenKey).size()) {
+                    if (tokenized.get(tokenKey).size() != nerd.get(tokenKey).size()) {
 
-                            System.err.println("tokenised mismatch! Expected " + tokenized.get(tokenKey).size() + " got " + nerd.get(tokenKey).size());
-                        } else {
+                        System.err.println("tokenised mismatch! Expected " + tokenized.get(tokenKey).size() + " got " + nerd.get(tokenKey).size());
+                    } else {
 
-                            tokenized = tokenized.with(nerd.getKeys().get("placeName"), nerd.get(spansKey));
+                        tokenized = tokenized.with(nerd.getKeys().get("placeName"), nerd.get(spansKey));
 
-                            statements.add(tokenized);
+                        statements.add(tokenized);
 
-                            keys = keys
-                                    .with(tokenizedKeys)
-                                    .with(spansKey);
-                        }
+                        keys = keys
+                                .with(tokenizedKeys)
+                                .with(spansKey);
                     }
+                }
 
-                    if(!statements.isEmpty()) {
+                if (!statements.isEmpty()) {
 
-                        String id = trial.get("trialAccount-id");
 
-                        LocalDate date = getDate(id);
+                    System.out.println(id);
 
-                        System.out.println(id);
+                    int i = 0;
 
-                        int i = 0;
+                    ListIterator<Datum> jtr = statements.listIterator();
+                    while (jtr.hasNext()) {
+                        Datum statement = jtr.next();
+                        Spans<List<String>, String> spans = statement.get(spansKey);
 
-                        ListIterator<Datum> jtr = statements.listIterator();
-                        while( jtr.hasNext() ) {
-                            Datum statement = jtr.next();
-                            Spans<List<String>, String> spans = statement.get(spansKey);
+                        Spans<List<String>, Map> matchSpans = Spans.annotate(tokenKey, Map.class);
 
-                            Spans<List<String>, Map> matchSpans = Spans.annotate(tokenKey, Map.class);
+                        int j = 0;
 
-                            int j = 0;
+                        for (Span<List<String>, String> span : spans) {
 
-                            for (Span<List<String>, String> span : spans) {
-
-                                String candidate = String.join(" ", span.getSpanned(statement) );
+                            String candidate = String.join(" ", span.getSpanned(statement));
 
 //                            System.out.println(candidate);
 
-                                List<Match> matches = lookup.getMatches(candidate);
+                            List<Match> matches = lookup.getMatches(candidate);
 
-                                if(!matches.isEmpty()) {
+                            if (!matches.isEmpty()) {
 
-                                    String spanId = id + "-" + i + "-" + j;
+                                String spanId = id + "-" + i + "-" + j;
 
-                                    Match match = matches.get(0);
+                                Match match = matches.get(0);
 
-                                    Map<String, String> metadata = match.getMetadata();
-                                    String spanned = String.join(" ", span.getSpanned(statement));
+                                Map<String, String> metadata = match.getMetadata();
+                                String spanned = String.join(" ", span.getSpanned(statement));
 
-                                    metadata.put("trialId", id);
-                                    metadata.put("id", spanId);
-                                    metadata.put("spanned", spanned);
-                                    metadata.put("text", match.getText());
-                                    metadata.put("date", date.format(date2JS));
+                                metadata.put("trialId", id);
+                                metadata.put("id", spanId);
+                                metadata.put("spanned", spanned);
+                                metadata.put("text", match.getText());
+                                metadata.put("date", date.format(date2JS));
 
-                                    Span<List<String>, Map> matchSpan = Span.annotate(tokenKey, span.from(), span.to(), metadata);
+                                Span<List<String>, Map> matchSpan = Span.annotate(tokenKey, span.from(), span.to(), metadata);
 
-                                    this.matches.add(metadata);
+                                this.matches.add(metadata);
 
-                                    matchSpans = matchSpans.with(matchSpan);
-                                }
-                                ++j;
+                                matchSpans = matchSpans.with(matchSpan);
                             }
-
-                            statement = statement.with(placeMatchKey, matchSpans);
-
-                            jtr.set(statement);
-
-                            ++i;
+                            ++j;
                         }
 
-                        Datum2SimpleDocument<?> datum2SimpleDocument = new Datum2SimpleDocument(tokenKey, ImmutableList.of(spansKey, placeMatchKey  ));
+                        statement = statement.with(placeMatchKey, matchSpans);
 
-                        SimpleDocument document = datum2SimpleDocument.toDocument(id, statements);
+                        jtr.set(statement);
 
-
-                        if(!trialsByDate.containsKey(date)) {
-                            trialsByDate.put(date, new ArrayList<>());
-                        }
-
-                        List<SimpleDocument> trialsForDate = trialsByDate.get(date);
-                        trialsForDate.add(document);
-                        trialsByDate.put(date, trialsForDate);
-                        if(trialsById.containsKey(id)) {
-                            System.err.println(id + " already exists");
-                        }
-                        trialsById.put(id, document);
+                        ++i;
                     }
-                });
-            });
+
+                    Datum2SimpleDocument<?> datum2SimpleDocument = new Datum2SimpleDocument(tokenKey, ImmutableList.of(spansKey, placeMatchKey));
+
+                    SimpleDocument document = datum2SimpleDocument.toDocument(id, statements);
+
+
+                    if (!trialsByDate.containsKey(date)) {
+                        trialsByDate.put(date, new ArrayList<>());
+                    }
+
+                    List<SimpleDocument> trialsForDate = trialsByDate.get(date);
+                    trialsForDate.add(document);
+                    trialsByDate.put(date, trialsForDate);
+                    if (trialsById.containsKey(id)) {
+                        System.err.println(id + " already exists");
+                    }
+                    trialsById.put(id, document);
+                }
+//                });
+//            });
+            }
 
         } catch (Throwable err) {
             err.printStackTrace ();
