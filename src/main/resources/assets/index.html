@@ -38,38 +38,59 @@
         margin: 0;
         margin-bottom: 15px;
       }
+      .unmatched {
+        color: red;
+      }
+      .matched {
+        color: green;
+      }
+      .trial {
+        height:800px
+      }
+      .map {
+      }
     </style></head>
 <body>
 
 <div ng-controller="OBMapController">
 
-    <leaflet
-            width="900"
-            height="800px"
-            center="center"
-            tiles="tiles"
-            defaults="defaults"
-            markers="markers"
-            geojson="geojson"
-    ></leaflet>
-    <button ng-click="changeTiles('oldlondon')" class="btn btn-default">Old London</button>
-    <button ng-click="changeTiles('openstreetmap')" class="btn btn-default">Open Street Maps</button>
+    <div class="row" >
 
-    <input ng-model="query" type="text" />
-    <button ng-click="search(query)" class="btn btn-default">Search</button>
-    <button ng-click="extract(query)" class="btn btn-default">Extract</button>
-    <button ng-click="getAll()" class="btn btn-default">Get All</button>
+        <div class="map col-md-9">
+
+            <leaflet
+                    width="900px"
+                    height="800px"
+                    center="center"
+                    tiles="tiles"
+                    defaults="defaults"
+                    markers="markers"
+                    geojson="geojson"
+            ></leaflet>
+            <button ng-click="changeTiles('oldlondon')" class="btn btn-default">Old London</button>
+            <button ng-click="changeTiles('openstreetmap')" class="btn btn-default">Open Street Maps</button>
+
+            <input ng-model="query" type="text" />
+            <button ng-click="search(query)" class="btn btn-default">Search</button>
+            <button ng-click="extract(query)" class="btn btn-default">Extract</button>
+            <button ng-click="getAll()" class="btn btn-default">Get All</button>
+
+        </div>
 
 
-    <script type="text/ng-template" id="marker">
-        <ul>
-            <li>Match: {{match.text}}</li>
-            <li>Original: {{match.spanned}}</li>
-            <li>Lat: {{match.lat}}</li>
-            <li>Lng: {{match.lng}}</li>
-            <li>Trial: {{match.trialId}}</li>
-        </ul>
-    </script>
+        <!--<div>-->
+            <!--{{selectedMarker}}-->
+        <!--</div>-->
+
+        <div class="trial col-md-3">
+            <p ng-repeat="sentence in currentTrial.data track by $index">
+                <span ng-repeat="token in sentence.tokens track by $index" ng-class="{matched: currentTrial.matchedMap[$parent.$index][$index], unmatched: currentTrial.unmatchedMap[$parent.$index][$index]}">
+                    {{token}}
+                </span>
+            </p>
+        </div>
+
+    </div>
 </div>
 
 

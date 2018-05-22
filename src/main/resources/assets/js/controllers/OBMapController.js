@@ -1,6 +1,6 @@
 'use strict';
 
-app.controller('OBMapController', function($scope, $http, $compile, leafletData) {
+app.controller('OBMapController', function($scope, $rootScope, $http, $compile, leafletData) {
 
     var tilesDict = {
         openstreetmap: {
@@ -10,6 +10,42 @@ app.controller('OBMapController', function($scope, $http, $compile, leafletData)
             url: "https://nls-2.tileserver.com/fpsUZba7ERPD/{z}/{x}/{y}.png"
         }
     };
+
+    $scope.$watch("selectedMarker", function(val, old) {
+        if(val) {
+            $http.get("api/ob/trials-by-id", {
+                params : {
+                    id : val.properties.trialId
+                }
+            }).then(function(response) {
+                var matchedMap = {};
+                var unmatchedMap = {};
+                for(var i = 0; i < response.data.data.length; ++i) {
+                    matchedMap[i] = {};
+                    for(var j = 0; j < response.data.data[i].spans.placeNameMatch.length; ++j) {
+                        var span = response.data.data[i].spans.placeNameMatch[j];
+                        for(var k = span.from; k < span.to; ++k) {
+                            matchedMap[i][k] = span.value;
+                        }
+                    }
+
+                    unmatchedMap[i] = {};
+                    for(var j = 0; j < response.data.data[i].spans.placeName.length; ++j) {
+                        var span = response.data.data[i].spans.placeName[j];
+                        for(var k = span.from; k < span.to; ++k) {
+                            if(!matchedMap[i][k]) {
+                                unmatchedMap[i][k] = true;
+                            }
+                        }
+                    }
+
+                }
+                $scope.currentTrial = response.data;
+                $scope.currentTrial.matchedMap = matchedMap;
+                $scope.currentTrial.unmatchedMap = unmatchedMap;
+            });
+        }
+    });
 
     angular.extend($scope, {
         center: {
@@ -127,11 +163,23 @@ app.controller('OBMapController', function($scope, $http, $compile, leafletData)
               }
             });
             var timeline = L.timeline(data, {
-                start : moment("1674-04-29").add(1000, "y").toDate().getTime(),
-                end: moment("1913-04-01").add(1000, "y").toDate().getTime(),
+//                start : moment("1674-04-29").add(1000, "y").toDate().getTime(),
+                start : moment("1830-01-01").add(1000, "y").toDate().getTime(),
+//                end: moment("1913-04-01").add(1000, "y").toDate().getTime(),
+                end: moment("1839-12-31").add(1000, "y").toDate().getTime(),
               getInterval: getInterval,
               pointToLayer: function(data, latlng){
-                return L.marker(latlng);
+                return L.circleMarker(latlng,{radius:5}).bindPopup(function(l) {
+                    $scope.selectedMarker = data;
+                    return "<ul>"+
+                        "<li>Match: " + data.properties.text + "</li>"+
+                        "<li>Original: " + data.properties.spanned + "</li>"+
+                        "<li>Lat: " + data.properties.lat + "</li>"+
+                        "<li>Lng: " + data.properties.lng + "</li>"+
+                        "<li>Date: " + data.properties.date + "</li>"+
+                        "<li>Trial: " + data.properties.trialId + "</li>"+
+                    "</ul>";
+                });
               }
             });
             timelineControl.addTo(map);
@@ -143,5 +191,5 @@ app.controller('OBMapController', function($scope, $http, $compile, leafletData)
         //        updateList(timeline);
         });
     };
-
+    $scope.getAll();
 });
