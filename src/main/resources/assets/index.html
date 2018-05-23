@@ -47,6 +47,13 @@
       .trial {
         height:800px
       }
+      .trials {
+        max-height:800px;
+        overflow-y: scroll;
+      }
+      .trials button {
+        margin : 5px;
+      }
       .map {
       }
     </style></head>
@@ -57,17 +64,18 @@
 
         <div class="row" >
 
-            <div class="map col-md-8">
+            <div class="map col-md-10">
 
                 <leaflet
-                        width="600px"
-                        height="800px"
-                        center="center"
-                        tiles="tiles"
-                        defaults="defaults"
-                        markers="markers"
-                        geojson="geojson"
+                    width="800px"
+                    height="800px"
+                    center="center"
+                    tiles="tiles"
+                    defaults="defaults"
+                    markers="markers"
+                    geojson="geojson"
                 ></leaflet>
+
                 <button ng-click="changeTiles('oldlondon')" class="btn btn-default">Old London</button>
                 <button ng-click="changeTiles('openstreetmap')" class="btn btn-default">Open Street Maps</button>
 
@@ -78,31 +86,34 @@
 
             </div>
 
+            <div class="col-md-2 trials">
+                <div ng-repeat="trial in trials"><button class="btn btn-primary btn-xs" ng-click="selectTrial(trial.id)" >{{trial.id}}</button></div>
+            </div>
 
             <!--<div>-->
             <!--{{selectedMarker}}-->
             <!--</div>-->
+        </div>
 
-            <div class="trial col-md-4">
-                <p ng-repeat="sentence in currentTrial.data track by $index">
+        <div class="row">
+
+            <div class="trial col-md-12">
+                <p ng-repeat="sentence in selectedTrial.data track by $index">
                 <span
                     ng-repeat="token in sentence.tokens track by $index"
-                    ng-class="{matched: currentTrial.matchedMap[$parent.$index][$index], unmatched: currentTrial.unmatchedMap[$parent.$index][$index]}"
-
+                    ng-class="{matched: selectedTrial.matchedMap[$parent.$index][$index], unmatched: selectedTrial.unmatchedMap[$parent.$index][$index]}"
                 >
                     {{token}}
                 </span>
                 </p>
             </div>
+        </div>
 
-        </div>
-        <div class="row">
-            <div class="col-md-4">
-                <div ng-repeat="match in matches">
-                    {{match}}
-                </div>
-            </div>
-        </div>
+            <!--<div class="col-md-4">-->
+                <!--<div ng-repeat="match in matches">-->
+                    <!--{{match}}-->
+                <!--</div>-->
+            <!--</div>-->
     </div>
 </div>
 

@@ -1,6 +1,6 @@
 'use strict';
 
-app.controller('OBMapController', function($scope, $rootScope, $http, $compile, leafletData) {
+app.controller('OBMapController', function($scope, $rootScope, $http, $compile, leafletData, debounce) {
 
     var tilesDict = {
         openstreetmap: {
@@ -11,11 +11,23 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
         }
     };
 
-    $scope.$watch("selectedMarker", function(val, old) {
-        if(val) {
+    $scope.$watch("selectedDate", debounce(function(val, old) {
+        if(val != old && val) {
+            $http.get("api/ob/trials-by-date", {
+                params : {
+                    date : moment(val).format('YYYY-MM-DD')
+                }
+            }).then(function(response) {
+                $scope.trials = response.data;
+            });
+        }
+    }, 200));
+
+    $scope.$watch("selectedTrialId", function(val, old) {
+        if(val != old && val) {
             $http.get("api/ob/trials-by-id", {
                 params : {
-                    id : val.metadata.trialId
+                    id : val
                 }
             }).then(function(response) {
                 var matchedMap = {};
@@ -40,9 +52,10 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
                     }
 
                 }
-                $scope.currentTrial = response.data;
-                $scope.currentTrial.matchedMap = matchedMap;
-                $scope.currentTrial.unmatchedMap = unmatchedMap;
+                $scope.selectedTrial = response.data;
+                $scope.selectedTrial.matchedMap = matchedMap;
+                $scope.selectedTrial.unmatchedMap = unmatchedMap;
+                drawMatches($scope.matchesByTrial[val] || []);
             });
         }
     });
@@ -132,7 +145,8 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
             var match = matches[i];
             var lat = parseFloat(match.metadata.lat);
             var lng = parseFloat(match.metadata.lng);
-            $scope.markers[match.metadata.text.replace("-", " ") + " #" + (i+1)] = {
+
+            $scope.markers[(match.metadata.text || match.text).replace("-", " ") + " #" + (i+1)] = {
                 lat : lat,
                 lng : lng,
                 message : "<ul>"+
@@ -160,6 +174,9 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
         }
     };
 
+    $scope.selectTrial = function(id) {
+        $scope.selectedTrialId = id;
+    }
 
     function drawTimeline(data){
         var map = leafletData.getMap().then(function(map) {
@@ -183,9 +200,8 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
                 getInterval: getInterval,
                 pointToLayer: function(data, latlng) {
                     return L.circleMarker(latlng,{radius:5}).bindPopup(function(l) {
-                        $scope.selectedMarker = data;
-                        drawMatches($scope.matchesByTrial[data.metadata.trialId]);
-                        return "<ul>"+
+                        $scope.selectedTrialId = data.metadata.trialId;
+                        return "<ul>" +
                         "<li>Match: " + data.metadata.text + "</li>"+
                         "<li>Original: " + data.metadata.spanned + "</li>"+
                         "<li>Lat: " + data.metadata.lat + "</li>"+
@@ -199,9 +215,13 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
             timelineControl.addTo(map);
             timelineControl.addTimelines(timeline);
             timeline.addTo(map);
-//            timeline.on('change', function(e){
-//
-//            });
+            timeline.on('change', function(e){
+                $scope.selectedDate = moment(e.target.time).subtract(1000, "y").toDate();
+                $scope.selectedMarker = null;
+                $scope.selectedTrialId = null;
+                $scope.trials = [];
+                $scope.markers = [];
+            });
         });
     };
     $scope.getAll();
