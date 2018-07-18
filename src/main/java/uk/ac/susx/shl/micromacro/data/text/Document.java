@@ -1,4 +1,4 @@
-package uk.ac.susx.shl.data.text;
+package uk.ac.susx.shl.micromacro.core.data.text;
 
 import com.google.common.collect.ImmutableList;
 import uk.ac.susx.tag.method51.core.collections.ImmutableMap;

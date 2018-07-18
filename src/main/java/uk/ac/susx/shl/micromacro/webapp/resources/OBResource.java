@@ -1,10 +1,10 @@
-package uk.ac.susx.shl.webapp.resources;
+package uk.ac.susx.shl.micromacro.webapp.resources;
 
 
 import com.google.gson.Gson;
 import io.dropwizard.jersey.params.LocalDateParam;
-import uk.ac.susx.shl.data.text.OBTrials;
-import uk.ac.susx.shl.data.text.SimpleDocument;
+import uk.ac.susx.shl.micromacro.core.data.text.OBTrials;
+import uk.ac.susx.shl.micromacro.core.data.text.SimpleDocument;
 import uk.ac.susx.tag.method51.core.gson.GsonBuilderFactory;
 import uk.ac.susx.tag.method51.core.meta.KeySet;
 

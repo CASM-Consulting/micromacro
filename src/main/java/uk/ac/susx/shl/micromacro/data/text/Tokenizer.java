@@ -1,4 +1,4 @@
-package uk.ac.susx.shl.data.text;
+package uk.ac.susx.shl.micromacro.core.data.text;
 
 import opennlp.tools.tokenize.TokenizerME;
 import opennlp.tools.tokenize.TokenizerModel;

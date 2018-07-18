@@ -1,4 +1,4 @@
-package uk.ac.susx.shl.data.text;
+package uk.ac.susx.shl.micromacro.core.data.text;
 
 /**
  * Created by sw206 on 16/04/2018.

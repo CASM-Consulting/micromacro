@@ -1,15 +1,8 @@
-package uk.ac.susx.shl.data.text;
+package uk.ac.susx.shl.micromacro.core.data.text;
 
 import com.google.common.collect.ImmutableList;
-import uk.ac.susx.tag.method51.core.collections.ImmutableMap;
-import uk.ac.susx.tag.method51.core.meta.Datum;
-import uk.ac.susx.tag.method51.core.meta.Key;
-import uk.ac.susx.tag.method51.core.meta.span.Spans;
-import uk.ac.susx.tag.method51.core.meta.types.RuntimeType;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 

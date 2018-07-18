@@ -1,4 +1,4 @@
-package uk.ac.susx.shl.webapp;
+package uk.ac.susx.shl.micromacro.webapp;
 
 import io.dropwizard.Application;
 import io.dropwizard.bundles.assets.ConfiguredAssetsBundle;
@@ -6,10 +6,9 @@ import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 
-import uk.ac.susx.shl.webapp.health.DefaultHealthCheck;
-import uk.ac.susx.shl.webapp.resources.HelloWorldResource;
-import uk.ac.susx.shl.webapp.resources.OBResource;
-import uk.ac.susx.shl.webapp.resources.PlacesResource;
+import uk.ac.susx.shl.micromacro.webapp.health.DefaultHealthCheck;
+import uk.ac.susx.shl.micromacro.webapp.resources.OBResource;
+import uk.ac.susx.shl.micromacro.webapp.resources.PlacesResource;
 
 import javax.ws.rs.client.Client;
 import java.io.IOException;

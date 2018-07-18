@@ -1,11 +1,10 @@
-package uk.ac.susx.shl.data.text;
+package uk.ac.susx.shl.micromacro.core.data.text;
 
 import com.google.common.collect.ImmutableSet;
 import uk.ac.susx.tag.method51.core.meta.Datum;
 import uk.ac.susx.tag.method51.core.meta.Key;
 import uk.ac.susx.tag.method51.core.meta.span.Span;
 import uk.ac.susx.tag.method51.core.meta.span.Spans;
-import uk.ac.susx.tag.method51.core.meta.types.RuntimeType;
 
 import java.util.ArrayList;
 import java.util.List;

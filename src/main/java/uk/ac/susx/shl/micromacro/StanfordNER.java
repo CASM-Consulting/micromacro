@@ -1,11 +1,11 @@
-package uk.ac.susx.shl.data.text;
+package uk.ac.susx.shl.micromacro;
 
 import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 
-public class NERSocket {
+public class StanfordNER {
 
     private static Charset charset = Charset.forName("UTF-8");
 

@@ -1,4 +1,4 @@
-package uk.ac.susx.shl.data.text;
+package uk.ac.susx.shl.micromacro.core.data.text;
 
 import uk.ac.susx.tag.method51.core.meta.Datum;
 import uk.ac.susx.tag.method51.core.meta.Key;

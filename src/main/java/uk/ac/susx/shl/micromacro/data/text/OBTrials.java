@@ -1,12 +1,13 @@
-package uk.ac.susx.shl.data.text;
+package uk.ac.susx.shl.micromacro.core.data.text;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
-import uk.ac.susx.shl.data.Match;
-import uk.ac.susx.shl.data.geo.GeoJsonKnowledgeBase;
+import uk.ac.susx.shl.client.StanfordNER;
+import uk.ac.susx.shl.micromacro.core.data.Match;
+import uk.ac.susx.shl.micromacro.core.data.geo.GeoJsonKnowledgeBase;
 import uk.ac.susx.tag.method51.core.meta.Datum;
 import uk.ac.susx.tag.method51.core.meta.Key;
 import uk.ac.susx.tag.method51.core.meta.KeySet;
@@ -21,9 +22,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.*;
-import java.util.concurrent.ForkJoinPool;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import static java.time.temporal.ChronoField.DAY_OF_MONTH;
 import static java.time.temporal.ChronoField.MONTH_OF_YEAR;
@@ -151,7 +149,7 @@ public class OBTrials {
 
                     String text = String.join(" ", tokenized.get(tokenKey));
 
-                    String ner = NERSocket.get(text);
+                    String ner = StanfordNER.get(text);
 
 //                    System.out.println(ner);
                     Datum nerd = ner2Datum.toDatum(ner);

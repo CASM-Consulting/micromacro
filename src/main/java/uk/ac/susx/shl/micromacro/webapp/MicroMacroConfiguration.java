@@ -1,11 +1,10 @@
-package uk.ac.susx.shl.webapp;
+package uk.ac.susx.shl.micromacro.webapp;
 
 import io.dropwizard.Configuration;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.bundles.assets.AssetsBundleConfiguration;
 import io.dropwizard.bundles.assets.AssetsConfiguration;
 import io.dropwizard.client.JerseyClientConfiguration;
-import org.hibernate.validator.constraints.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.*;

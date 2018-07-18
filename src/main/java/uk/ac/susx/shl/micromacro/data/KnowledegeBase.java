@@ -1,6 +1,6 @@
-package uk.ac.susx.shl.data;
+package uk.ac.susx.shl.micromacro.core.data;
 
-import uk.ac.susx.shl.data.text.Candidate;
+import uk.ac.susx.shl.micromacro.core.data.text.Candidate;
 
 import java.util.List;
 

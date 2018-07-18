@@ -1,4 +1,4 @@
-package uk.ac.susx.shl.data.geo;
+package uk.ac.susx.shl.micromacro.core.data.geo;
 
 
 import com.google.common.collect.Sets;
@@ -21,9 +21,9 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
-import uk.ac.susx.shl.data.text.Candidate;
-import uk.ac.susx.shl.data.KnowledegeBase;
-import uk.ac.susx.shl.data.Match;
+import uk.ac.susx.shl.micromacro.core.data.text.Candidate;
+import uk.ac.susx.shl.micromacro.core.data.KnowledegeBase;
+import uk.ac.susx.shl.micromacro.core.data.Match;
 
 import java.io.IOException;
 import java.io.Reader;

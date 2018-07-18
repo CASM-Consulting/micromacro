@@ -194,9 +194,9 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
             });
             var timeline = L.timeline(data, {
 //                start : moment("1674-04-29").add(1000, "y").toDate().getTime(),
-                start : moment("1830-01-01").add(1000, "y").toDate().getTime(),
+                start : moment("1803-01-01").add(1000, "y").toDate().getTime(),
 //                end: moment("1913-04-01").add(1000, "y").toDate().getTime(),
-                end: moment("1830-12-31").add(1000, "y").toDate().getTime(),
+                end: moment("1803-12-31").add(1000, "y").toDate().getTime(),
                 getInterval: getInterval,
                 pointToLayer: function(data, latlng) {
                     return L.circleMarker(latlng,{radius:5, color:"green"}).bindPopup(function(l) {

@@ -1,7 +1,7 @@
-package uk.ac.susx.shl.data.text;
+package uk.ac.susx.shl.micromacro.core.data.text;
 
-import uk.ac.susx.shl.data.Match;
-import uk.ac.susx.shl.data.geo.GeoJsonKnowledgeBase;
+import uk.ac.susx.shl.micromacro.core.data.Match;
+import uk.ac.susx.shl.micromacro.core.data.geo.GeoJsonKnowledgeBase;
 
 import java.io.BufferedWriter;
 import java.nio.file.Files;
