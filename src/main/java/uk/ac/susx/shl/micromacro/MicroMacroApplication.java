@@ -1,12 +1,15 @@
-package uk.ac.susx.shl.micromacro.webapp;
+package uk.ac.susx.shl.micromacro;
 
 import io.dropwizard.Application;
 import io.dropwizard.bundles.assets.ConfiguredAssetsBundle;
 import io.dropwizard.client.JerseyClientBuilder;
+import io.dropwizard.jdbi3.JdbiFactory;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 
+import org.jdbi.v3.core.Jdbi;
 import uk.ac.susx.shl.micromacro.webapp.health.DefaultHealthCheck;
+import uk.ac.susx.shl.micromacro.webapp.resources.Method52Resouce;
 import uk.ac.susx.shl.micromacro.webapp.resources.OBResource;
 import uk.ac.susx.shl.micromacro.webapp.resources.PlacesResource;
 
@@ -49,6 +52,10 @@ public class MicroMacroApplication extends Application<MicroMacroConfiguration> 
 
 //        environment.jersey().register(new ExternalServiceResourace(client));
 
+
+        final JdbiFactory factory = new JdbiFactory();
+        final Jdbi jdbi = factory.build(environment, configuration.getDataSourceFactory(), "postgresql");
+        environment.jersey().register(new Method52Resouce(jdbi));
     }
 
 }

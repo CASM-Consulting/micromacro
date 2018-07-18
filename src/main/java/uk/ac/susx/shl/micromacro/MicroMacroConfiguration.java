@@ -1,10 +1,11 @@
-package uk.ac.susx.shl.micromacro.webapp;
+package uk.ac.susx.shl.micromacro;
 
 import io.dropwizard.Configuration;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.bundles.assets.AssetsBundleConfiguration;
 import io.dropwizard.bundles.assets.AssetsConfiguration;
 import io.dropwizard.client.JerseyClientConfiguration;
+import io.dropwizard.db.DataSourceFactory;
 
 import javax.validation.Valid;
 import javax.validation.constraints.*;
@@ -48,5 +49,19 @@ public class MicroMacroConfiguration extends Configuration implements AssetsBund
     @JsonProperty("jerseyClient")
     public void setJerseyClientConfiguration(JerseyClientConfiguration jerseyClient) {
         this.jerseyClient = jerseyClient;
+    }
+
+    @Valid
+    @NotNull
+    private DataSourceFactory database = new DataSourceFactory();
+
+    @JsonProperty("database")
+    public void setDataSourceFactory(DataSourceFactory factory) {
+        this.database = factory;
+    }
+
+    @JsonProperty("database")
+    public DataSourceFactory getDataSourceFactory() {
+        return database;
     }
 }

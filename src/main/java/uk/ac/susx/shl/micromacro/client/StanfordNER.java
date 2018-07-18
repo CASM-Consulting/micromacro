@@ -1,4 +1,4 @@
-package uk.ac.susx.shl.micromacro;
+package uk.ac.susx.shl.micromacro.client;
 
 import java.io.*;
 import java.net.Socket;
