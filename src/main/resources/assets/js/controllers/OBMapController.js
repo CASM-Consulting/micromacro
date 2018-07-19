@@ -1,6 +1,6 @@
 'use strict';
 
-app.controller('OBMapController', function($scope, $rootScope, $http, $compile, leafletData, debounce) {
+app.controller('OBMapController', function($scope, $rootScope, $http, $compile, leafletData, debounce, $window) {
 
     var tilesDict = {
         openstreetmap: {
@@ -224,5 +224,66 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
             });
         });
     };
+
+
+    $scope.listDatabases = function() {
+        $http.get("api/m52/list-databases", {
+            params : {}
+        }).then(function(response) {
+            $scope.databases = response.data;
+        });
+    };
+
+    $scope.listTables = function() {
+        if(!$scope.database) {
+            $window.alert("Please select a database first.");
+        } else {
+            $http.get("api/m52/list-tables", {
+                params : {
+                    database : $scope.database
+                }
+            }).then(function(response) {
+                $scope.tables = response.data;
+            });
+        }
+    };
+
+    $scope.listKeys = function() {
+        if(!$scope.database || !$scope.table) {
+            $window.alert("Please select a database and a table first.");
+        } else {
+            $http.get("api/m52/list-keys", {
+                params : {
+                    database : $scope.database,
+                    table : $scope.table
+                }
+            }).then(function(response) {
+                $scope.selectedKeys = [];
+                $scope.keys = response.data;
+
+            });
+        }
+    };
+
+
+    $scope.loadAnnotations = function()  {
+        if(!$scope.database || !$scope.table || !$scope.key) {
+            $window.alert("Please select a database, a table, and a key first.");
+        } else {
+            $http.get("api/m52/load-annotations", {
+                params : {
+                    database : $scope.database,
+                    table : $scope.table,
+                    key : $scope.key
+                }
+            }).then(function(response) {
+
+            });
+        }
+
+    };
+
+    $scope.listDatabases();
     $scope.getAll();
+
 });

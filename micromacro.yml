@@ -19,12 +19,12 @@ database:
   password: postgres
 
   # the JDBC URL
-  url: jdbc:postgresql://127.0.0.1/ob-data
+  url: jdbc:postgresql://127.0.0.1/
 
   # any properties specific to your JDBC driver:
   properties:
     charSet: UTF-8
-    prepareThreshold: 0
+    #prepareThreshold: 0
 
   # the maximum amount of time to wait on an empty pool before throwing an exception
   #maxWaitForConnection: 1s
@@ -35,11 +35,14 @@ database:
   # the timeout before a connection validation queries fail
   #validationQueryTimeout: 3s
 
+
+  initialSize: 1
+
   # the minimum number of connections to keep open
-  #minSize: 8
+  minSize: 0
 
   # the maximum number of connections to keep open
-  #maxSize: 32
+  maxSize: 1
 
   # whether or not idle connections should be validated
   #checkConnectionWhileIdle: false

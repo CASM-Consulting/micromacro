@@ -8,6 +8,7 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 
 import org.jdbi.v3.core.Jdbi;
+import uk.ac.susx.shl.micromacro.db.JdbiProvider;
 import uk.ac.susx.shl.micromacro.webapp.health.DefaultHealthCheck;
 import uk.ac.susx.shl.micromacro.webapp.resources.Method52Resouce;
 import uk.ac.susx.shl.micromacro.webapp.resources.OBResource;
@@ -53,9 +54,9 @@ public class MicroMacroApplication extends Application<MicroMacroConfiguration> 
 //        environment.jersey().register(new ExternalServiceResourace(client));
 
 
-        final JdbiFactory factory = new JdbiFactory();
-        final Jdbi jdbi = factory.build(environment, configuration.getDataSourceFactory(), "postgresql");
-        environment.jersey().register(new Method52Resouce(jdbi));
+        final JdbiProvider provider = new JdbiProvider(configuration.getDataSourceFactory(), environment);
+
+        environment.jersey().register(new Method52Resouce(provider));
     }
 
 }
