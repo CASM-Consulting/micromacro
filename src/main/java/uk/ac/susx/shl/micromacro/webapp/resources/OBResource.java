@@ -2,7 +2,7 @@ package uk.ac.susx.shl.micromacro.webapp.resources;
 
 
 import com.google.gson.Gson;
-import io.dropwizard.jersey.params.LocalDateParam;
+import io.dropwizard.jersey.jsr310.LocalDateParam;
 import uk.ac.susx.shl.micromacro.core.data.text.OBTrials;
 import uk.ac.susx.shl.micromacro.core.data.text.SimpleDocument;
 import uk.ac.susx.tag.method51.core.gson.GsonBuilderFactory;
@@ -32,11 +32,10 @@ public class OBResource {
 
     private final Gson gson;
 
-    public OBResource(String sessionsPath, String geoJsonPath, String obMapPath) throws IOException {
+    public OBResource(String sessionsPath, String geoJsonPath, String obCacheTable) throws IOException {
 
-        obTrials = new OBTrials(sessionsPath, geoJsonPath, obMapPath);
-//        obTrials.clear();
-//        obTrials.load();
+        obTrials = new OBTrials(sessionsPath, geoJsonPath, obCacheTable);
+
 
         trialsByDate = obTrials.getDocumentsByDate();
         trialsId = obTrials.getDocumentsById();
@@ -50,7 +49,7 @@ public class OBResource {
     public Response trialsByDate(@QueryParam("date") Optional<LocalDateParam> dateParam) {
 
         if(dateParam.isPresent()) {
-            final LocalDate date = LocalDate.of(dateParam.get().get().getYear(),dateParam.get().get().getMonthOfYear(), dateParam.get().get().getDayOfMonth());
+            final LocalDate date = dateParam.get().get();
 
             List<SimpleDocument> trials = trialsByDate.get(date);
 
@@ -89,6 +88,16 @@ public class OBResource {
         return Response.status(Response.Status.OK).entity(
                 gson.toJson(matches)
         ).build();
+    }
+
+
+    @GET
+    @Path("load")
+    public Response load(@QueryParam("from") Optional<LocalDateParam> from, @QueryParam("to") Optional<LocalDateParam> to) {
+
+        obTrials.load(from.get().get(), to.get().get());
+
+        return Response.status(Response.Status.OK).build();
     }
 
 }

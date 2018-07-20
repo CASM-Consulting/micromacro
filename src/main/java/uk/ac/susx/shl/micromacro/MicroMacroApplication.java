@@ -40,7 +40,7 @@ public class MicroMacroApplication extends Application<MicroMacroConfiguration> 
         final PlacesResource places = new PlacesResource(configuration.geoJsonPath);
         environment.jersey().register(places);
 
-        final OBResource ob = new OBResource(configuration.sessionsPath, configuration.geoJsonPath, configuration.obMapPath);
+        final OBResource ob = new OBResource(configuration.sessionsPath, configuration.geoJsonPath, configuration.obCacheTable);
         environment.jersey().register(ob);
 
 
@@ -54,9 +54,15 @@ public class MicroMacroApplication extends Application<MicroMacroConfiguration> 
 //        environment.jersey().register(new ExternalServiceResourace(client));
 
 
-        final JdbiProvider provider = new JdbiProvider(configuration.getDataSourceFactory(), environment);
+//        final JdbiProvider provider = new JdbiProvider(configuration.getDataSourceFactory(), environment);
 
-        environment.jersey().register(new Method52Resouce(provider));
+
+        JdbiFactory factory = new JdbiFactory();
+
+        Jdbi jdbi = factory.build(environment, configuration.getDataSourceFactory(), "postgresql");
+
+
+        environment.jersey().register(new Method52Resouce(jdbi));
     }
 
 }

@@ -137,14 +137,18 @@ public class XML2Datum extends DefaultHandler {
 
         this.interestingElements = ImmutableList.copyOf(interestingElements);
 
+        keys = getKeys(interestingElements);
 
+    }
+
+    public static KeySet getKeys(List<Element> interestingElements) {
         KeySet ks = KeySet.of();
 
         for(Element e : interestingElements) {
             ks = ks.with(Key.of(e.label, RuntimeType.stringSpans(String.class)));
         }
 
-        keys = ks;
+        return ks;
     }
 
     public KeySet getKeys() {
@@ -261,7 +265,7 @@ public class XML2Datum extends DefaultHandler {
     }
 
 
-    public static Iterable<Datum> getData(Path start, List<XML2Datum.Element> interestingElements, String document, String suffix)  {
+    public static Iterable<Datum> getData(Path start, Set<Path> files, List<XML2Datum.Element> interestingElements, String documentNode, String suffix)  {
 
         try {
 
@@ -269,7 +273,7 @@ public class XML2Datum extends DefaultHandler {
 
             SAXParser saxParser = factory.newSAXParser();
 
-            Deque<Path> paths = new ArrayDeque<>(Files.walk(start).filter(path -> path.toString().endsWith("xml")).collect(Collectors.toList()));
+            Deque<Path> paths = new ArrayDeque<>(Files.walk(start).filter(path -> ( files.contains(path) || files.isEmpty() ) && path.toString().endsWith("xml")).collect(Collectors.toList()));
 
             return new Iterable<Datum>() {
                 @Override
@@ -287,7 +291,7 @@ public class XML2Datum extends DefaultHandler {
                                     saxParser.parse(xmlInput, handler);
                                     Datum datum = handler.getDatum();
                                     KeySet keys = handler.getKeys();
-                                    Key<Spans<String, String>> documentKey = keys.get(document);
+                                    Key<Spans<String, String>> documentKey = keys.get(documentNode);
 
                                     for (Datum doc : datum.getSpannedData(documentKey, keys, suffix)) {
                                         buffer.add(doc);

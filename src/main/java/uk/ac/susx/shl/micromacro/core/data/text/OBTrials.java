@@ -3,11 +3,13 @@ package uk.ac.susx.shl.micromacro.core.data.text;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import org.jdbi.v3.core.Jdbi;
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
 import uk.ac.susx.shl.micromacro.client.StanfordNER;
 import uk.ac.susx.shl.micromacro.core.data.Match;
 import uk.ac.susx.shl.micromacro.core.data.geo.GeoJsonKnowledgeBase;
+import uk.ac.susx.tag.method51.core.data.impl.PostgreSQLDatumStore;
 import uk.ac.susx.tag.method51.core.meta.Datum;
 import uk.ac.susx.tag.method51.core.meta.Key;
 import uk.ac.susx.tag.method51.core.meta.KeySet;
@@ -15,13 +17,16 @@ import uk.ac.susx.tag.method51.core.meta.span.Span;
 import uk.ac.susx.tag.method51.core.meta.span.Spans;
 import uk.ac.susx.tag.method51.core.meta.types.RuntimeType;
 
+import javax.sql.DataSource;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.time.temporal.ChronoField.DAY_OF_MONTH;
 import static java.time.temporal.ChronoField.MONTH_OF_YEAR;
@@ -42,6 +47,9 @@ public class OBTrials {
 
     private final Path start;
 
+    private final Jdbi jdbi;
+    private final String table;
+
     private KeySet keys;
 
     private final DateTimeFormatter id2Date = new DateTimeFormatterBuilder()
@@ -50,6 +58,13 @@ public class OBTrials {
                 .appendValue(MONTH_OF_YEAR, 2)
                 .appendValue(DAY_OF_MONTH, 2)
                 .toFormatter();
+
+    private final DateTimeFormatter file2Date = new DateTimeFormatterBuilder()
+            .appendValue(YEAR, 4)
+            .appendValue(MONTH_OF_YEAR, 2)
+            .appendValue(DAY_OF_MONTH, 2)
+            .appendLiteral(".xml")
+            .toFormatter();
 
     private final DateTimeFormatter date2JS = new DateTimeFormatterBuilder()
             .appendValue(YEAR, 4)
@@ -60,11 +75,14 @@ public class OBTrials {
             .toFormatter();
 
 
-    public OBTrials(String sessionsPath, String geoJsonPath, String obMapPath) throws IOException {
+    public OBTrials(String sessionsPath, String geoJsonPath, String obMapPath, Jdbi jdbi, String obTable) throws IOException {
         lookup = new GeoJsonKnowledgeBase(Paths.get(geoJsonPath));
         placeMatchKey = Key.of("placeNameMatch", RuntimeType.listSpans(Map.class));
         keys = KeySet.of(placeMatchKey);
         start = Paths.get(sessionsPath);
+
+        this.jdbi = jdbi;
+        this.table = obTable;
 
         DB db = DBMaker
                 .fileDB(obMapPath)
@@ -84,7 +102,39 @@ public class OBTrials {
         matches.clear();
     }
 
-    public void load() {
+
+    private Path getFile() {
+        return null;
+    }
+
+    private Set<Path> getFiles(LocalDate from, LocalDate to) throws IOException{
+
+        Set<Path> paths = new HashSet<>(Files.walk(start).filter(path -> {
+
+            LocalDate fileDate = LocalDate.parse(path.toString(), id2Date);
+
+            if(fileDate.isAfter(from) && fileDate.isBefore(to) || fileDate.equals(from) || fileDate.equals(to)) {
+               return true;
+            } else {
+                return false;
+            }
+
+        }).collect(Collectors.toList()));
+
+
+        return paths;
+    }
+
+    private PostgreSQLDatumStore initStore(String database, String table, KeySet keys){
+
+        return null;
+    }
+
+    /**
+     * Marshals OB Corpus XML TEI through NER to DBMap indexes by id and date.
+     *
+     */
+    public void load(LocalDate from, LocalDate to) {
 
         List<XML2Datum.Element> interestingElements = new ArrayList<>();
 
@@ -94,11 +144,14 @@ public class OBTrials {
 
         interestingElements.add(new XML2Datum.Element("p", ImmutableMap.of(), "statement"));
 
+        KeySet keys = XML2Datum.getKeys(interestingElements);
+
         try {
 
-            Iterator<Datum> itr = XML2Datum.getData(start, interestingElements, "trialAccount", "-id").iterator();
+            Set<Path> files = getFiles(from, to);
 
-//
+            Iterator<Datum> itr = XML2Datum.getData(start, files, interestingElements, "trialAccount", "-id").iterator();
+
 //            ForkJoinPool forkJoinPool = new ForkJoinPool(4);
 //
 //            forkJoinPool.submit(() -> {
@@ -117,7 +170,7 @@ public class OBTrials {
 
 //                stream.forEach(trial -> {
 
-                KeySet keys = trial.getKeys();
+//                KeySet keys = trial.getKeys();
                 Key<Spans<String, String>> sentenceKey = keys.get("statement");
                 Key<String> textKey = keys.get("text");
 

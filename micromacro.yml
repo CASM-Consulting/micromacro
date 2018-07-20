@@ -1,11 +1,19 @@
 server:
   rootPath: /api/*
+  applicationConnectors:
+    - type: http
+      port: 8090
+  adminConnectors:
+    - type: http
+      port: 8091
+
 assets:
   overrides:
     /: src/main/resources/assets/
 
 sessionsPath: data/sessionsPapersSample
-obMapPath: dbmap
+obMapPath: data/cache
+obCacheTable: obcache
 geoJsonPath: data/LL_PL_PA_WA_POINTS_FeaturesT.json
 
 database:
@@ -19,7 +27,7 @@ database:
   password: postgres
 
   # the JDBC URL
-  url: jdbc:postgresql://127.0.0.1/
+  url: jdbc:postgresql://127.0.0.1/ob-data
 
   # any properties specific to your JDBC driver:
   properties:
@@ -42,6 +50,7 @@ database:
   minSize: 0
 
   # the maximum number of connections to keep open
+  ## otherwise every connection makes a pool which doesn't get closed!
   maxSize: 1
 
   # whether or not idle connections should be validated

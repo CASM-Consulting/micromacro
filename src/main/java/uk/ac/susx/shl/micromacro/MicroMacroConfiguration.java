@@ -17,6 +17,10 @@ public class MicroMacroConfiguration extends Configuration implements AssetsBund
     @JsonProperty
     String obMapPath;
 
+    @NotNull
+    @JsonProperty
+    String obCacheTable;
+
 
     @NotNull
     @JsonProperty

@@ -32,33 +32,17 @@ import java.util.Optional;
 @Produces(MediaType.APPLICATION_JSON)
 public class Method52Resouce {
 
-    private final JdbiProvider jdbiProvider;
+    private final Jdbi jdbi;
 
-    public Method52Resouce(JdbiProvider jdbiProvider) {
+    public Method52Resouce(Jdbi jdbi) {
 
-        this.jdbiProvider = jdbiProvider;
+        this.jdbi = jdbi;
     }
 
-
-    @GET
-    @Path("list-databases")
-    public Response listDatabases() throws SQLException {
-        Jdbi jdbi = jdbiProvider.get();
-        try (Handle handle  = jdbi.open()) {
-            Connection con = handle.getConnection();
-            //no need to close - hadle does it
-            List<String> dbs = PostgresUtils.getDBNames(con);
-            return Response.status(Response.Status.OK).entity(
-                dbs
-            ).build();
-
-        }
-    }
 
     @GET
     @Path("list-tables")
-    public Response listTables(@QueryParam("database") Optional<String> database) throws SQLException {
-        Jdbi jdbi = jdbiProvider.get(database.get());
+    public Response listTables() throws SQLException {
 
         try (Handle handle  = jdbi.open()) {
             Connection con = handle.getConnection();
@@ -72,8 +56,7 @@ public class Method52Resouce {
 
     @GET
     @Path("list-keys")
-    public Response listKeys(@QueryParam("database") Optional<String> database, @QueryParam("table") Optional<String> table) throws SQLException {
-        Jdbi jdbi = jdbiProvider.get(database.get());
+    public Response listKeys(@QueryParam("table") Optional<String> table) throws SQLException {
 
         Gson gson = GsonBuilderFactory.get().create();
 
@@ -92,8 +75,7 @@ public class Method52Resouce {
 
     @GET
     @Path("get-scores")
-    public Response getScores(@QueryParam("database") Optional<String> database, @QueryParam("table") Optional<String> table, @QueryParam("key") Optional<String> key) throws SQLException {
-        Jdbi jdbi = jdbiProvider.get(database.get());
+    public Response getScores(@QueryParam("table") Optional<String> table, @QueryParam("key") Optional<String> key) throws SQLException {
 
         Gson gson = GsonBuilderFactory.get().create();
 
