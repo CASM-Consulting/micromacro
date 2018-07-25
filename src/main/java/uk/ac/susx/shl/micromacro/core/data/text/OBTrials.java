@@ -25,6 +25,7 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -47,9 +48,6 @@ public class OBTrials {
 
     private final Path start;
 
-    private final Jdbi jdbi;
-    private final String table;
-
     private KeySet keys;
 
     private final DateTimeFormatter id2Date = new DateTimeFormatterBuilder()
@@ -63,7 +61,6 @@ public class OBTrials {
             .appendValue(YEAR, 4)
             .appendValue(MONTH_OF_YEAR, 2)
             .appendValue(DAY_OF_MONTH, 2)
-            .appendLiteral(".xml")
             .toFormatter();
 
     private final DateTimeFormatter date2JS = new DateTimeFormatterBuilder()
@@ -75,14 +72,11 @@ public class OBTrials {
             .toFormatter();
 
 
-    public OBTrials(String sessionsPath, String geoJsonPath, String obMapPath, Jdbi jdbi, String obTable) throws IOException {
+    public OBTrials(String sessionsPath, String geoJsonPath, String obMapPath) throws IOException {
         lookup = new GeoJsonKnowledgeBase(Paths.get(geoJsonPath));
         placeMatchKey = Key.of("placeNameMatch", RuntimeType.listSpans(Map.class));
         keys = KeySet.of(placeMatchKey);
         start = Paths.get(sessionsPath);
-
-        this.jdbi = jdbi;
-        this.table = obTable;
 
         DB db = DBMaker
                 .fileDB(obMapPath)
@@ -110,24 +104,28 @@ public class OBTrials {
     private Set<Path> getFiles(LocalDate from, LocalDate to) throws IOException{
 
         Set<Path> paths = new HashSet<>(Files.walk(start).filter(path -> {
-
-            LocalDate fileDate = LocalDate.parse(path.toString(), id2Date);
-
-            if(fileDate.isAfter(from) && fileDate.isBefore(to) || fileDate.equals(from) || fileDate.equals(to)) {
-               return true;
-            } else {
+            if(!path.toString().endsWith(".xml")) {
                 return false;
             }
+
+            String normalised = path.getFileName().toString().replaceAll("^(\\d{4}\\d{2}\\d{2})\\w?\\.xml", "$1");
+            try {
+
+                LocalDate fileDate = LocalDate.parse(normalised, file2Date);
+                if(fileDate.isAfter(from) && fileDate.isBefore(to) || fileDate.equals(from) || fileDate.equals(to)) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } catch(DateTimeParseException e) {
+                return false;
+            }
+
 
         }).collect(Collectors.toList()));
 
 
         return paths;
-    }
-
-    private PostgreSQLDatumStore initStore(String database, String table, KeySet keys){
-
-        return null;
     }
 
     /**
@@ -144,7 +142,7 @@ public class OBTrials {
 
         interestingElements.add(new XML2Datum.Element("p", ImmutableMap.of(), "statement"));
 
-        KeySet keys = XML2Datum.getKeys(interestingElements);
+//        KeySet keys = XML2Datum.getKeys(interestingElements);
 
         try {
 
@@ -161,6 +159,10 @@ public class OBTrials {
 
                 String id = trial.get("trialAccount-id");
 
+                if(trialsById.containsKey(id)) {
+                    continue;
+                }
+
                 LocalDate date = getDate(id);
 //                if(trialsByDate.containsKey(date)) {
 //                    continue;
@@ -170,7 +172,7 @@ public class OBTrials {
 
 //                stream.forEach(trial -> {
 
-//                KeySet keys = trial.getKeys();
+                KeySet keys = trial.getKeys();
                 Key<Spans<String, String>> sentenceKey = keys.get("statement");
                 Key<String> textKey = keys.get("text");
 
@@ -223,7 +225,6 @@ public class OBTrials {
                 }
 
                 if (!statements.isEmpty()) {
-
 
                     System.out.println(id);
 
@@ -303,8 +304,13 @@ public class OBTrials {
         }
     }
 
-    public Map<LocalDate, List<SimpleDocument>> getDocumentsByDate() {
-        return trialsByDate;
+    public List<Map<LocalDate, List<SimpleDocument>>> getDocumentsByDate(LocalDate from, LocalDate to) {
+        List<Map<LocalDate, List<SimpleDocument>>> trials = new ArrayList<>();
+        for (LocalDate date = from; date.isBefore(to); date = date.plusDays(1))
+        {
+            trials.add(ImmutableMap.of(date, trialsByDate.get(date)));
+        }
+        return trials;
     }
 
     public Map<String, SimpleDocument> getDocumentsById() {

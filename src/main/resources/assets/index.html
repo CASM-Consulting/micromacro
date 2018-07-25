@@ -61,24 +61,53 @@
 
 <div ng-controller="OBMapController">
     <div class="container">
-
         <div class="row">
-            <div class="col-md-5">
-                <span>Select database</span>
-                <span>
-                    <select ng-model="database"
-                            ng-change="listTables()">
-                        <option ng-repeat="db in databases" ng-value="db">{{db}}</option>
-                    </select>
-                </span>
+            <div class="col-md-3">
+                <span>From</span>
+                <p class="input-group">
+                    <input type="text"
+                           class="form-control"
+                           uib-datepicker-popup
+                           ng-model="config.from"
+                           is-open="fromOpen"
+                           datepicker-options="fromDateOptions"
+                           ng-required="true"
+                           close-text="Close"  />
+                    <span class="input-group-btn">
+                        <button type="button"
+                                class="btn btn-default"
+                                ng-click="fromOpen = true;">
+                            <i class="glyphicon glyphicon-calendar"></i></button>
+                    </span>
+                </p>
+            </div>
+            <div class="col-md-3">
+                <span>To</span>
+                <p class="input-group">
+                    <input type="text"
+                           class="form-control"
+                           uib-datepicker-popup
+                           ng-model="config.to"
+                           is-open="toOpen"
+                           datepicker-options="toDateOptions"
+                           ng-required="true"
+                           close-text="Close" />
+                    <span class="input-group-btn">
+                        <button type="button"
+                                class="btn btn-default"
+                                ng-click="toOpen = true;">
+                            <i class="glyphicon glyphicon-calendar"></i></button>
+                    </span>
+                </p>
             </div>
 
         </div>
+
         <div class="row">
             <div class="col-md-5">
                 <span>Select table</span>
                 <span>
-                    <select ng-model="table"
+                    <select ng-model="config.table"
                             ng-change="listKeys()">
                         <option ng-repeat="tbl in tables" ng-value="tbl">{{tbl}}</option>
                     </select>
@@ -90,7 +119,7 @@
             <div class="col-md-5">
                 <span>Select keys</span>
                 <span>
-                    <select ng-model="key" >
+                    <select ng-model="config.key" >
                         <option ng-repeat="key in keys | toArray | orderBy:'$key' " ng-value="key.$key">{{key.$key}}</option>
                     </select>
                 </span>
@@ -102,7 +131,7 @@
         <div class="row">
             <div class="col-md-5">
                 <span>
-                    <button ng-click="loadAnnotations()" class="btn btn-default">Load</button>
+                    <button ng-click="loadData()" class="btn btn-default">Load</button>
                 </span>
             </div>
         </div>
@@ -180,6 +209,7 @@
 <script src="bower_components/angular-route/angular-route.min.js" charset="utf-8"></script>
 <!--<script src="bower_components/angular-ui/build/angular-ui.min.js" charset="utf-8"></script>-->
 <script src="bower_components/angular-bootstrap/ui-bootstrap.min.js" charset="utf-8"></script>
+<script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js" charset="utf-8"></script>
 
 <script src="bower_components/angular-simple-logger/dist/angular-simple-logger.js"></script>
 <script src="bower_components/d3/d3.min.js" charset="utf-8"></script>

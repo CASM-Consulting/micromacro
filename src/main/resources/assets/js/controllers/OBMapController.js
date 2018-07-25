@@ -101,6 +101,9 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
         });
     };
 
+    var responseToFeatures = function(response) {
+    };
+
     $scope.getAll = function() {
         $http.get("/api/ob/matches", {
             params : {
@@ -178,7 +181,7 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
         $scope.selectedTrialId = id;
     }
 
-    function drawTimeline(data){
+    function drawTimeline(data, from, to){
         var map = leafletData.getMap().then(function(map) {
 
             var getInterval = function(trial) {
@@ -194,9 +197,11 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
             });
             var timeline = L.timeline(data, {
 //                start : moment("1674-04-29").add(1000, "y").toDate().getTime(),
-                start : moment("1803-01-01").add(1000, "y").toDate().getTime(),
+//                start : moment("1803-01-01").add(1000, "y").toDate().getTime(),
+                start : moment(from).add(1000, "y").toDate().getTime(),
 //                end: moment("1913-04-01").add(1000, "y").toDate().getTime(),
-                end: moment("1803-12-31").add(1000, "y").toDate().getTime(),
+//                end: moment("1803-12-31").add(1000, "y").toDate().getTime(),
+                end: moment(to).add(1000, "y").toDate().getTime(),
                 getInterval: getInterval,
                 pointToLayer: function(data, latlng) {
                     return L.circleMarker(latlng,{radius:5, color:"green"}).bindPopup(function(l) {
@@ -226,36 +231,24 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
     };
 
 
-    $scope.listDatabases = function() {
-        $http.get("api/m52/list-databases", {
-            params : {}
+    $scope.listTables = function() {
+
+        $http.get("api/m52/list-tables", {
+            params : {
+                database : $scope.database
+            }
         }).then(function(response) {
-            $scope.databases = response.data;
+            $scope.tables = response.data;
         });
     };
 
-    $scope.listTables = function() {
-        if(!$scope.database) {
-            $window.alert("Please select a database first.");
-        } else {
-            $http.get("api/m52/list-tables", {
-                params : {
-                    database : $scope.database
-                }
-            }).then(function(response) {
-                $scope.tables = response.data;
-            });
-        }
-    };
-
     $scope.listKeys = function() {
-        if(!$scope.database || !$scope.table) {
+        if(!$scope.config.table) {
             $window.alert("Please select a database and a table first.");
         } else {
             $http.get("api/m52/list-keys", {
                 params : {
-                    database : $scope.database,
-                    table : $scope.table
+                    table : $scope.config.table
                 }
             }).then(function(response) {
                 $scope.selectedKeys = [];
@@ -264,26 +257,77 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
             });
         }
     };
+//        if(!$scope.config.table || !$scope.config.key) {
+//            $window.alert("Please select a table, and a key first.");
+//        } else {
 
+//                    table : $scope.config.table,
+//                    key : $scope.config.key
+//        }
 
-    $scope.loadAnnotations = function()  {
-        if(!$scope.database || !$scope.table || !$scope.key) {
-            $window.alert("Please select a database, a table, and a key first.");
-        } else {
-            $http.get("api/m52/load-annotations", {
-                params : {
-                    database : $scope.database,
-                    table : $scope.table,
-                    key : $scope.key
+    $scope.loadData = function()  {
+        var from = $scope.config.from.toISOString().split('T')[0];
+        var to = $scope.config.to.toISOString().split('T')[0]
+        $http.get("api/ob/load", {
+            params : {
+                from : from,
+                to : to
+            }
+        }).then(function(response) {
+            $scope.matchesByTrial = {};
+
+            var features = [];
+
+            for(var i = 0; i < response.data.length; ++i) {
+                var match = response.data[i];
+                var feature = {
+                    geometry: {
+                        type : "Point",
+                        coordinates : [match.lng, match.lat]
+                    },
+                    type : "Feature",
+                    metadata : match
                 }
-            }).then(function(response) {
 
-            });
-        }
+                var trialId = feature.metadata.trialId;
 
+                if(!(trialId in $scope.matchesByTrial)) {
+                    $scope.matchesByTrial[trialId] = [];
+                }
+                $scope.matchesByTrial[trialId].push(feature);
+
+                features.push(feature);
+            }
+
+            drawTimeline({
+                type : "FeatureCollection",
+                features : features
+            }, from, to);
+        });
     };
 
-    $scope.listDatabases();
-    $scope.getAll();
+
+    var dateOptions = {
+        formatYear: 'yyyy',
+            maxDate: new Date(1913, 4, 1),
+            minDate: new Date(1674, 4, 29),
+        startingDay: 1
+    };
+
+    $scope.fromDateOptions = angular.extend({}, dateOptions, {
+        initDate: new Date(1803 ,1, 1)
+    });
+
+    $scope.toDateOptions = angular.extend({}, dateOptions, {
+        initDate: new Date(1803, 12, 31)
+    });
+
+    $scope.config = $window.localStorage.getItem("config") || {
+        from: $scope.fromDateOptions.initDate,
+        to: $scope.toDateOptions.initDate
+    };
+
+    $scope.listTables();
+//    $scope.getAll();
 
 });

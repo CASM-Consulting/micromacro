@@ -5,7 +5,7 @@
     "angular": "1.6.10",
     "angular-route": "1.6.10",
     "angular-bootstrap": "2.5.0",
-    "ui-leaflet":"2.0.0",
+    "ui-leaflet": "2.0.0",
     "bootstrap": "3.3.7",
     "angular-nvd3": "1.0.9",
     "flot": "0.8.3"

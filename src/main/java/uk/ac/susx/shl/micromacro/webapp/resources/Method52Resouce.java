@@ -12,10 +12,7 @@ import uk.ac.susx.tag.method51.core.data.PostgresUtils;
 import uk.ac.susx.tag.method51.core.gson.GsonBuilderFactory;
 import uk.ac.susx.tag.method51.core.meta.KeySet;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.sql.Connection;
@@ -56,14 +53,14 @@ public class Method52Resouce {
 
     @GET
     @Path("list-keys")
-    public Response listKeys(@QueryParam("table") Optional<String> table) throws SQLException {
+    public Response listKeys(@QueryParam("table") String table) throws SQLException {
 
         Gson gson = GsonBuilderFactory.get().create();
 
         try (Handle handle  = jdbi.open()) {
             Connection con = handle.getConnection();
             //no need to close - hadle does it
-            JsonElement keysMeta = gson.fromJson(PostgresUtils.getComment(con, table.get()), JsonObject.class).get("keys");
+            JsonElement keysMeta = gson.fromJson(PostgresUtils.getComment(con, table), JsonObject.class).get("keys");
 
             KeySet keys = gson.fromJson(keysMeta, KeySet.class);
 
@@ -73,18 +70,16 @@ public class Method52Resouce {
         }
     }
 
-    @GET
+    @POST
     @Path("get-scores")
-    public Response getScores(@QueryParam("table") Optional<String> table, @QueryParam("key") Optional<String> key) throws SQLException {
+    public Response getScores(@QueryParam("table") String table, @QueryParam("key") String key, @QueryParam("ids") List<String> ids) throws SQLException {
 
         Gson gson = GsonBuilderFactory.get().create();
-
-
 
         try (Handle handle  = jdbi.open()) {
             Connection con = handle.getConnection();
             //no need to close - hadle does it
-            JsonElement keysMeta = gson.fromJson(PostgresUtils.getComment(con, table.get()), JsonObject.class).get("keys");
+            JsonElement keysMeta = gson.fromJson(PostgresUtils.getComment(con, table), JsonObject.class).get("keys");
 
             KeySet keys = gson.fromJson(keysMeta, KeySet.class);
 

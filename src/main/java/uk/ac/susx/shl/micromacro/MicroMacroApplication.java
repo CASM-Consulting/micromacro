@@ -37,12 +37,17 @@ public class MicroMacroApplication extends Application<MicroMacroConfiguration> 
     public void run(final MicroMacroConfiguration configuration,
                     final Environment environment) throws IOException {
 
+
+
+        JdbiFactory factory = new JdbiFactory();
+
+        Jdbi jdbi = factory.build(environment, configuration.getDataSourceFactory(), "postgresql");
+
         final PlacesResource places = new PlacesResource(configuration.geoJsonPath);
         environment.jersey().register(places);
 
-        final OBResource ob = new OBResource(configuration.sessionsPath, configuration.geoJsonPath, configuration.obCacheTable);
+        final OBResource ob = new OBResource(configuration.sessionsPath, configuration.geoJsonPath, configuration.obMapPath, configuration.obCacheTable, jdbi);
         environment.jersey().register(ob);
-
 
         final DefaultHealthCheck healthCheck = new DefaultHealthCheck();
         environment.healthChecks().register("default", healthCheck);
@@ -50,16 +55,6 @@ public class MicroMacroApplication extends Application<MicroMacroConfiguration> 
 
         final Client client = new JerseyClientBuilder(environment).using(configuration.getJerseyClientConfiguration())
                 .build(getName());
-
-//        environment.jersey().register(new ExternalServiceResourace(client));
-
-
-//        final JdbiProvider provider = new JdbiProvider(configuration.getDataSourceFactory(), environment);
-
-
-        JdbiFactory factory = new JdbiFactory();
-
-        Jdbi jdbi = factory.build(environment, configuration.getDataSourceFactory(), "postgresql");
 
 
         environment.jersey().register(new Method52Resouce(jdbi));
