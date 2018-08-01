@@ -246,7 +246,7 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
             var getInterval = function(trial) {
                 return {
                     start: moment(trial.metadata.date).add(1000, "y").toDate().getTime(),
-                    end:   moment(trial.metadata.date).add(1000, "y").toDate().getTime() + 86400000
+                    end:   moment(trial.metadata.date).add(1000, "y").toDate().getTime() + (86400000 - 1000)
                 };
             };
             var timelineControl = L.timelineSliderControl({
@@ -258,11 +258,7 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
             var daysCovered = moment(to).diff(moment(from)) / (1000*60*60*24);
 
             var timeline = L.timeline(data, {
-//                start : moment("1674-04-29").add(1000, "y").toDate().getTime(),
-//                start : moment("1803-01-01").add(1000, "y").toDate().getTime(),
                 start : moment(from).add(1000, "y").toDate().getTime(),
-//                end: moment("1913-04-01").add(1000, "y").toDate().getTime(),
-//                end: moment("1803-12-31").add(1000, "y").toDate().getTime(),
                 end: moment(to).add(1000, "y").toDate().getTime(),
                 steps: daysCovered,
                 duration : daysCovered * 1000,
@@ -292,7 +288,6 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
                 $scope.markers = [];
 
                 updateTrials($scope.selectedDate);
-
             });
         });
     };

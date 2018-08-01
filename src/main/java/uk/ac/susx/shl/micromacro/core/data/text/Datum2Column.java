@@ -9,32 +9,33 @@ import uk.ac.susx.tag.method51.core.meta.span.Span;
 import uk.ac.susx.tag.method51.core.meta.span.Spans;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-public class Datum2Column<T> {
+public class Datum2Column {
 
     private Datum datum;
     private final Key<String> textKey;
 //    private final SentenceDetector sentenceDetector;
 
-    private final Key<Spans<String,T>> extractKey;
+    private final List<Key> extractKeys;
 
-    public Datum2Column(Datum datum, Key<String> textKey, Key<Spans<String,T>> extractKey) throws IOException {
+    public Datum2Column(Datum datum, Key<String> textKey, List<Key> extractKeys) throws IOException {
         this.datum = datum;
         this.textKey = textKey;
-        this.extractKey = extractKey;
-
+        this.extractKeys = extractKeys;
     }
 
 
     public String columnise() {
 
-        Datum listVersion = Tokenizer.tokenize(datum, textKey, KeySet.of(extractKey));
+        Datum listVersion = Tokenizer.tokenize(datum, textKey, KeySet.ofIterable(new ArrayList<>(extractKeys)));
 
         KeySet listKeys = listVersion.getKeys();
 
-        Key<List<String>> listKey = listKeys.get(textKey.name()+"-list");
-        Key<Spans<List<String>,T>> listExtractKey = listKeys.get(extractKey.name()+"-list");
+        Key<List<String>> listKey = listKeys.get(textKey.name()+"-token");
 
         List<String> tokens = listVersion.get(listKey);
 
@@ -43,22 +44,42 @@ public class Datum2Column<T> {
         for(int i = 0; i < tokens.size(); ++i) {
             sb.append(tokens.get(i));
             sb.append("\t");
-            Optional<Spans<List<String>,T>> maybeSpans = listVersion.maybeGet(listExtractKey);
-            if(maybeSpans.isPresent() && maybeSpans.get().mayberGetAt(i).isPresent()) {
 
-                Span<List<String>,T> span = maybeSpans.get().getAt(i);
-                sb.append(span.get());
+            List<String> label = new ArrayList<>();
 
-                if(span.from() == i) {
-                    sb.append("-B");
-                } else {
-                    sb.append("-I");
+            for(Key extractKey : extractKeys) {
+                Key<Spans<List<String>,?>> listExtractKey = listKeys.get(extractKey.name()+"-token");
+
+                Optional<Spans<List<String>,?>> maybeSpans = listVersion.maybeGet(listExtractKey);
+
+                if(maybeSpans.isPresent() && maybeSpans.get().mayberGetAt(i).isPresent()) {
+
+                    Span<List<String>,?> span = maybeSpans.get().getAt(i);
+
+                    if(span.from() == i) {
+                        label.add(span.get() + "-B");
+                    } else {
+                        label.add(span.get() + "-I");
+                    }
+
                 }
-
-            } else {
-                sb.append("O");
+//                else {
+//                    sb.append("O");
+//                }
             }
+
+            int ls = label.size();
+            if(ls == 0) {
+                sb.append("O");
+            } else if( ls == 1 ) {
+                sb.append(label.get(0));
+            } else {
+                throw new RuntimeException("overlapping labels, can't deal.");
+            }
+
             sb.append("\n");
+
+
         }
 
         return sb.toString();

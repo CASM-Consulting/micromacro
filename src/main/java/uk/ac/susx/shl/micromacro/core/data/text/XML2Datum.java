@@ -19,6 +19,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 
@@ -28,6 +29,8 @@ import java.util.stream.Collectors;
 public class XML2Datum extends DefaultHandler {
 
     public static class Element {
+
+        private final Element link;
 
         private final String name;
 
@@ -54,21 +57,23 @@ public class XML2Datum extends DefaultHandler {
             valueAttribute = null;
             isContainer = false;
             selfClosing = false;
+            link = null;
         }
 
         public Element(String name, Map<String, String> attributes, String label) {
-            this(name, attributes, label, null, false, false);
+            this(name, attributes, label, null, false, false, null);
         }
 
 
 
-        private Element(String name, Map<String, String> attributes, String label, String valueAttribute, boolean selfClosing, boolean isContainer) {
+        private Element(String name, Map<String, String> attributes, String label, String valueAttribute, boolean selfClosing, boolean isContainer, Element link) {
             this.name = name;
             this.attributes = ImmutableMap.copyOf(attributes);
             this.label = label;
             this.valueAttribute = valueAttribute;
             this.selfClosing = selfClosing;
             this.isContainer = isContainer;
+            this.link = link;
         }
 
         @Override
@@ -94,19 +99,23 @@ public class XML2Datum extends DefaultHandler {
         }
 
         public Element attributes(Map<String, String> attributes) {
-            return new Element(name, attributes, label, valueAttribute, selfClosing, isContainer);
+            return new Element(name, attributes, label, valueAttribute, selfClosing, isContainer, link);
         }
 
         public Element valueAttribute(String valueAttribute) {
-            return new Element(name, attributes, label, valueAttribute, selfClosing, isContainer);
+            return new Element(name, attributes, label, valueAttribute, selfClosing, isContainer, link);
         }
 
         public Element selfClosing(boolean selfClosing) {
-            return new Element(name, attributes, label, valueAttribute, selfClosing, isContainer);
+            return new Element(name, attributes, label, valueAttribute, selfClosing, isContainer, link);
+        }
+
+        public Element link(Element link) {
+            return new Element(name, attributes, label, valueAttribute, selfClosing, isContainer, link);
         }
 
         public Element isContainer(boolean isContainer) {
-            return new Element(name, attributes, label, valueAttribute, selfClosing, isContainer);
+            return new Element(name, attributes, label, valueAttribute, selfClosing, isContainer, link);
         }
     }
 
@@ -116,7 +125,7 @@ public class XML2Datum extends DefaultHandler {
 
     private StringBuilder text;
 
-    private List<Element> interestingElements;
+    private final Map<Element, Key<Spans<String, String>>> interestingElements;
 
     private int i;
 
@@ -126,7 +135,7 @@ public class XML2Datum extends DefaultHandler {
 
     private final KeySet keys;
 
-    public XML2Datum(List<Element> interestingElements) {
+    public XML2Datum(Map<Key<Spans<String, String>>, List<Element>> interestingElements) {
         i = 0;
         enabled = false;
         stack = new ArrayDeque<>();
@@ -135,9 +144,18 @@ public class XML2Datum extends DefaultHandler {
 
         textKey = Key.of("text", RuntimeType.STRING);
 
-        this.interestingElements = ImmutableList.copyOf(interestingElements);
+        Map<Element, Key<Spans<String, String>>> ies = new HashMap<>();
 
-        keys = getKeys(interestingElements);
+        for(Map.Entry<Key<Spans<String, String>>, List<Element>> entry : interestingElements.entrySet()) {
+            for(Element element : entry.getValue()) {
+                ies.put(element, entry.getKey());
+            }
+        }
+
+        this.interestingElements = ImmutableMap.copyOf(ies);
+
+//        keys = getKeys(interestingElements);
+        keys = KeySet.ofIterable(new HashSet<>(this.interestingElements.values()));
 
     }
 
@@ -177,12 +195,14 @@ public class XML2Datum extends DefaultHandler {
 
         Optional<Element> possiblyInteresting = Optional.empty();
 
-        for(Element interesting : interestingElements) {
+        Set<Element> ies = interestingElements.keySet();
+
+        for(Element interesting : ies) {
             if(interesting.is(element)) {
                 if(possiblyInteresting.isPresent()) {
                     throw new RuntimeException("Element already matched.");
                 }
-                possiblyInteresting = Optional.of(interesting.attributes(element.attributes));
+                possiblyInteresting = Optional.of(interesting.attributes(element.attributes).link(interesting));
                 startCheck(possiblyInteresting.get());
             }
         }
@@ -219,7 +239,8 @@ public class XML2Datum extends DefaultHandler {
             }
             int end = i;
             String label = element.label;
-            Key<Spans<String, String>> key = Key.of(label, RuntimeType.stringSpans(String.class));
+            Key<Spans<String, String>> key = interestingElements.get(element.link);
+//            Key<Spans<String, String>> key = Key.of(label, RuntimeType.stringSpans(String.class));
 
             Spans<String, String> spans;
 
@@ -265,7 +286,7 @@ public class XML2Datum extends DefaultHandler {
     }
 
 
-    public static Iterable<Datum> getData(Path start, Set<Path> files, List<XML2Datum.Element> interestingElements, String documentNode, String suffix)  {
+    public static Iterable<Datum> getData(Path start, Set<Path> files, Map<Key<Spans<String, String>>, List<Element>> interestingElements, String documentNode, String suffix)  {
 
         try {
 

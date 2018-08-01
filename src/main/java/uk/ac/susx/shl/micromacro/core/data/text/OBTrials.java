@@ -134,13 +134,39 @@ public class OBTrials {
      */
     public void load(LocalDate from, LocalDate to) {
 
-        List<XML2Datum.Element> interestingElements = new ArrayList<>();
+        Key<Spans<String, String>> sessions = Key.of("sessionsPaper", RuntimeType.stringSpans(String.class));
+        Key<Spans<String, String>> trials = Key.of("trialAccount", RuntimeType.stringSpans(String.class));
+        Key<Spans<String, String>> stments = Key.of("statement", RuntimeType.stringSpans(String.class));
+//        Key<Spans<String, String>> entities = Key.of("entities", RuntimeType.stringSpans(String.class));
 
-        interestingElements.add(new XML2Datum.Element("div0", ImmutableMap.of("type", "sessionsPaper"), "sessionsPaper").isContainer(true));
+        Map<Key<Spans<String, String>>, List<XML2Datum.Element>> interestingElements = new HashMap<>();
 
-        interestingElements.add(new XML2Datum.Element("div1", ImmutableMap.of("type", "trialAccount"), "trialAccount").valueAttribute("id"));
 
-        interestingElements.add(new XML2Datum.Element("p", ImmutableMap.of(), "statement"));
+        interestingElements.put(sessions, ImmutableList.of(
+                new XML2Datum.Element("div0", ImmutableMap.of("type", "sessionsPaper"), "sessionsPaper").isContainer(true)
+        ));
+
+        interestingElements.put(trials, ImmutableList.of(
+                new XML2Datum.Element("div1", ImmutableMap.of("type", "trialAccount"), "trialAccount").valueAttribute("id")
+        ));
+
+        interestingElements.put(stments, ImmutableList.of(
+                new XML2Datum.Element("p", ImmutableMap.of(), "statement")
+        ));
+
+//        interestingElements.add(new XML2Datum.Element("div1", ImmutableMap.of("type", "frontMatter"), "frontMatter"));
+//        interestingElements.put(entities, ImmutableList.of(
+////                new XML2Datum.Element("placeName", ImmutableMap.of(), "placeName"),
+//                new XML2Datum.Element("rs", ImmutableMap.of("type", "crimeDate"), "crimeDate"))
+//        );
+
+//        List<XML2Datum.Element> interestingElements = new ArrayList<>();
+//
+//        interestingElements.add(new XML2Datum.Element("div0", ImmutableMap.of("type", "sessionsPaper"), "sessionsPaper").isContainer(true));
+//
+//        interestingElements.add(new XML2Datum.Element("div1", ImmutableMap.of("type", "trialAccount"), "trialAccount").valueAttribute("id"));
+//
+//        interestingElements.add(new XML2Datum.Element("p", ImmutableMap.of(), "statement"));
 
 //        KeySet keys = XML2Datum.getKeys(interestingElements);
 
