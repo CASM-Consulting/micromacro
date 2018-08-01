@@ -12,7 +12,7 @@ assets:
     /: src/main/resources/assets/
 
 sessionsPath: data/sessionsPapers
-obMapPath: data/cache
+obMapPath: data/cache2
 obCacheTable: obcache
 geoJsonPath: data/LL_PL_PA_WA_POINTS_FeaturesT.json
 

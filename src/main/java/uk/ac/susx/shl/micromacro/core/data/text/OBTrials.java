@@ -17,12 +17,13 @@ import uk.ac.susx.tag.method51.core.meta.span.Span;
 import uk.ac.susx.tag.method51.core.meta.span.Spans;
 import uk.ac.susx.tag.method51.core.meta.types.RuntimeType;
 
-import javax.sql.DataSource;
+import com.joestelmach.natty.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
@@ -70,6 +71,8 @@ public class OBTrials {
             .appendLiteral('-')
             .appendValue(DAY_OF_MONTH, 2)
             .toFormatter();
+
+    private final Parser dateParser = new Parser();
 
 
     public OBTrials(String sessionsPath, String geoJsonPath, String obMapPath) throws IOException {
@@ -137,6 +140,7 @@ public class OBTrials {
         Key<Spans<String, String>> sessions = Key.of("sessionsPaper", RuntimeType.stringSpans(String.class));
         Key<Spans<String, String>> trials = Key.of("trialAccount", RuntimeType.stringSpans(String.class));
         Key<Spans<String, String>> stments = Key.of("statement", RuntimeType.stringSpans(String.class));
+        Key<Spans<String, String>> crimeDate = Key.of("crimeDate", RuntimeType.stringSpans(String.class));
 //        Key<Spans<String, String>> entities = Key.of("entities", RuntimeType.stringSpans(String.class));
 
         Map<Key<Spans<String, String>>, List<XML2Datum.Element>> interestingElements = new HashMap<>();
@@ -154,11 +158,11 @@ public class OBTrials {
                 new XML2Datum.Element("p", ImmutableMap.of(), "statement")
         ));
 
+        interestingElements.put(crimeDate, ImmutableList.of(
+//                new XML2Datum.Element("placeName", ImmutableMap.of(), "placeName"),
+                new XML2Datum.Element("rs", ImmutableMap.of("type", "crimeDate"), "crimeDate"))
+        );
 //        interestingElements.add(new XML2Datum.Element("div1", ImmutableMap.of("type", "frontMatter"), "frontMatter"));
-//        interestingElements.put(entities, ImmutableList.of(
-////                new XML2Datum.Element("placeName", ImmutableMap.of(), "placeName"),
-//                new XML2Datum.Element("rs", ImmutableMap.of("type", "crimeDate"), "crimeDate"))
-//        );
 
 //        List<XML2Datum.Element> interestingElements = new ArrayList<>();
 //
@@ -206,10 +210,13 @@ public class OBTrials {
 
                 List<Datum> statements = new ArrayList<>();
 
-                KeySet retain = keys.with(idKey);
+                KeySet retain = keys
+                        .with(idKey)
+//                        .with(crimeDate)
+                        ;
 
                 Key<List<String>> tokenKey = null;
-                Key<Spans<List<String>, String>> spansKey = null;
+                Key<Spans<List<String>, String>> placeNameSpansKey = null;
 
                 for (Datum statement : trial.getSpannedData(sentenceKey, retain)) {
 
@@ -219,12 +226,12 @@ public class OBTrials {
 
                     tokenKey = tokenizedKeys.get(textKey + Tokenizer.SUFFIX);
 
-                    spansKey = Key.of("placeName", RuntimeType.listSpans(String.class));
+                    placeNameSpansKey = Key.of("placeName", RuntimeType.listSpans(String.class));
 
                     NER2Datum ner2Datum = new NER2Datum(
                             tokenKey,
                             ImmutableSet.of("placeName"),
-                            spansKey,
+                            placeNameSpansKey,
                             true
                     );
 
@@ -235,19 +242,25 @@ public class OBTrials {
 //                    System.out.println(ner);
                     Datum nerd = ner2Datum.toDatum(ner);
 
+                    //retain original crime date spans - tokenisation not required
+                    tokenized = tokenized.with(crimeDate, statement.get(crimeDate));
+
                     if (tokenized.get(tokenKey).size() != nerd.get(tokenKey).size()) {
 
                         System.err.println("tokenised mismatch! Expected " + tokenized.get(tokenKey).size() + " got " + nerd.get(tokenKey).size());
                     } else {
 
-                        tokenized = tokenized.with(nerd.getKeys().get("placeName"), nerd.get(spansKey));
+                        tokenized = tokenized
+                                .with(nerd.getKeys().get("placeName"), nerd.get(placeNameSpansKey))
+                        ;
 
                         statements.add(tokenized);
 
                         keys = keys
                                 .with(tokenizedKeys)
-                                .with(spansKey);
+                                .with(placeNameSpansKey);
                     }
+
                 }
 
                 if (!statements.isEmpty()) {
@@ -259,52 +272,21 @@ public class OBTrials {
                     ListIterator<Datum> jtr = statements.listIterator();
                     while (jtr.hasNext()) {
                         Datum statement = jtr.next();
-                        Spans<List<String>, String> spans = statement.get(spansKey);
 
-                        Spans<List<String>, Map> matchSpans = Spans.annotate(tokenKey, Map.class);
+                        statement = processPlaceNames(statement, placeNameSpansKey, tokenKey, id, i);
 
-                        int j = 0;
-
-                        for (Span<List<String>, String> span : spans) {
-
-                            String candidate = String.join(" ", span.getSpanned(statement));
-
-//                            System.out.println(candidate);
-
-                            List<Match> matches = lookup.getMatches(candidate);
-
-                            if (!matches.isEmpty()) {
-
-                                String spanId = id + "-" + i + "-" + j;
-
-                                Match match = matches.get(0);
-
-                                Map<String, String> metadata = match.getMetadata();
-                                String spanned = String.join(" ", span.getSpanned(statement));
-
-                                metadata.put("trialId", id);
-                                metadata.put("id", spanId);
-                                metadata.put("spanned", spanned);
-                                metadata.put("text", match.getText());
-                                metadata.put("date", date.format(date2JS));
-
-                                Span<List<String>, Map> matchSpan = Span.annotate(tokenKey, span.from(), span.to(), metadata);
-
-                                this.matches.add(metadata);
-
-                                matchSpans = matchSpans.with(matchSpan);
-                            }
-                            ++j;
-                        }
-
-                        statement = statement.with(placeMatchKey, matchSpans);
+                        statement = processDates(statement, crimeDate, textKey, id, i, Date.from(date.atTime(0,0,0).toInstant(ZoneOffset.UTC)));
 
                         jtr.set(statement);
 
                         ++i;
                     }
 
-                    Datum2SimpleDocument<?> datum2SimpleDocument = new Datum2SimpleDocument(tokenKey, ImmutableList.of(spansKey, placeMatchKey));
+                    Datum2SimpleDocument<?> datum2SimpleDocument = new Datum2SimpleDocument(tokenKey, ImmutableList.of(
+                            placeNameSpansKey,
+                            placeMatchKey,
+                            Key.of("crimeDate-token", RuntimeType.listSpans(String.class))
+                    ));
 
                     SimpleDocument document = datum2SimpleDocument.toDocument(id, statements);
 
@@ -328,6 +310,84 @@ public class OBTrials {
         } catch (Throwable err) {
             err.printStackTrace ();
         }
+    }
+
+
+    private Datum processDates(Datum datum, Key<Spans<String, String>> datesKey,
+                               Key<String> textKey, String trialId, int statementIdx, Date refDate) {
+
+        Spans<String, String> dateSpans = datum.get(datesKey);
+
+        Spans<String, LocalDate> dates = Spans.annotate(textKey, LocalDate.class);
+
+        for (Span<String, String> span : dateSpans) {
+
+            String dateText = span.getSpanned(datum);
+
+            System.out.println(dateText);
+
+            List<DateGroup> dateGroups = dateParser.parse(dateText, refDate);
+
+            if(dateGroups.size() == 1) {
+
+                List<Date> parsed = dateGroups.get(0).getDates();
+
+                if(parsed.size() == 1) {
+
+                    LocalDate date = parsed.get(0).toInstant().atOffset(ZoneOffset.UTC).toLocalDate();
+
+
+
+                }
+            }
+        }
+
+
+        return datum;
+    }
+
+    private Datum processPlaceNames(Datum datum, Key<Spans<List<String>, String>> placeNameSpansKey,
+                                    Key<List<String>> tokenKey, String trialId, int statementIdx) {
+        Spans<List<String>, String> placeNameSpans = datum.get(placeNameSpansKey);
+
+        Spans<List<String>, Map> placeNameMatchSpans = Spans.annotate(tokenKey, Map.class);
+
+        int j = 0;
+
+        for (Span<List<String>, String> span : placeNameSpans) {
+
+            String candidate = String.join(" ", span.getSpanned(datum));
+
+//          System.out.println(candidate);
+
+            List<Match> matches = lookup.getMatches(candidate);
+
+            if (!matches.isEmpty()) {
+
+                String spanId = trialId + "-" + statementIdx + "-" + j;
+
+                Match match = matches.get(0);
+
+                Map<String, String> metadata = match.getMetadata();
+                String spanned = String.join(" ", span.getSpanned(datum));
+
+                metadata.put("trialId", trialId);
+                metadata.put("id", spanId);
+                metadata.put("spanned", spanned);
+                metadata.put("text", match.getText());
+//                metadata.put("date", date.format(date2JS));
+
+                Span<List<String>, Map> placeNameMatchSpan = Span.annotate(tokenKey, span.from(), span.to(), metadata);
+
+                this.matches.add(metadata);
+
+                placeNameMatchSpans = placeNameMatchSpans.with(placeNameMatchSpan);
+            }
+            ++j;
+        }
+
+        datum = datum.with(placeMatchKey, placeNameMatchSpans);
+        return datum;
     }
 
     public List<Map<LocalDate, List<SimpleDocument>>> getDocumentsByDate(LocalDate from, LocalDate to) {
