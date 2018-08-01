@@ -45,24 +45,24 @@ public class OBResource {
         KeySet keys = obTrials.keys();
         gson = GsonBuilderFactory.get(keys).create();
     }
-//
-//    @GET
-//    @Path("trials-by-date")
-//    public Response trialsByDate(@QueryParam("date") Optional<LocalDateParam> dateParam) {
-//
-//        if(dateParam.isPresent()) {
-//            final LocalDate date = dateParam.get().get();
-//
-//            List<SimpleDocument> trials = trialsByDate.get(date);
-//
-//            return Response.status(Response.Status.OK).entity(
-//                gson.toJson(trials)
-//            ).build();
-//        } else {
-//            return Response.status(Response.Status.BAD_REQUEST).build();
-//        }
-//
-//    }
+
+    @GET
+    @Path("trials-by-date")
+    public Response trialsByDate(@QueryParam("date") Optional<LocalDateParam> dateParam) {
+
+        if(dateParam.isPresent()) {
+            final LocalDate date = dateParam.get().get();
+
+            List<SimpleDocument> trials = obTrials.getDocumentsByDate(date, date.plusDays(1)).get(0).get(date);
+
+            return Response.status(Response.Status.OK).entity(
+                gson.toJson(trials)
+            ).build();
+        } else {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+
+    }
 
     @GET
     @Path("trials-by-id")
@@ -95,8 +95,11 @@ public class OBResource {
     public Response load(@QueryParam("from") LocalDateParam from, @QueryParam("to") LocalDateParam to) {
 
         obTrials.load(from.get(), to.get());
+        List<Map<String, String>> matches = obTrials.getMatches();
 
-        return Response.status(Response.Status.OK).build();
+        return Response.status(Response.Status.OK).entity(
+                gson.toJson(matches)
+        ).build();
     }
 
 }

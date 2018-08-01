@@ -73,3 +73,4 @@ app.directive('loading', ['$http' ,function ($http)
         }
     };
 }]);
+8

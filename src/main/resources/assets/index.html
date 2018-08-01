@@ -150,6 +150,7 @@
                     defaults="defaults"
                     markers="markers"
                     geojson="geojson"
+                    layers="layers"
                 ></leaflet>
 
                 <button ng-click="changeTiles('oldlondon')" class="btn btn-default">Old London</button>
@@ -215,10 +216,14 @@
 <script src="bower_components/d3/d3.min.js" charset="utf-8"></script>
 <script src="bower_components/nvd3/build/nv.d3.min.js" charset="utf-8"></script>
 <!--<script src="bower_components/leaflet/dist/leaflet.js"></script>-->
+
+<!--leaflet-->
 <script src="node_modules/leaflet/dist/leaflet.js"></script>
 <script src="bower_components/ui-leaflet/dist/ui-leaflet.js"></script>
 <script src="node_modules/moment/moment.js"></script>
 <script src="node_modules/leaflet.timeline/dist/leaflet.timeline.js"></script>
+<script src="node_modules/leaflet.heat/dist/leaflet-heat.js"></script>
+<script src="node_modules/ui-leaflet-layers/dist/ui-leaflet-layers.js"></script>
 
 <script src="/js/app.js"></script>
 <script src="/js/controllers/OBMapController.js"></script>

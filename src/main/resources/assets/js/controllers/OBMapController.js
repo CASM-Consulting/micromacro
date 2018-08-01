@@ -2,6 +2,9 @@
 
 app.controller('OBMapController', function($scope, $rootScope, $http, $compile, leafletData, debounce, $window) {
 
+    var HEAT_INTENSITY = 10;
+    $scope.trailsByDate = {};
+
     var tilesDict = {
         openstreetmap: {
             url: "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -13,15 +16,26 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
 
     $scope.$watch("selectedDate", debounce(function(val, old) {
         if(val != old && val) {
-            $http.get("api/ob/trials-by-date", {
-                params : {
-                    date : moment(val).format('YYYY-MM-DD')
-                }
-            }).then(function(response) {
-                $scope.trials = response.data;
-            });
+
+            var date =  moment(val).format('YYYY-MM-DD');
+
+//            updateTrials(date);
         }
     }, 200));
+
+    var updateTrials = function(date) {
+        var date =  moment(date).format('YYYY-MM-DD');
+
+        $http.get("api/ob/trials-by-date", {
+            params : {
+                date : date
+            }
+        }).then(function(response) {
+            $scope.trials = response.data;
+
+        });
+        drawHeat($scope.trailsByDate[date]);
+    };
 
     $scope.$watch("selectedTrialId", function(val, old) {
         if(val != old && val) {
@@ -69,9 +83,54 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
         defaults: {
             scrollWheelZoom: true
         },
-        tiles: tilesDict.oldlondon
+        tiles: tilesDict.oldlondon,
+        layers: {}
 
     });
+
+//    $scope.layers.overlays = {
+//            heat: {
+//                name: 'Heat Map',
+//                type: 'heat',
+//                data: [
+//                    [51.5074, 0.1278, 20],
+//                    [51.5075, 0.1279, 20],
+//                    [51.5086, 0.1290, 20],
+//                    [51.5087, 0.1291, 20]
+//                ],
+//                layerOptions: {
+//                    radius: 10,
+//                    blur: 5
+//                },
+//                visible: true
+//            }
+//        };
+
+    var drawHeat = function(data) {
+        if(!data) return;
+
+        leafletData.getLayers().then(function(layers) {
+            if(layers.overlays.heat) {
+                layers.overlays.heat.setLatLngs(data);
+            } else {
+                $scope.layers.overlays = {
+                    heat : {
+                        name: 'Heat Map',
+                        type: 'heat',
+                        data: data,
+                        layerOptions: {
+                            radius: 20,
+                            blur: 20
+                        },
+                        visible: true
+                    }
+                };
+            }
+        });
+
+
+
+    };
 
     $scope.changeTiles = function(tiles) {
         $scope.tiles = tilesDict[tiles];
@@ -187,7 +246,7 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
             var getInterval = function(trial) {
                 return {
                     start: moment(trial.metadata.date).add(1000, "y").toDate().getTime(),
-                    end:   moment(trial.metadata.date).add(1000, "y").toDate().getTime()
+                    end:   moment(trial.metadata.date).add(1000, "y").toDate().getTime() + 86400000
                 };
             };
             var timelineControl = L.timelineSliderControl({
@@ -195,6 +254,9 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
                     return moment(date).subtract(1000, "y").format("YYYY-MM-DD");
                 }
             });
+
+            var daysCovered = moment(to).diff(moment(from)) / (1000*60*60*24);
+
             var timeline = L.timeline(data, {
 //                start : moment("1674-04-29").add(1000, "y").toDate().getTime(),
 //                start : moment("1803-01-01").add(1000, "y").toDate().getTime(),
@@ -202,6 +264,8 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
 //                end: moment("1913-04-01").add(1000, "y").toDate().getTime(),
 //                end: moment("1803-12-31").add(1000, "y").toDate().getTime(),
                 end: moment(to).add(1000, "y").toDate().getTime(),
+                steps: daysCovered,
+                duration : daysCovered * 1000,
                 getInterval: getInterval,
                 pointToLayer: function(data, latlng) {
                     return L.circleMarker(latlng,{radius:5, color:"green"}).bindPopup(function(l) {
@@ -226,6 +290,9 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
                 $scope.selectedTrialId = null;
                 $scope.trials = [];
                 $scope.markers = [];
+
+                updateTrials($scope.selectedDate);
+
             });
         });
     };
@@ -253,7 +320,6 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
             }).then(function(response) {
                 $scope.selectedKeys = [];
                 $scope.keys = response.data;
-
             });
         }
     };
@@ -296,7 +362,12 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
                 }
                 $scope.matchesByTrial[trialId].push(feature);
 
+                var date = match.date;
                 features.push(feature);
+                if(!(date in $scope.trailsByDate)) {
+                    $scope.trailsByDate[date] = [];
+                }
+                $scope.trailsByDate[date].push([match.lat, match.lng, HEAT_INTENSITY]);
             }
 
             drawTimeline({
