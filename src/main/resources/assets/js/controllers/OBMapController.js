@@ -5,7 +5,28 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
     var DATE_FORMAT = 'YYYY-MM-DD';
 
     $scope.heatmapIntensity = 10;
-    $scope.heatmapDecay = 10;
+    $scope.heatmapDecay = 20;
+    $scope.timelineDuration = 100;
+    $scope.heatmapRadius = 10;
+    $scope.heatmapBlur = 15;
+
+    $scope.$watch("heatmapRadius", function(val, old ) {
+        if(val && val != old) {
+            leafletData.getLayers().then(function(layers) {
+                layers.overlays.heat.setOptions({radius:val})
+            });
+        }
+    });
+
+    $scope.$watch("heatmapBlur", function(val, old ) {
+        if(val && val != old) {
+            leafletData.getLayers().then(function(layers) {
+                layers.overlays.heat.setOptions({blur:val})
+            });
+        }
+    });
+
+
     $scope.matchLLByDate = {};
 
     var tilesDict = {
@@ -83,8 +104,13 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
             lng: -0.11,
             zoom: 12
         },
+
         defaults: {
-            scrollWheelZoom: true
+            scrollWheelZoom: true,
+            minZoom: 10,
+            maxZoom: 14,
+            wheelDebounceTime: 100,
+            scrollWheelZoom:false
         },
         tiles: tilesDict.oldlondon,
         layers: {}
@@ -143,8 +169,8 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
                         type: 'heat',
                         data: data,
                         layerOptions: {
-                            radius: 20,
-                            blur: 20
+                            radius: $scope.heatmapRadius,
+                            blur: $scope.heatmapBlur
                         },
                         visible: true
                     }
@@ -273,19 +299,30 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
                     end:   moment(trial.metadata.date).add(1000, "y").toDate().getTime() + (86400000 - 1000)
                 };
             };
+
+            var daysCovered = moment(to).diff(moment(from)) / (1000*60*60*24);
+
             var timelineControl = L.timelineSliderControl({
+                steps: daysCovered,
+                duration : daysCovered * $scope.timelineDuration,
+                enableKeyboardControls: true,
                 formatOutput: function(date){
                     return moment(date).subtract(1000, "y").format(DATE_FORMAT);
                 }
             });
 
-            var daysCovered = moment(to).diff(moment(from)) / (1000*60*60*24);
+            $scope.$watch("timelineDuration", function(val, old) {
+
+                if(val && val != old) {
+
+                    timelineControl.options.duration = val;
+                }
+            });
+
 
             var timeline = L.timeline(data, {
                 start : moment(from).add(1000, "y").toDate().getTime(),
                 end: moment(to).add(1000, "y").toDate().getTime(),
-                steps: daysCovered,
-                duration : daysCovered * 10000,
                 getInterval: getInterval,
                 pointToLayer: function(data, latlng) {
                     return L.circleMarker(latlng,{radius:5, color:"green"}).bindPopup(function(l) {

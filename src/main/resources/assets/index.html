@@ -104,7 +104,7 @@
         </div>
 
         <div class="row">
-            <div class="col-md-5">
+            <div class="col-md-3">
                 <span>Select table</span>
                 <span>
                     <select ng-model="config.table"
@@ -113,10 +113,8 @@
                     </select>
                 </span>
             </div>
-        </div>
 
-        <div class="row">
-            <div class="col-md-5">
+            <div class="col-md-3">
                 <span>Select keys</span>
                 <span>
                     <select ng-model="config.key" >
@@ -125,11 +123,7 @@
                 </span>
             </div>
 
-        </div>
-
-
-        <div class="row">
-            <div class="col-md-5">
+            <div class="col-md-1">
                 <span>
                     <button ng-click="loadData()" class="btn btn-default">Load</button>
                 </span>
@@ -137,19 +131,45 @@
         </div>
 
         <div class="row">
+            <div class="col-md-12">
+                <span class="">Heatmap</span>
+            </div>
+        </div>
+        <div class="row">
             <div class="col-md-2">
-                <span>Heatmap Intensity</span>
+                <span>Intensity</span>
                 <span>
-                    <input ng-model="heatmapIntensity" step=1 type="number">
+                    <input ng-model="heatmapIntensity" step="1" type="number">
                 </span>
             </div>
 
             <div class="col-md-2">
-                <span>Heatmap Decay</span>
+                <span>Decay</span>
                 <span>
-                    <input ng-model="heatmapDecay" step=1 type="number">
+                    <input ng-model="heatmapDecay" step="1" type="number">
                 </span>
             </div>
+
+            <div class="col-md-2">
+                <span>Radius</span>
+                <span>
+                    <input ng-model="heatmapRadius" step="1" type="number">
+                </span>
+            </div>
+
+            <div class="col-md-2">
+                <span>Blur</span>
+                <span>
+                    <input ng-model="heatmapBlur" step="1" type="number">
+                </span>
+            </div>
+
+            <!--<div class="col-md-2">-->
+                <!--<span>Timeline Duration</span>-->
+                <!--<span>-->
+                    <!--<input ng-model="timelineDuration" step="100" type="number">-->
+                <!--</span>-->
+            <!--</div>-->
 
         </div>
 
@@ -233,7 +253,7 @@
 <!--<script src="bower_components/leaflet/dist/leaflet.js"></script>-->
 
 <!--leaflet-->
-<script src="node_modules/leaflet/dist/leaflet.js"></script>
+<script src="node_modules/leaflet/dist/leaflet-src.js"></script>
 <script src="bower_components/ui-leaflet/dist/ui-leaflet.js"></script>
 <script src="node_modules/moment/moment.js"></script>
 <script src="node_modules/leaflet.timeline/dist/leaflet.timeline.js"></script>
