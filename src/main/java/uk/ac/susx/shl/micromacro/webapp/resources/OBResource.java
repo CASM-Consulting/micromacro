@@ -53,7 +53,7 @@ public class OBResource {
         if(dateParam.isPresent()) {
             final LocalDate date = dateParam.get().get();
 
-            List<SimpleDocument> trials = obTrials.getDocumentsByDate(date, date.plusDays(1)).get(0).get(date);
+            List<SimpleDocument> trials = obTrials.getDocumentsByDate(date, date.plusDays(1)).get(date);
 
             return Response.status(Response.Status.OK).entity(
                 gson.toJson(trials)

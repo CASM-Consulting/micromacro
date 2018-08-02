@@ -2,8 +2,11 @@
 
 app.controller('OBMapController', function($scope, $rootScope, $http, $compile, leafletData, debounce, $window) {
 
-    var HEAT_INTENSITY = 10;
-    $scope.trailsByDate = {};
+    var DATE_FORMAT = 'YYYY-MM-DD';
+
+    $scope.heatmapIntensity = 10;
+    $scope.heatmapDecay = 10;
+    $scope.matchLLByDate = {};
 
     var tilesDict = {
         openstreetmap: {
@@ -17,14 +20,14 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
     $scope.$watch("selectedDate", debounce(function(val, old) {
         if(val != old && val) {
 
-            var date =  moment(val).format('YYYY-MM-DD');
+            var date =  moment(val).format(DATE_FORMAT);
 
 //            updateTrials(date);
         }
     }, 200));
 
     var updateTrials = function(date) {
-        var date =  moment(date).format('YYYY-MM-DD');
+        var date = moment(date).format(DATE_FORMAT);
 
         $http.get("api/ob/trials-by-date", {
             params : {
@@ -34,7 +37,7 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
             $scope.trials = response.data;
 
         });
-        drawHeat($scope.trailsByDate[date]);
+        drawHeat(date);
     };
 
     $scope.$watch("selectedTrialId", function(val, old) {
@@ -106,7 +109,28 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
 //            }
 //        };
 
-    var drawHeat = function(data) {
+    var drawHeat = function(date) {
+
+        var from = moment(date).subtract($scope.heatmapDecay, 'days').format(DATE_FORMAT);
+        var to = moment(date).format(DATE_FORMAT);
+
+        var data = [];
+        var i = 1;
+        for(var d = moment(from); d.diff(to, 'days') <= 0; d.add(1, 'days') ) {
+            var dayDate = moment(d).format(DATE_FORMAT);
+            var dayData = $scope.matchLLByDate[dayDate] || [];
+
+            var intensity = (i / $scope.heatmapDecay) *  $scope.heatmapIntensity;
+
+            for(var j = 0; j < dayData.length; ++j) {
+                var point = dayData[j];
+
+                data.push(point.concat(intensity));
+            }
+
+            ++i;
+        }
+
         if(!data) return;
 
         leafletData.getLayers().then(function(layers) {
@@ -251,7 +275,7 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
             };
             var timelineControl = L.timelineSliderControl({
                 formatOutput: function(date){
-                    return moment(date).subtract(1000, "y").format("YYYY-MM-DD");
+                    return moment(date).subtract(1000, "y").format(DATE_FORMAT);
                 }
             });
 
@@ -261,7 +285,7 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
                 start : moment(from).add(1000, "y").toDate().getTime(),
                 end: moment(to).add(1000, "y").toDate().getTime(),
                 steps: daysCovered,
-                duration : daysCovered * 1000,
+                duration : daysCovered * 10000,
                 getInterval: getInterval,
                 pointToLayer: function(data, latlng) {
                     return L.circleMarker(latlng,{radius:5, color:"green"}).bindPopup(function(l) {
@@ -359,10 +383,10 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
 
                 var date = match.date;
                 features.push(feature);
-                if(!(date in $scope.trailsByDate)) {
-                    $scope.trailsByDate[date] = [];
+                if(!(date in $scope.matchLLByDate)) {
+                    $scope.matchLLByDate[date] = [];
                 }
-                $scope.trailsByDate[date].push([match.lat, match.lng, HEAT_INTENSITY]);
+                $scope.matchLLByDate[date].push([match.lat, match.lng]);
             }
 
             drawTimeline({

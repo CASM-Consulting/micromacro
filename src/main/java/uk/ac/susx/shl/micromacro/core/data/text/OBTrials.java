@@ -3,13 +3,11 @@ package uk.ac.susx.shl.micromacro.core.data.text;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import org.jdbi.v3.core.Jdbi;
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
 import uk.ac.susx.shl.micromacro.client.StanfordNER;
 import uk.ac.susx.shl.micromacro.core.data.Match;
 import uk.ac.susx.shl.micromacro.core.data.geo.GeoJsonKnowledgeBase;
-import uk.ac.susx.tag.method51.core.data.impl.PostgreSQLDatumStore;
 import uk.ac.susx.tag.method51.core.meta.Datum;
 import uk.ac.susx.tag.method51.core.meta.Key;
 import uk.ac.susx.tag.method51.core.meta.KeySet;
@@ -137,28 +135,28 @@ public class OBTrials {
      */
     public void load(LocalDate from, LocalDate to) {
 
-        Key<Spans<String, String>> sessions = Key.of("sessionsPaper", RuntimeType.stringSpans(String.class));
-        Key<Spans<String, String>> trials = Key.of("trialAccount", RuntimeType.stringSpans(String.class));
-        Key<Spans<String, String>> stments = Key.of("statement", RuntimeType.stringSpans(String.class));
-        Key<Spans<String, String>> crimeDate = Key.of("crimeDate", RuntimeType.stringSpans(String.class));
+        Key<Spans<String, String>> sessionsKey = Key.of("sessionsPaper", RuntimeType.stringSpans(String.class));
+        Key<Spans<String, String>> trialsKey = Key.of("trialAccount", RuntimeType.stringSpans(String.class));
+        Key<Spans<String, String>> statementsKey = Key.of("statement", RuntimeType.stringSpans(String.class));
+        Key<Spans<String, String>> crimeDateKey = Key.of("crimeDate", RuntimeType.stringSpans(String.class));
 //        Key<Spans<String, String>> entities = Key.of("entities", RuntimeType.stringSpans(String.class));
 
         Map<Key<Spans<String, String>>, List<XML2Datum.Element>> interestingElements = new HashMap<>();
 
 
-        interestingElements.put(sessions, ImmutableList.of(
+        interestingElements.put(sessionsKey, ImmutableList.of(
                 new XML2Datum.Element("div0", ImmutableMap.of("type", "sessionsPaper"), "sessionsPaper").isContainer(true)
         ));
 
-        interestingElements.put(trials, ImmutableList.of(
+        interestingElements.put(trialsKey, ImmutableList.of(
                 new XML2Datum.Element("div1", ImmutableMap.of("type", "trialAccount"), "trialAccount").valueAttribute("id")
         ));
 
-        interestingElements.put(stments, ImmutableList.of(
+        interestingElements.put(statementsKey, ImmutableList.of(
                 new XML2Datum.Element("p", ImmutableMap.of(), "statement")
         ));
 
-        interestingElements.put(crimeDate, ImmutableList.of(
+        interestingElements.put(crimeDateKey, ImmutableList.of(
 //                new XML2Datum.Element("placeName", ImmutableMap.of(), "placeName"),
                 new XML2Datum.Element("rs", ImmutableMap.of("type", "crimeDate"), "crimeDate"))
         );
@@ -193,7 +191,8 @@ public class OBTrials {
                     continue;
                 }
 
-                LocalDate date = getDate(id);
+                LocalDate sessionDate = getDate(id);
+                Date refDate = Date.from(sessionDate.atTime(0,0,0).toInstant(ZoneOffset.UTC));
 //                if(trialsByDate.containsKey(date)) {
 //                    continue;
 //                }
@@ -243,7 +242,7 @@ public class OBTrials {
                     Datum nerd = ner2Datum.toDatum(ner);
 
                     //retain original crime date spans - tokenisation not required
-                    tokenized = tokenized.with(crimeDate, statement.get(crimeDate));
+                    tokenized = tokenized.with(crimeDateKey, statement.get(crimeDateKey));
 
                     if (tokenized.get(tokenKey).size() != nerd.get(tokenKey).size()) {
 
@@ -269,13 +268,28 @@ public class OBTrials {
 
                     int i = 0;
 
+                    //figure out date first
+                    Optional<LocalDate> crimeDate = Optional.empty();
+
+                    for(Datum statement : statements) {
+                        if(!crimeDate.isPresent()) {
+                            crimeDate = getFirstDate(statement, crimeDateKey, textKey, refDate);
+                        }
+                    }
+
+                    LocalDate date;
+                    if(crimeDate.isPresent()) {
+                        date = crimeDate.get();
+                    } else {
+                        date = sessionDate;
+                    }
+
+
                     ListIterator<Datum> jtr = statements.listIterator();
                     while (jtr.hasNext()) {
                         Datum statement = jtr.next();
 
-                        statement = processPlaceNames(statement, placeNameSpansKey, tokenKey, id, i);
-
-                        statement = processDates(statement, crimeDate, textKey, id, i, Date.from(date.atTime(0,0,0).toInstant(ZoneOffset.UTC)));
+                        statement = processPlaceNames(statement, placeNameSpansKey, tokenKey, id, i, date);
 
                         jtr.set(statement);
 
@@ -313,14 +327,17 @@ public class OBTrials {
     }
 
 
-    private Datum processDates(Datum datum, Key<Spans<String, String>> datesKey,
-                               Key<String> textKey, String trialId, int statementIdx, Date refDate) {
+
+
+    private Optional<LocalDate> getFirstDate(Datum datum, Key<Spans<String, String>> datesKey,
+                               Key<String> textKey, Date refDate) {
 
         Spans<String, String> dateSpans = datum.get(datesKey);
 
-        Spans<String, LocalDate> dates = Spans.annotate(textKey, LocalDate.class);
+        Optional<LocalDate> date = Optional.empty();
 
-        for (Span<String, String> span : dateSpans) {
+        if(dateSpans.get().size() == 1) {
+            Span<String, String> span = dateSpans.get(0);
 
             String dateText = span.getSpanned(datum);
 
@@ -334,20 +351,16 @@ public class OBTrials {
 
                 if(parsed.size() == 1) {
 
-                    LocalDate date = parsed.get(0).toInstant().atOffset(ZoneOffset.UTC).toLocalDate();
-
-
-
+                    date = Optional.of(parsed.get(0).toInstant().atOffset(ZoneOffset.UTC).toLocalDate());
                 }
             }
         }
 
-
-        return datum;
+        return date;
     }
 
     private Datum processPlaceNames(Datum datum, Key<Spans<List<String>, String>> placeNameSpansKey,
-                                    Key<List<String>> tokenKey, String trialId, int statementIdx) {
+                                    Key<List<String>> tokenKey, String trialId, int statementIdx, LocalDate date) {
         Spans<List<String>, String> placeNameSpans = datum.get(placeNameSpansKey);
 
         Spans<List<String>, Map> placeNameMatchSpans = Spans.annotate(tokenKey, Map.class);
@@ -375,7 +388,7 @@ public class OBTrials {
                 metadata.put("id", spanId);
                 metadata.put("spanned", spanned);
                 metadata.put("text", match.getText());
-//                metadata.put("date", date.format(date2JS));
+                metadata.put("date", date.format(date2JS));
 
                 Span<List<String>, Map> placeNameMatchSpan = Span.annotate(tokenKey, span.from(), span.to(), metadata);
 
@@ -390,11 +403,18 @@ public class OBTrials {
         return datum;
     }
 
-    public List<Map<LocalDate, List<SimpleDocument>>> getDocumentsByDate(LocalDate from, LocalDate to) {
-        List<Map<LocalDate, List<SimpleDocument>>> trials = new ArrayList<>();
+    public Map<LocalDate, List<SimpleDocument>> getDocumentsByDate(LocalDate from, LocalDate to) {
+        Map<LocalDate, List<SimpleDocument>> trials = new HashMap<>();
         for (LocalDate date = from; date.isBefore(to); date = date.plusDays(1))
         {
-            trials.add(ImmutableMap.of(date, trialsByDate.get(date)));
+            if(trialsByDate.containsKey(date)) {
+                if(!trials.containsKey(date)) {
+                    trials.put(date, new ArrayList<>());
+                }
+                List<SimpleDocument> ts = trials.get(date);
+                ts.addAll(trialsByDate.get(date));
+                trials.put(date, ts);
+            }
         }
         return trials;
     }
