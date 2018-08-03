@@ -182,6 +182,7 @@ public class OBTrials {
 //
 //            forkJoinPool.submit(() -> {
 //                Iterable<Datum> iterable = () -> itr;
+            int idx = 0;
             while(itr.hasNext()) {
                 Datum trial = itr.next();
 
@@ -273,7 +274,7 @@ public class OBTrials {
 
                     for(Datum statement : statements) {
                         if(!crimeDate.isPresent()) {
-                            crimeDate = getFirstDate(statement, crimeDateKey, textKey, refDate);
+                            crimeDate = getFirstDate(statement, crimeDateKey, refDate);
                         }
                     }
 
@@ -329,8 +330,7 @@ public class OBTrials {
 
 
 
-    private Optional<LocalDate> getFirstDate(Datum datum, Key<Spans<String, String>> datesKey,
-                               Key<String> textKey, Date refDate) {
+    private Optional<LocalDate> getFirstDate(Datum datum, Key<Spans<String, String>> datesKey, Date refDate) {
 
         Spans<String, String> dateSpans = datum.get(datesKey);
 

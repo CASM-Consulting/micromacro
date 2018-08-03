@@ -4,6 +4,59 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
 
     var DATE_FORMAT = 'YYYY-MM-DD';
 
+    var dateOptions = {
+        formatYear: 'yyyy',
+        maxDate: new Date(1913, 4, 1),
+        minDate: new Date(1674, 4, 29),
+        startingDay: 1
+    };
+
+    $scope.heatmapOptions = {
+        //do local storage stuff ^^
+    };
+
+    var restoreConfig = function() {
+
+        var restoreDate = function(obj, key) {
+            obj[key] = new Date(obj[key]);
+        };
+        var stored = JSON.parse($window.localStorage.getItem("config"));
+
+        if(stored) {
+            stored.from = new Date(stored.from);
+            stored.to = new Date(stored.to);
+            $scope.config = stored;
+        } else {
+            $scope.config = {
+                from: $scope.fromDateOptions.initDate,
+                to: $scope.toDateOptions.initDate
+            };
+        }
+    };
+
+    restoreConfig();
+
+    $scope.$watch("config.table", function(val, old) {
+        if((!$scope.config.keys && $scope.config.table) || (val && val != old)) {
+            $scope.listKeys();
+        }
+    }, true);
+
+    $scope.$watch("config", function(val, old) {
+        if(val && val != old) {
+            $window.localStorage.setItem("config", JSON.stringify(val) );
+        }
+    }, true);
+
+
+    $scope.fromDateOptions = angular.extend({}, dateOptions, {
+        initDate: $scope.config.from || new Date(1803 ,1, 1)
+    });
+
+    $scope.toDateOptions = angular.extend({}, dateOptions, {
+        initDate: $scope.config.to || new Date(1803, 12, 31)
+    });
+
     $scope.heatmapIntensity = 10;
     $scope.heatmapDecay = 20;
     $scope.timelineDuration = 100;
@@ -367,7 +420,7 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
 
     $scope.listKeys = function() {
         if(!$scope.config.table) {
-            $window.alert("Please select a database and a table first.");
+            $window.alert("Please select a table first.");
         } else {
             $http.get("api/m52/list-keys", {
                 params : {
@@ -426,6 +479,8 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
                 $scope.matchLLByDate[date].push([match.lat, match.lng]);
             }
 
+            getScores(Object.keys($scope.matchesByTrial));
+
             drawTimeline({
                 type : "FeatureCollection",
                 features : features
@@ -434,25 +489,19 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
     };
 
 
-    var dateOptions = {
-        formatYear: 'yyyy',
-            maxDate: new Date(1913, 4, 1),
-            minDate: new Date(1674, 4, 29),
-        startingDay: 1
+    var getScores = function(ids) {
+
+        $http.post("api/m52/get-scores", {
+            table : $scope.config.table,
+            key : $scope.config.key,
+            ids: ids
+        },{
+
+        }).then(function(response) {
+            console.log(response.status);
+        });
     };
 
-    $scope.fromDateOptions = angular.extend({}, dateOptions, {
-        initDate: new Date(1803 ,1, 1)
-    });
-
-    $scope.toDateOptions = angular.extend({}, dateOptions, {
-        initDate: new Date(1803, 12, 31)
-    });
-
-    $scope.config = $window.localStorage.getItem("config") || {
-        from: $scope.fromDateOptions.initDate,
-        to: $scope.toDateOptions.initDate
-    };
 
     $scope.listTables();
 //    $scope.getAll();
