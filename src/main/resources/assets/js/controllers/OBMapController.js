@@ -3,6 +3,7 @@
 app.controller('OBMapController', function($scope, $rootScope, $http, $compile, leafletData, debounce, $window) {
 
     var DATE_FORMAT = 'YYYY-MM-DD';
+    var TRIAL_ID_KEY = 'trial_id';
 
     var dateOptions = {
         formatYear: 'yyyy',
@@ -28,8 +29,9 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
             $scope.config = stored;
         } else {
             $scope.config = {
-                from: $scope.fromDateOptions.initDate,
-                to: $scope.toDateOptions.initDate
+                from: new Date(1803 ,1, 1),
+                to: new Date(1803, 12, 31),
+                scoreThresh : 0
             };
         }
     };
@@ -50,11 +52,11 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
 
 
     $scope.fromDateOptions = angular.extend({}, dateOptions, {
-        initDate: $scope.config.from || new Date(1803 ,1, 1)
+        initDate: $scope.config.from
     });
 
     $scope.toDateOptions = angular.extend({}, dateOptions, {
-        initDate: $scope.config.to || new Date(1803, 12, 31)
+        initDate: $scope.config.to
     });
 
     $scope.heatmapIntensity = 10;
@@ -199,12 +201,19 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
             var dayDate = moment(d).format(DATE_FORMAT);
             var dayData = $scope.matchLLByDate[dayDate] || [];
 
-            var intensity = (i / $scope.heatmapDecay) *  $scope.heatmapIntensity;
+            var intensity = (i / $scope.heatmapDecay) * $scope.heatmapIntensity;
 
             for(var j = 0; j < dayData.length; ++j) {
-                var point = dayData[j];
+                var trialId = dayData[j].trialId;
+                var score = $scope.scoresByTrialId[trialId];
+                if(score > $scope.config.scoreThresh) {
 
-                data.push(point.concat(intensity));
+                    var point = dayData[j].latlng;
+
+                    data.push(point.concat(intensity));
+                } else {
+                    console.log(trialId + " under thresh with " + score);
+                }
             }
 
             ++i;
@@ -343,7 +352,16 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
         $scope.selectedTrialId = id;
     }
 
+    var timeline = null;
+    var timelineControl = null;
+
     function drawTimeline(data, from, to){
+        if(timeline) {
+            timeline.remove();
+        }
+        if(timelineControl) {
+            timelineControl.remove();
+        }
         var map = leafletData.getMap().then(function(map) {
 
             var getInterval = function(trial) {
@@ -355,7 +373,7 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
 
             var daysCovered = moment(to).diff(moment(from)) / (1000*60*60*24);
 
-            var timelineControl = L.timelineSliderControl({
+            timelineControl = L.timelineSliderControl({
                 steps: daysCovered,
                 duration : daysCovered * $scope.timelineDuration,
                 enableKeyboardControls: true,
@@ -373,7 +391,7 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
             });
 
 
-            var timeline = L.timeline(data, {
+            timeline = L.timeline(data, {
                 start : moment(from).add(1000, "y").toDate().getTime(),
                 end: moment(to).add(1000, "y").toDate().getTime(),
                 getInterval: getInterval,
@@ -440,7 +458,9 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
 //                    key : $scope.config.key
 //        }
 
+    $scope.loading = false;
     $scope.loadData = function()  {
+        $scope.loading = true;
         var from = $scope.config.from.toISOString().split('T')[0];
         var to = $scope.config.to.toISOString().split('T')[0]
         $http.get("api/ob/load", {
@@ -476,7 +496,12 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
                 if(!(date in $scope.matchLLByDate)) {
                     $scope.matchLLByDate[date] = [];
                 }
-                $scope.matchLLByDate[date].push([match.lat, match.lng]);
+
+                $scope.matchLLByDate[date].push({
+                    trialId : trialId,
+                    latlng : [match.lat, match.lng]
+                });
+
             }
 
             getScores(Object.keys($scope.matchesByTrial));
@@ -485,20 +510,37 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
                 type : "FeatureCollection",
                 features : features
             }, from, to);
+            $scope.loading = false;
         });
     };
 
 
     var getScores = function(ids) {
+        var table = $scope.config.table;
+        var key = $scope.config.key;
 
-        $http.post("api/m52/get-scores", {
-            table : $scope.config.table,
-            key : $scope.config.key,
-            ids: ids
-        },{
-
+        $http.post("api/m52/get-scores", JSON.stringify(
+            ids
+        ),{
+            params: {
+                table : table,
+                key : key
+            }
         }).then(function(response) {
-            console.log(response.status);
+
+//            var scorePath = table+"/"+key;
+
+            var scores = {};
+
+            for(var i = 0; i < response.data.length; ++i) {
+                var datum = response.data[i];
+                var id = datum[TRIAL_ID_KEY];
+                scores[id] = datum[key];
+            }
+
+            $scope.scoresByTrialId = scores;
+
+//            console.log(response.status);
         });
     };
 

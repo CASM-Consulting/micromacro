@@ -79,14 +79,15 @@ public class Method52Resouce {
 
     @POST
     @Path("get-scores")
-    public Response getScores(@QueryParam("table") String table, @QueryParam("key") String key, @QueryParam("ids") List<String> ids) throws SQLException, StoreException {
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response getScores(@QueryParam("table") String table, @QueryParam("key") String key, List<String> ids) throws SQLException, StoreException {
 
 
         //change back to native id format
         ListIterator<String> itr = ids.listIterator();
         while(itr.hasNext()) {
             String id = itr.next();
-            itr.set(id.replaceAll(".", "-"));
+            itr.set(id.replaceAll("-", "."));
         }
 
         Gson gson = GsonBuilderFactory.get().create();
@@ -99,14 +100,25 @@ public class Method52Resouce {
 
             KeySet keys = gson.fromJson(keysMeta, KeySet.class);
 
+            Key<String> idKey = keys.get("trial_id");
+
+            gson = GsonBuilderFactory.get(keys).create();
+
             PostgreSQLConnection connectionParams = new PostgreSQLConnection().setConnection(con);
             PostgreSQLDatumStore store = new PostgreSQLDatumStore.Builder(connectionParams, table)
                     .incoming(KeySet.of(keys.get(key)))
-                    .uniqueIndex(keys.get("trial_id"))
+                    .uniqueIndex(idKey)
                     .build();
+
+            store.connect();
 
             List<Datum> results = store.get(ids);
 
+            ListIterator<Datum> jtr = results.listIterator();
+            while(jtr.hasNext()) {
+                Datum datum = jtr.next();
+                jtr.set(datum.with(idKey, datum.get(idKey).replaceAll("\\.", "-")));
+            }
 
             return Response.status(Response.Status.OK).entity(
                     gson.toJson(results)

@@ -172,9 +172,26 @@
 
         </div>
 
+        <div class="row">
+            <div class="col-md-12">
+                <span class="">Score</span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-2">
+                <span>Threshold</span>
+                <span>
+                    <input ng-model="config.scoreThresh" step="0.1" min="0" max="1" type="number">
+                </span>
+            </div>
+
+        </div>
+
+
         <div class="row" >
 
             <div class="map col-md-10">
+                <span ng-show="loading">LOADING</span>
 
                 <leaflet
                     width="800px"
