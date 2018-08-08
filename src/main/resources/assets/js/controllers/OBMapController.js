@@ -204,15 +204,19 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
             var intensity = (i / $scope.heatmapDecay) * $scope.heatmapIntensity;
 
             for(var j = 0; j < dayData.length; ++j) {
-                var trialId = dayData[j].trialId;
-                var score = $scope.scoresByTrialId[trialId];
-                if(score > $scope.config.scoreThresh) {
+                var point = dayData[j].latlng;
+                if($scope.scores) {
+                    var trialId = dayData[j].trialId;
+                    var score = $scope.scoresByTrialId[trialId];
+                    if(score > $scope.config.scoreThresh) {
 
-                    var point = dayData[j].latlng;
 
-                    data.push(point.concat(intensity));
+                        data.push(point.concat(intensity));
+                    } else {
+                        console.log(trialId + " under thresh with " + score);
+                    }
                 } else {
-                    console.log(trialId + " under thresh with " + score);
+                    data.push(point.concat(intensity));
                 }
             }
 
@@ -514,34 +518,59 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
         });
     };
 
+    $scope.saveToTable = function()  {
+        $scope.loading = true;
+        var from = $scope.config.from.toISOString().split('T')[0];
+        var to = $scope.config.to.toISOString().split('T')[0]
+        $http.get("api/ob/save2Table", {
+            params : {
+                from : from,
+                to : to,
+                table : $scope.config.newTable
+            }
+        }).then(function(response) {
+            alert("saved");
+            $scope.loading = false;
+        }, function(response){
+            alert("failed " + response.data);
+            $scope.loading = false;
+        });
+    }
 
     var getScores = function(ids) {
         var table = $scope.config.table;
         var key = $scope.config.key;
 
-        $http.post("api/m52/get-scores", JSON.stringify(
-            ids
-        ),{
-            params: {
-                table : table,
-                key : key
-            }
-        }).then(function(response) {
 
-//            var scorePath = table+"/"+key;
-
+        if(table && key) {
             var scores = {};
 
-            for(var i = 0; i < response.data.length; ++i) {
-                var datum = response.data[i];
-                var id = datum[TRIAL_ID_KEY];
-                scores[id] = datum[key];
-            }
+            $http.post("api/m52/get-scores", JSON.stringify(
+                ids
+            ),{
+                params: {
+                    table : table,
+                    key : key
+                }
+            }).then(function(response) {
 
-            $scope.scoresByTrialId = scores;
+    //            var scorePath = table+"/"+key;
 
-//            console.log(response.status);
-        });
+
+                for(var i = 0; i < response.data.length; ++i) {
+                    var datum = response.data[i];
+                    var id = datum[TRIAL_ID_KEY];
+                    scores[id] = datum[key];
+                }
+
+                $scope.scoresByTrialId = scores;
+
+    //            console.log(response.status);
+            });
+        } else {
+            $scope.scores = false;
+        }
+
     };
 
 
