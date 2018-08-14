@@ -332,7 +332,7 @@ public class OBTrials {
     }
 
 
-    public void save2Table(LocalDate from, LocalDate to, PostgreSQLDatumStore.Builder storeBuilder) throws StoreException {
+    public void saveSents2Table(LocalDate from, LocalDate to, PostgreSQLDatumStore.Builder storeBuilder) throws StoreException {
 
 
         Key<String> sentenceIdKey= Key.of("sentenceId", RuntimeType.STRING);
@@ -530,7 +530,192 @@ public class OBTrials {
         }
     }
 
+    public void saveStatements2Table(LocalDate from, LocalDate to, PostgreSQLDatumStore.Builder storeBuilder) throws StoreException {
 
+
+        Key<String> statementIdKey = Key.of("statementId", RuntimeType.STRING);
+        Key<List<String>> placeNamesKey =  Key.of("placeNames", RuntimeType.list(RuntimeType.STRING));
+        storeBuilder.uniqueIndex(statementIdKey);
+
+        Key<Spans<List<String>, String>> placeNameSpansKey = Key.of("placeName", RuntimeType.listSpans(String.class));
+
+
+        Key<Spans<String, String>> sessionsKey = Key.of("sessionsPaper", RuntimeType.stringSpans(String.class));
+        Key<Spans<String, String>> trialsKey = Key.of("trialAccount", RuntimeType.stringSpans(String.class));
+        Key<Spans<String, String>> statementsKey = Key.of("statement", RuntimeType.stringSpans(String.class));
+//        Key<Spans<String, String>> crimeDateKey = Key.of("crimeDate", RuntimeType.stringSpans(String.class));
+//        Key<Spans<String, String>> entities = Key.of("entities", RuntimeType.stringSpans(String.class));
+
+        Map<Key<Spans<String, String>>, List<XML2Datum.Element>> interestingElements = new HashMap<>();
+
+
+        interestingElements.put(sessionsKey, ImmutableList.of(
+                new XML2Datum.Element("div0", ImmutableMap.of("type", "sessionsPaper"), "sessionsPaper").isContainer(true)
+        ));
+
+        interestingElements.put(trialsKey, ImmutableList.of(
+                new XML2Datum.Element("div1", ImmutableMap.of("type", "trialAccount"), "trialAccount").valueAttribute("id")
+        ));
+
+        interestingElements.put(statementsKey, ImmutableList.of(
+                new XML2Datum.Element("p", ImmutableMap.of(), "statement")
+        ));
+
+//        interestingElements.put(crimeDateKey, ImmutableList.of(
+////                new XML2Datum.Element("placeName", ImmutableMap.of(), "placeName"),
+//                new XML2Datum.Element("rs", ImmutableMap.of("type", "crimeDate"), "crimeDate"))
+//        );
+
+
+        PostgreSQLDatumStore store = storeBuilder
+                .uniqueIndex(statementIdKey)
+                .build();
+        store.connect();
+        boolean keysEnsured = false;
+
+        try {
+
+            Set<Path> files = getFiles(from, to);
+
+            Iterator<Datum> itr = XML2Datum.getData(start, files, interestingElements, "trialAccount", "-id").iterator();
+
+//            ForkJoinPool forkJoinPool = new ForkJoinPool(4);
+//
+//            forkJoinPool.submit(() -> {
+//                Iterable<Datum> iterable = () -> itr;
+            int idx = 0;
+            while(itr.hasNext()) {
+                Datum trial = itr.next();
+
+                String trialId = trial.get("trialAccount-id");
+
+                LocalDate sessionDate = getDate(trialId);
+                Date refDate = Date.from(sessionDate.atTime(0,0,0).toInstant(ZoneOffset.UTC));
+//                if(trialsByDate.containsKey(date)) {
+//                    continue;
+//                }
+
+//                Stream<Datum> stream = StreamSupport.stream(iterable.spliterator(),true);
+
+//                stream.forEach(trial -> {
+
+                KeySet keys = trial.getKeys();
+                Key<String> textKey = keys.get("text");
+
+                Key<String> trialIdKey = trial.getKeys().get("trialAccount-id");
+                List<Datum> statements = new ArrayList<>();
+
+                KeySet retain = keys
+                        .with(trialIdKey)
+                        .with(statementIdKey)
+                        .with(placeNameSpansKey)
+//                        .with(crimeDate)
+                        ;
+
+                Key<List<String>> tokenKey = null;
+
+                int i = 0;
+                for (Datum statement : trial.getSpannedData(statementsKey, retain)) {
+
+                    statement = statement.with(statementIdKey, trialId+"-"+i);
+
+                    Datum tokenized = Tokenizer.tokenize(statement, textKey, retain);
+
+                    KeySet tokenizedKeys = tokenized.getKeys();
+
+                    tokenKey = tokenizedKeys.get(textKey + Tokenizer.SUFFIX);
+
+                    NER2Datum ner2Datum = new NER2Datum(
+                            tokenKey,
+                            ImmutableSet.of("placeName"),
+                            placeNameSpansKey,
+                            true
+                    );
+
+                    String text = String.join(" ", tokenized.get(tokenKey));
+
+                    String ner = StanfordNER.get(text);
+
+//                    System.out.println(ner);
+                    Datum nerd = ner2Datum.toDatum(ner);
+
+                    //retain original crime date spans - tokenisation not required
+//                        tokenized = tokenized.with(crimeDateKey, sentence.get(crimeDateKey));
+
+                    if (tokenized.get(tokenKey).size() != nerd.get(tokenKey).size()) {
+
+                        System.err.println("tokenised mismatch! Expected " + tokenized.get(tokenKey).size() + " got " + nerd.get(tokenKey).size());
+                    } else {
+
+                        tokenized = tokenized
+                                .with(nerd.getKeys().get("placeName"), nerd.get(placeNameSpansKey))
+                        ;
+
+                        statements.add(tokenized);
+
+                        keys = keys
+                                .with(tokenizedKeys)
+                                .with(placeNameSpansKey);
+                    }
+
+                    ++i;
+                }
+
+
+                KeySet storeKeys = KeySet.of(
+                        trialIdKey,
+                        statementIdKey,
+                        textKey,
+//                    placeNameSpansKey,
+                        placeNamesKey
+                );
+
+                if(!keysEnsured) {
+                    store.addKeys(storeKeys);
+                    keysEnsured = true;
+                }
+
+                if (!statements.isEmpty()) {
+
+                    System.out.println(trialId);
+
+
+                    for(Datum statement : statements) {
+
+
+                        Datum datum = new Datum();
+
+                        datum = datum
+                                .with(trialIdKey, trialId)
+                                .with(statementIdKey, statement.get(statementIdKey))
+                                .with(textKey, statement.get(textKey));
+                        Spans<List<String>, String> placeNameSpans = statement.get(placeNameSpansKey);
+                        if(!placeNameSpans.get().isEmpty()){
+
+//                            datum = datum.with(placeNameSpansKey, placeNameSpans);
+
+                            List<String> placeNames = new ArrayList<>();
+                            for(Span<List<String>, String> span : placeNameSpans.get()) {
+                                placeNames.add(String.join(" ", span.getSpanned(statement)));
+                            }
+
+                            datum = datum.with(placeNamesKey, placeNames);
+                        }
+
+
+                        store.set(datum);
+                    }
+
+                    store.commit();
+                }
+//                });
+//            });
+            }
+
+        } catch (Throwable err) {
+            err.printStackTrace ();
+        }
+    }
 
 
     private Optional<LocalDate> getFirstDate(Datum datum, Key<Spans<String, String>> datesKey, Date refDate) {

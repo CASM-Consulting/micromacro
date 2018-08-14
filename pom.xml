@@ -11,7 +11,7 @@
 
     <groupId>uk.ac.susx.shl</groupId>
     <artifactId>micromacro</artifactId>
-    <version>0.1.3</version>
+    <version>0.1.4</version>
     <packaging>jar</packaging>
 
     <name>micromacro</name>
@@ -36,6 +36,7 @@
         <opennlp.version>1.8.4</opennlp.version>
         <mapdb.version>3.0.6</mapdb.version>
         <natty.version>0.13</natty.version>
+        <junit.jupiter.version>5.2.0</junit.jupiter.version>
     </properties>
 
     <dependencyManagement>
@@ -72,6 +73,12 @@
 
 
     <dependencies>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>${junit.jupiter.version}</version>
+            <scope>test</scope>
+        </dependency>
 
         <dependency>
             <groupId>com.joestelmach</groupId>

@@ -518,11 +518,30 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
         });
     };
 
-    $scope.saveToTable = function()  {
+    $scope.saveSents2Table = function()  {
         $scope.loading = true;
         var from = $scope.config.from.toISOString().split('T')[0];
         var to = $scope.config.to.toISOString().split('T')[0]
-        $http.get("api/ob/save2Table", {
+        $http.get("api/ob/saveSents2Table", {
+            params : {
+                from : from,
+                to : to,
+                table : $scope.config.newTable
+            }
+        }).then(function(response) {
+            alert("saved");
+            $scope.loading = false;
+        }, function(response){
+            alert("failed " + response.data);
+            $scope.loading = false;
+        });
+    };
+
+    $scope.saveStatements2Table = function()  {
+        $scope.loading = true;
+        var from = $scope.config.from.toISOString().split('T')[0];
+        var to = $scope.config.to.toISOString().split('T')[0]
+        $http.get("api/ob/saveStatements2Table", {
             params : {
                 from : from,
                 to : to,

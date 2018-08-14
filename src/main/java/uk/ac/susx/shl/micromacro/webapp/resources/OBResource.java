@@ -3,7 +3,6 @@ package uk.ac.susx.shl.micromacro.webapp.resources;
 
 import com.google.gson.Gson;
 import io.dropwizard.jersey.jsr310.LocalDateParam;
-import io.dropwizard.jersey.jsr310.LocalDateTimeParam;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.Jdbi;
 import uk.ac.susx.shl.micromacro.core.data.text.OBTrials;
@@ -12,9 +11,7 @@ import uk.ac.susx.tag.method51.core.data.PostgreSQLConnection;
 import uk.ac.susx.tag.method51.core.data.StoreException;
 import uk.ac.susx.tag.method51.core.data.impl.PostgreSQLDatumStore;
 import uk.ac.susx.tag.method51.core.gson.GsonBuilderFactory;
-import uk.ac.susx.tag.method51.core.meta.Key;
 import uk.ac.susx.tag.method51.core.meta.KeySet;
-import uk.ac.susx.tag.method51.core.meta.types.RuntimeType;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -114,7 +111,26 @@ public class OBResource {
 
 
     @GET
-    @Path("save2Table")
+    @Path("saveSents2Table")
+    public Response saveSents2Table(@QueryParam("from") LocalDateParam from, @QueryParam("to") LocalDateParam to, @QueryParam("table") String table) throws StoreException {
+        try (Handle handle = jdbi.open()) {
+
+            Connection con = handle.getConnection();
+
+            PostgreSQLConnection connectionParams = new PostgreSQLConnection().setConnection(con);
+
+            PostgreSQLDatumStore.Builder storeBuilder = new PostgreSQLDatumStore.Builder(connectionParams, table);
+
+            obTrials.saveSents2Table(from.get(), to.get(), storeBuilder);
+
+            return Response.status(Response.Status.OK).build();
+        }
+    }
+
+
+
+    @GET
+    @Path("saveStatements2Table")
     public Response save2Table(@QueryParam("from") LocalDateParam from, @QueryParam("to") LocalDateParam to, @QueryParam("table") String table) throws StoreException {
         try (Handle handle = jdbi.open()) {
 
@@ -124,7 +140,7 @@ public class OBResource {
 
             PostgreSQLDatumStore.Builder storeBuilder = new PostgreSQLDatumStore.Builder(connectionParams, table);
 
-            obTrials.save2Table(from.get(), to.get(), storeBuilder);
+            obTrials.saveStatements2Table(from.get(), to.get(), storeBuilder);
 
             return Response.status(Response.Status.OK).build();
         }
