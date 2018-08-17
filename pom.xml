@@ -37,6 +37,7 @@
         <mapdb.version>3.0.6</mapdb.version>
         <natty.version>0.13</natty.version>
         <junit.jupiter.version>5.2.0</junit.jupiter.version>
+        <commons-csv.version>1.5</commons-csv.version>
     </properties>
 
     <dependencyManagement>
@@ -73,6 +74,13 @@
 
 
     <dependencies>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-csv</artifactId>
+            <version>${commons-csv.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>

@@ -16,6 +16,7 @@ import org.geotools.geojson.geom.GeometryJSON;
 import org.geotools.geometry.jts.JTS;
 import org.opengis.feature.Feature;
 import org.geotools.referencing.CRS;
+import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.geometry.BoundingBox;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -29,6 +30,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * Created by sw206 on 16/04/2018.
@@ -38,6 +40,8 @@ public class GeoJsonKnowledgeBase implements KnowledegeBase {
     private final Map<String, List<Map>> data;
     private final List<String> keyList;
     private final Map<String, Set<String>> keyLetters;
+
+    private Pattern parenetheses = Pattern.compile("\\(.*\\)");
 
     public GeoJsonKnowledgeBase(Path path) throws IOException {
         data = load(path);
@@ -79,6 +83,11 @@ public class GeoJsonKnowledgeBase implements KnowledegeBase {
                 Feature f = itr.next();
 
                 String name = (String)f.getProperty("P_NAME").getValue();
+
+                name = parenetheses.matcher(name).replaceAll("")
+                    .replace("[", "")
+                    .replace("]", "");
+
                 BoundingBox bb = f.getBounds();
 
                 try {
@@ -89,6 +98,9 @@ public class GeoJsonKnowledgeBase implements KnowledegeBase {
 
                     datum.put("lat", Double.toString(target.getX()));
                     datum.put("lng", Double.toString(target.getY()));
+
+                    datum.put("NAME", (String)((SimpleFeature) f).getAttribute("NAME"));
+                    datum.put("NAME_1", (String)((SimpleFeature) f).getAttribute("NAME_1"));
 
                     if(!data.containsKey(name)) {
                         data.put(name, new ArrayList<>());
