@@ -207,7 +207,7 @@ public class OBTrials {
 //                stream.forEach(trial -> {
 
                 KeySet keys = trial.getKeys();
-                Key<Spans<String, String>> sentenceKey = keys.get("statement");
+//                Key<Spans<String, String>> statementKey = keys.get("statement");
                 Key<String> textKey = keys.get("text");
 
                 Key<String> idKey = trial.getKeys().get("trialAccount-id");
@@ -222,7 +222,7 @@ public class OBTrials {
                 Key<List<String>> tokenKey = null;
                 Key<Spans<List<String>, String>> placeNameSpansKey = null;
 
-                for (Datum statement : trial.getSpannedData(sentenceKey, retain)) {
+                for (Datum statement : trial.getSpannedData(statementsKey, retain)) {
 
                     Datum tokenized = Tokenizer.tokenize(statement, textKey, retain);
 

@@ -260,7 +260,7 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
             }
         }).then(function(response){
 
-            drawMatches(response.data);
+            drawMatches2(response.data);
         });
     };
 
@@ -335,19 +335,38 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
                   "<li>Date: " + match.metadata.date + "</li>"+
                   "<li>Trial: " + match.metadata.trialId + "</li>"+
                 "</ul>",
-//                message : "<div ng-include=\"'marker'\"></div>",
                 icon: {
                     iconUrl: 'node_modules/leaflet/dist/images/marker-icon.png',
                     iconSize:     [25, 41],
                     iconAnchor:   [12, 41],
                 },
-//                getMessageScope : function(match) {
-//                    return function() {
-//                        var scope = $scope.$new(true);
-//                        scope.match = match;
-//                        return scope;
-//                    }
-//                }(match)
+
+            };
+        }
+    };
+
+    var drawMatches2 = function(matches) {
+        $scope.markers = {};
+        for(var i = 0; i < matches.length; ++i) {
+            var match = matches[i];
+            var lat = parseFloat(match.metadata.lat);
+            var lng = parseFloat(match.metadata.lng);
+
+            $scope.markers[(match.metadata.text || match.text).replace("-", " ") + " #" + (i+1)] = {
+                lat : lat,
+                lng : lng,
+                message : "<ul>"+
+                  "<li>Match: " + match.text + "</li>"+
+                  "<li>Original: " + match.candidate.text + "</li>"+
+                  "<li>Lat: " + match.metadata.lat + "</li>"+
+                  "<li>Lng: " + match.metadata.lng + "</li>"+
+                "</ul>",
+                icon: {
+                    iconUrl: 'node_modules/leaflet/dist/images/marker-icon.png',
+                    iconSize:     [25, 41],
+                    iconAnchor:   [12, 41],
+                },
+
             };
         }
     };

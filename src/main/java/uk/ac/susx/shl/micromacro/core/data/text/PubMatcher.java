@@ -2,12 +2,18 @@ package uk.ac.susx.shl.micromacro.core.data.text;
 
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
 import uk.ac.susx.shl.micromacro.core.data.Match;
 import uk.ac.susx.shl.micromacro.core.data.geo.GeoJsonKnowledgeBase;
+import uk.ac.susx.tag.method51.core.meta.Datum;
+import uk.ac.susx.tag.method51.core.meta.Key;
+import uk.ac.susx.tag.method51.core.meta.KeySet;
+import uk.ac.susx.tag.method51.core.meta.span.Spans;
+import uk.ac.susx.tag.method51.core.meta.types.RuntimeType;
 
 import java.io.FileReader;
 import java.io.Serializable;
@@ -43,7 +49,9 @@ public class PubMatcher {
 
     private Map<String, List<Pub>> pubHash;
 
-    public PubMatcher (boolean clear) throws Exception {
+    private boolean lc;
+
+    public PubMatcher (boolean clear, boolean lc) throws Exception {
         DB db = DBMaker
                 .fileDB("data/pubDB")
                 .fileMmapEnable()
@@ -59,6 +67,8 @@ public class PubMatcher {
 
         pubs = new ArrayList<>();
         pubHash = new HashMap<>();
+
+        this.lc = lc;
 
         if(clear) {
             pubs.clear();
@@ -101,7 +111,12 @@ public class PubMatcher {
 
         for(Pub pub : pubs) {
 
-            String name = trimNumbers(pub.name.toLowerCase());
+            String name = pub.name;
+
+            if(lc) {
+                name = name.toLowerCase();
+            }
+            name = trimNumbers(name);
             String first = name.split(" ")[0];
 
             if(!pubHash.containsKey(first)) {
@@ -163,54 +178,101 @@ public class PubMatcher {
         LOG.info(matched + " of " + pubs.size() + " matched" );
     }
 
-    private class Candidate {
-        List<Pub> pubs;
-        String soFar;
-    }
 
     public void matchPubs(List<String> tokens) {
 
-        String raster = String.join(" ", tokens).toLowerCase();
-
-        List<Candidate> candidates = new ArrayList<>();
+        String raster = String.join(" ", tokens);
+        if(lc) {
+            raster = raster.toLowerCase();
+        }
 
         int i = 0;
         int j = 0;
         for(String token : tokens) {
 
-            token = token.toLowerCase();
+            if(lc) {
+                token = token.toLowerCase();
+            }
             if(pubHash.containsKey(token)) {
 
                 List<Pub> pubs = pubHash.get(token);
 
+//                System.out.println(pubs.size());
+
                 for(Pub pub : pubs) {
 
-                    if(raster.startsWith(pub.name.toLowerCase(), j+i)) {
+                    String pubName = pub.name;
+
+                    if(lc) {
+                        pubName = pubName.toLowerCase();
+                    }
+
+                    int max = raster.length()-1;
+                    int from = Math.min(j+i, max);
+                    int to = Math.min(j+i+pubName.length(), max);
+
+                    if(raster.substring(from, to).equals(pubName)) {
                         System.out.println(pub.name);
                         System.out.println(i);
                     }
                 }
-
             }
 
             j += token.length();
             ++i;
         }
-
     }
 
     public static void main(String[] args) throws Exception {
-        Set<Path> paths = new OBFiles(Paths.get("data/sessionsPapers"))
-                .getFiles(LocalDate.of(1800,1,1), LocalDate.of(1800,12,31));
+
+        PubMatcher pm = new PubMatcher(true, false);
 
 
+        Path start = Paths.get("data/sessionsPapers");
 
-        PubMatcher pm = new PubMatcher(true);
+        Set<Path> paths = new OBFiles(start)
+            .getFiles(LocalDate.of(1800,1,1), LocalDate.of(1800,12,31));
+
+        Map<Key<Spans<String, String>>, List<XML2Datum.Element>> interestingElements = new HashMap<>();
+
+        Key<Spans<String, String>> sessionsKey = Key.of("sessionsPaper", RuntimeType.stringSpans(String.class));
+        Key<Spans<String, String>> trialsKey = Key.of("trialAccount", RuntimeType.stringSpans(String.class));
+        Key<Spans<String, String>> statementsKey = Key.of("statement", RuntimeType.stringSpans(String.class));
 
 
-        List<String> test = Arrays.asList("Drinking in the Colton Arms".split(" "));
+        interestingElements.put(sessionsKey, ImmutableList.of(
+                new XML2Datum.Element("div0", ImmutableMap.of("type", "sessionsPaper"), "sessionsPaper").isContainer(true)
+        ));
 
-        pm.matchPubs(test);
+        interestingElements.put(trialsKey, ImmutableList.of(
+                new XML2Datum.Element("div1", ImmutableMap.of("type", "trialAccount"), "trialAccount").valueAttribute("id")
+        ));
 
+        interestingElements.put(statementsKey, ImmutableList.of(
+                new XML2Datum.Element("p", ImmutableMap.of(), "statement")
+        ));
+
+        Iterator<Datum> itr = XML2Datum.getData(start, paths, interestingElements, "trialAccount", "-id").iterator();
+
+
+        while(itr.hasNext()) {
+            Datum trial = itr.next();
+
+            KeySet keys = trial.getKeys();
+
+            Key<String> textKey = keys.get("text");
+
+            for (Datum statement : trial.getSpannedData(statementsKey, keys)) {
+
+                Datum tokenized = Tokenizer.tokenize(statement, textKey, keys);
+                KeySet tokenizedKeys = tokenized.getKeys();
+                Key<List<String>> tokenKey = tokenizedKeys.get(textKey + Tokenizer.SUFFIX);
+
+                List<String> tokens = tokenized.get(tokenKey);
+
+                pm.matchPubs(tokens);
+
+            }
+        }
     }
 }
