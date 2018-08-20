@@ -17,6 +17,8 @@ import uk.ac.susx.tag.method51.core.meta.types.RuntimeType;
 
 import java.io.FileReader;
 import java.io.Serializable;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
@@ -314,10 +316,19 @@ public class PubMatcher {
         PubMatcher pm = new PubMatcher(true, false);
 
 
+        Path outDir = Paths.get("data","obNerPub");
+
+        try {
+            Files.createDirectory(outDir);
+        } catch (FileAlreadyExistsException e) {
+            //pass
+        }
+
         Path start = Paths.get("data/sessionsPapers");
 
         Set<Path> paths = new OBFiles(start)
-            .getFiles(LocalDate.of(1800,1,1), LocalDate.of(1800,12,31));
+//            .getFiles(LocalDate.of(1800,1,1), LocalDate.of(1800,12,31));
+            .getFiles(LocalDate.of(1686,1,1), LocalDate.of(1914,12,31));
 
         Map<Key<Spans<String, String>>, List<XML2Datum.Element>> interestingElements = new HashMap<>();
 
@@ -349,6 +360,7 @@ public class PubMatcher {
             KeySet keys = trial.getKeys();
 
             Key<String> textKey = keys.get("text");
+            StringBuilder sb = new StringBuilder();
 
             for (Datum statement : trial.getSpannedData(statementsKey, keys)) {
 
@@ -363,14 +375,21 @@ public class PubMatcher {
                     Spans<List<String>, String> pubSpans = pm.matchPubs(tokenized, tokenKey);
 
                     if(pubSpans.get().size() > 0){
+
                         tokenized = tokenized.with(pubSpansKey, pubSpans);
 
                         Datum2Column columns = new Datum2Column(tokenized, tokenKey, ImmutableList.of(pubSpansKey));
                         String s = columns.columnise();
-                        System.out.println(s);
-                        System.out.println();
+                        sb.append(s);
+                        sb.append("\n");
                     }
                 }
+            }
+
+            if(sb.length() > 0) {
+
+                String trialId = trial.get(trialsKey).get(0).get();
+                Files.write(outDir.resolve(trialId+".col"), ImmutableList.of(sb));
             }
         }
     }
