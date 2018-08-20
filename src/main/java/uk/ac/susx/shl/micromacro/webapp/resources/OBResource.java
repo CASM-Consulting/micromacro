@@ -46,6 +46,7 @@ public class OBResource {
 
         this.jdbi = jdbi;
 
+        obTrials.clear();
 //        trialsByDate = obTrials.getDocumentsByDate();
         trialsId = obTrials.getDocumentsById();
 

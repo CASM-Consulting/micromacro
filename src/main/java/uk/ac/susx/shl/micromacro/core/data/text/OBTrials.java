@@ -143,6 +143,8 @@ public class OBTrials {
         Key<Spans<String, String>> trialsKey = Key.of("trialAccount", RuntimeType.stringSpans(String.class));
         Key<Spans<String, String>> statementsKey = Key.of("statement", RuntimeType.stringSpans(String.class));
         Key<Spans<String, String>> crimeDateKey = Key.of("crimeDate", RuntimeType.stringSpans(String.class));
+        Key<Spans<String, String>> offenceCategoryKey = Key.of("offenceCategory", RuntimeType.stringSpans(String.class));
+        Key<Spans<String, String>> offenceSubcategoryKey = Key.of("offenceSubcategory", RuntimeType.stringSpans(String.class));
 //        Key<Spans<String, String>> entities = Key.of("entities", RuntimeType.stringSpans(String.class));
 
         Map<Key<Spans<String, String>>, List<XML2Datum.Element>> interestingElements = new HashMap<>();
@@ -158,6 +160,14 @@ public class OBTrials {
 
         interestingElements.put(statementsKey, ImmutableList.of(
                 new XML2Datum.Element("p", ImmutableMap.of(), "statement")
+        ));
+
+        interestingElements.put(offenceCategoryKey, ImmutableList.of(
+                new XML2Datum.Element("interp", ImmutableMap.of("type", "offenceCategory"), "offenceCategory").valueAttribute("value")
+        ));
+
+        interestingElements.put(offenceSubcategoryKey, ImmutableList.of(
+                new XML2Datum.Element("interp", ImmutableMap.of("type", "offenceSubcategory"), "offenceSubcategory").valueAttribute("value")
         ));
 
         interestingElements.put(crimeDateKey, ImmutableList.of(
@@ -246,8 +256,10 @@ public class OBTrials {
 //                    System.out.println(ner);
                     Datum nerd = ner2Datum.toDatum(ner);
 
-                    //retain original crime date spans - tokenisation not required
+                    //retain original crime date / offcat spans - tokenisation not required
                     tokenized = tokenized.with(crimeDateKey, statement.get(crimeDateKey));
+                    tokenized = tokenized.with(offenceCategoryKey, statement.get(offenceCategoryKey));
+                    tokenized = tokenized.with(offenceSubcategoryKey, statement.get(offenceSubcategoryKey));
 
                     if (tokenized.get(tokenKey).size() != nerd.get(tokenKey).size()) {
 
@@ -275,10 +287,18 @@ public class OBTrials {
 
                     //figure out date first
                     Optional<LocalDate> crimeDate = Optional.empty();
+                    Optional<String> offenceCategory = Optional.empty();
+                    Optional<String> offenceSubcategory = Optional.empty();
 
                     for(Datum statement : statements) {
                         if(!crimeDate.isPresent()) {
                             crimeDate = getFirstDate(statement, crimeDateKey, refDate);
+                        }
+                        if(!offenceCategory.isPresent()) {
+                            offenceCategory = getCrimeCat(statement, offenceCategoryKey);
+                        }
+                        if(!offenceSubcategory.isPresent()) {
+                            offenceSubcategory = getCrimeCat(statement, offenceSubcategoryKey);
                         }
                     }
 
@@ -309,6 +329,13 @@ public class OBTrials {
 
                     SimpleDocument document = datum2SimpleDocument.toDocument(id, statements);
 
+                    if(offenceCategory.isPresent()) {
+                        document = document.with("offCat", offenceCategory.get());
+                    }
+
+                    if(offenceSubcategory.isPresent()) {
+                        document = document.with("offSubcat", offenceSubcategory.get());
+                    }
 
                     if (!trialsByDate.containsKey(date)) {
                         trialsByDate.put(date, new ArrayList<>());
@@ -718,13 +745,31 @@ public class OBTrials {
     }
 
 
+    private Optional<String> getCrimeCat(Datum datum, Key<Spans<String, String>> datesKey ) {
+
+        Optional<String> crime = Optional.empty();
+
+        Spans<String, String> crimeCatSpans = datum.get(datesKey);
+
+        if(crimeCatSpans.get().size() == 1) {
+            Span<String, String> span = crimeCatSpans.get(0);
+
+            String crimeText = span.get();
+            System.out.println(crimeText);
+
+            crime = Optional.of(crimeText);
+        }
+
+        return crime;
+    }
+
     private Optional<LocalDate> getFirstDate(Datum datum, Key<Spans<String, String>> datesKey, Date refDate) {
 
         Spans<String, String> dateSpans = datum.get(datesKey);
 
         Optional<LocalDate> date = Optional.empty();
 
-        if(dateSpans.get().size() == 1) {
+        if(dateSpans.get().size() >= 1) {
             Span<String, String> span = dateSpans.get(0);
 
             String dateText = span.getSpanned(datum);
