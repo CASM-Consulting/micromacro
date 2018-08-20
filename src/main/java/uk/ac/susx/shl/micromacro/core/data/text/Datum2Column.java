@@ -16,13 +16,12 @@ import java.util.Map;
 
 public class Datum2Column {
 
-    private Datum datum;
-    private final Key<String> textKey;
-//    private final SentenceDetector sentenceDetector;
+    private final Datum datum;
+    private final Key textKey;
 
     private final List<Key> extractKeys;
 
-    public Datum2Column(Datum datum, Key<String> textKey, List<Key> extractKeys) throws IOException {
+    public Datum2Column(Datum datum, Key textKey, List<Key> extractKeys) throws IOException {
         this.datum = datum;
         this.textKey = textKey;
         this.extractKeys = extractKeys;
@@ -31,11 +30,26 @@ public class Datum2Column {
 
     public String columnise() {
 
-        Datum listVersion = Tokenizer.tokenize(datum, textKey, KeySet.ofIterable(new ArrayList<>(extractKeys)));
+        Datum listVersion;
+        Key<List<String>> listKey;
+        KeySet listKeys;
+        String suffix;
+        if(!textKey.type.type.getRawClass().isAssignableFrom(List.class)) {
 
-        KeySet listKeys = listVersion.getKeys();
+            suffix = Tokenizer.SUFFIX;
+            listVersion = Tokenizer.tokenize(datum, textKey, KeySet.ofIterable(new ArrayList<>(extractKeys)));
+            listKeys = listVersion.getKeys();
+            listKey = listKeys.get(textKey.name()+suffix);
+        } else {
 
-        Key<List<String>> listKey = listKeys.get(textKey.name()+"-token");
+            suffix = "";
+            listVersion = datum;
+            listKeys = datum.getKeys();
+            listKey = textKey;
+        }
+
+
+
 
         List<String> tokens = listVersion.get(listKey);
 
@@ -48,7 +62,7 @@ public class Datum2Column {
             List<String> label = new ArrayList<>();
 
             for(Key extractKey : extractKeys) {
-                Key<Spans<List<String>,?>> listExtractKey = listKeys.get(extractKey.name()+"-token");
+                Key<Spans<List<String>,?>> listExtractKey = listKeys.get(extractKey.name()+suffix);
 
                 Optional<Spans<List<String>,?>> maybeSpans = listVersion.maybeGet(listExtractKey);
 

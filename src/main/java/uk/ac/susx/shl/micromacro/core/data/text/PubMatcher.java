@@ -22,6 +22,7 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class PubMatcher {
@@ -88,8 +89,11 @@ public class PubMatcher {
 
         for(CSVRecord record : records) {
 
+            String name = record.get("pub_name");
+            name = trimNumbers(name);
+
             Pub pub = new Pub(
-                trimNumbers(record.get("pub_name")),
+                name,
                 record.get("parish"),
                 trimNumbers(record.get("pub_add_1")),
                 record.get("pub_add_2"),
@@ -98,8 +102,39 @@ public class PubMatcher {
                 record.get("pub_add_5"),
                 record.get("pub_add_6")
             );
-
             pubs.add(pub);
+
+            Matcher m = andPattern.matcher(name);
+            if(m.find()) {
+                String andName = m.replaceAll("&");
+                Pub andPub = new Pub(
+                        andName,
+                        record.get("parish"),
+                        trimNumbers(record.get("pub_add_1")),
+                        record.get("pub_add_2"),
+                        record.get("pub_add_3"),
+                        record.get("pub_add_4"),
+                        record.get("pub_add_5"),
+                        record.get("pub_add_6")
+                );
+                pubs.add(andPub);
+            }
+
+            m = ampersandPattern.matcher(name);
+            if(m.find()) {
+                String andName = m.replaceAll("and");
+                Pub andPub = new Pub(
+                        andName,
+                        record.get("parish"),
+                        trimNumbers(record.get("pub_add_1")),
+                        record.get("pub_add_2"),
+                        record.get("pub_add_3"),
+                        record.get("pub_add_4"),
+                        record.get("pub_add_5"),
+                        record.get("pub_add_6")
+                );
+                pubs.add(andPub);
+            }
         }
 
         return pubs;
@@ -116,7 +151,7 @@ public class PubMatcher {
             if(lc) {
                 name = name.toLowerCase();
             }
-            name = trimNumbers(name);
+
             String first = name.split(" ")[0];
 
             if(!pubHash.containsKey(first)) {
@@ -134,7 +169,9 @@ public class PubMatcher {
         return pubHash;
     }
 
-    private Pattern leadingNumbers = Pattern.compile("^[\\d\\s\\p{Punct}]+(.*)");
+    private Pattern leadingNumbers = Pattern.compile("^[\\d\\s\\p{Punct}a]+(.*)");
+    private Pattern andPattern = Pattern.compile("\\b[aA]nd\\b");
+    private Pattern ampersandPattern = Pattern.compile("\\b&\\b");
 
     private String trimNumbers(String original) {
 
@@ -150,7 +187,7 @@ public class PubMatcher {
 
         for(Pub pub : pubs) {
 
-            String pubName = trimNumbers(pub.name);
+            String pubName = pub.name;
 
             List<Match> candidates = lookup.getMatches(pubName);
 
@@ -179,48 +216,97 @@ public class PubMatcher {
     }
 
 
-    public void matchPubs(List<String> tokens) {
+    public Spans<List<String>, String> matchPubs(Datum datum, Key<List<String>> tokenKey) {
+
+        Spans<List<String>, String> pubSpans = Spans.annotate(tokenKey, String.class);
+
+        List<String> tokens = datum.get(tokenKey);
 
         String raster = String.join(" ", tokens);
         if(lc) {
             raster = raster.toLowerCase();
         }
 
+
+        Map<Integer, Integer> indexMap = new HashMap<>();
+
+        int k = 0;
+        for(int i = 0; i < tokens.size(); ++i) {
+            String token = tokens.get(i);
+
+            for(int j = 0; j < token.length(); ++j, ++k) {
+
+                indexMap.put(k+i, i);
+            }
+        }
+
         int i = 0;
         int j = 0;
+
+        boolean pubSearch = false;
+
         for(String token : tokens) {
 
-            if(lc) {
-                token = token.toLowerCase();
-            }
-            if(pubHash.containsKey(token)) {
+            if(pubSearch) {
 
-                List<Pub> pubs = pubHash.get(token);
+                if(lc) {
+                    token = token.toLowerCase();
+                }
+                if(pubHash.containsKey(token)) {
+
+                    List<Pub> pubs = pubHash.get(token);
 
 //                System.out.println(pubs.size());
 
-                for(Pub pub : pubs) {
+                    List<Pub> candidates = new ArrayList<>();
 
-                    String pubName = pub.name;
+                    int maxLength = 0;
+                    for(Pub pub : pubs) {
 
-                    if(lc) {
-                        pubName = pubName.toLowerCase();
+                        String pubName = pub.name;
+
+                        if(lc) {
+                            pubName = pubName.toLowerCase();
+                        }
+
+                        int max = raster.length()-1;
+                        int from = Math.min(j+i, max);
+                        int to = Math.min(j+i+pubName.length(), max);
+
+                        if(raster.substring(from, to).equals(pubName)) {
+                            if(pub.name.length() > maxLength) {
+                                maxLength = pub.name.length();
+                            }
+//                            System.out.println(pub.name);
+//                            System.out.println(i);
+                            candidates.add(pub);
+                        }
                     }
 
-                    int max = raster.length()-1;
-                    int from = Math.min(j+i, max);
-                    int to = Math.min(j+i+pubName.length(), max);
-
-                    if(raster.substring(from, to).equals(pubName)) {
-                        System.out.println(pub.name);
-                        System.out.println(i);
+                    ListIterator<Pub> itr = candidates.listIterator();
+                    while(itr.hasNext()) {
+                        Pub candidate =  itr.next();
+                        if(candidate.name.length() < maxLength) {
+                            itr.remove();
+                        }
                     }
+
+                    if(candidates.size() >= 1) {
+
+                        pubSpans = pubSpans.with(indexMap.get(j+i), indexMap.get(j+i+candidates.get(0).name.length()-1), "pub");
+                    }
+
+
                 }
             }
 
             j += token.length();
             ++i;
+
+            pubSearch = token.equalsIgnoreCase("the");
         }
+
+        return pubSpans;
     }
 
     public static void main(String[] args) throws Exception {
@@ -254,6 +340,8 @@ public class PubMatcher {
 
         Iterator<Datum> itr = XML2Datum.getData(start, paths, interestingElements, "trialAccount", "-id").iterator();
 
+        Key<Spans<List<String>, String>> pubSpansKey = Key.of("pubs", RuntimeType.listSpans(String.class));
+
 
         while(itr.hasNext()) {
             Datum trial = itr.next();
@@ -264,14 +352,25 @@ public class PubMatcher {
 
             for (Datum statement : trial.getSpannedData(statementsKey, keys)) {
 
-                Datum tokenized = Tokenizer.tokenize(statement, textKey, keys);
-                KeySet tokenizedKeys = tokenized.getKeys();
-                Key<List<String>> tokenKey = tokenizedKeys.get(textKey + Tokenizer.SUFFIX);
+                List<Datum> sents = Sentizer.sentize(statement, textKey, keys);
 
-                List<String> tokens = tokenized.get(tokenKey);
+                for(Datum sentence : sents ) {
 
-                pm.matchPubs(tokens);
+                    Datum tokenized = Tokenizer.tokenize(sentence, textKey, keys);
+                    KeySet tokenizedKeys = tokenized.getKeys();
+                    Key<List<String>> tokenKey = tokenizedKeys.get(textKey + Tokenizer.SUFFIX);
 
+                    Spans<List<String>, String> pubSpans = pm.matchPubs(tokenized, tokenKey);
+
+                    if(pubSpans.get().size() > 0){
+                        tokenized = tokenized.with(pubSpansKey, pubSpans);
+
+                        Datum2Column columns = new Datum2Column(tokenized, tokenKey, ImmutableList.of(pubSpansKey));
+                        String s = columns.columnise();
+                        System.out.println(s);
+                        System.out.println();
+                    }
+                }
             }
         }
     }
