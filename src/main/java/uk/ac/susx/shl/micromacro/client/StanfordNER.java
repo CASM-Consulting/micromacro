@@ -4,15 +4,23 @@ import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
+import java.util.Map;
 
 public class StanfordNER {
 
     private static Charset charset = Charset.forName("UTF-8");
 
-    public static String get(String input) {
+    private final int port;
+
+
+    public StanfordNER(int port) {
+        this.port = port;
+    }
+
+    public String get(String input) {
 
         try (
-                Socket socket = new Socket("127.0.0.1", 9191);
+                Socket socket = new Socket("127.0.0.1", port);
                 PrintWriter out = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), charset), true);
                 BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream(), charset))
         ) {
@@ -35,12 +43,6 @@ public class StanfordNER {
 
             throw new RuntimeException(e);
         }
-    }
-
-
-    public static void main(String[] args) throws Exception {
-
-
     }
 
 }

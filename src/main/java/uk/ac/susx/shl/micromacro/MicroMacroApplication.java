@@ -47,7 +47,9 @@ public class MicroMacroApplication extends Application<MicroMacroConfiguration> 
         final PlacesResource places = new PlacesResource(configuration.geoJsonPath);
         environment.jersey().register(places);
 
-        final OBResource ob = new OBResource(configuration.sessionsPath, configuration.geoJsonPath, configuration.obMapPath, configuration.obCacheTable, jdbi);
+        final OBResource ob = new OBResource(configuration.sessionsPath, configuration.geoJsonPath,
+                configuration.obMapPath, configuration.obCacheTable, jdbi,
+                configuration.placeNerPort, configuration.pubNerPort);
         environment.jersey().register(ob);
 
         final DefaultHealthCheck healthCheck = new DefaultHealthCheck();

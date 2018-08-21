@@ -8,9 +8,7 @@ import org.mapdb.DBMaker;
 import uk.ac.susx.shl.micromacro.client.StanfordNER;
 import uk.ac.susx.shl.micromacro.core.data.Match;
 import uk.ac.susx.shl.micromacro.core.data.geo.GeoJsonKnowledgeBase;
-import uk.ac.susx.tag.method51.core.data.DatumStore;
 import uk.ac.susx.tag.method51.core.data.StoreException;
-import uk.ac.susx.tag.method51.core.data.impl.DatumStoreBuilder;
 import uk.ac.susx.tag.method51.core.data.impl.PostgreSQLDatumStore;
 import uk.ac.susx.tag.method51.core.meta.Datum;
 import uk.ac.susx.tag.method51.core.meta.Key;
@@ -76,12 +74,17 @@ public class OBTrials {
 
     private final Parser dateParser = new Parser();
 
+    private final StanfordNER placeNerService;
+    private final StanfordNER pubNerService;
 
-    public OBTrials(String sessionsPath, String geoJsonPath, String obMapPath) throws IOException {
+    public OBTrials(String sessionsPath, String geoJsonPath, String obMapPath, StanfordNER placeNer, StanfordNER pubNer) throws IOException {
         lookup = new GeoJsonKnowledgeBase(Paths.get(geoJsonPath));
         placeMatchKey = Key.of("placeNameMatch", RuntimeType.listSpans(Map.class));
         keys = KeySet.of(placeMatchKey);
         start = Paths.get(sessionsPath);
+
+        this.placeNerService = placeNer;
+        this.pubNerService = pubNer;
 
         DB db = DBMaker
                 .fileDB(obMapPath)
@@ -231,43 +234,45 @@ public class OBTrials {
 
                 Key<List<String>> tokenKey = null;
                 Key<Spans<List<String>, String>> placeNameSpansKey = null;
+                Key<Spans<List<String>, String>> pubSpansKey = null;
 
                 for (Datum statement : trial.getSpannedData(statementsKey, retain)) {
 
                     Datum tokenized = Tokenizer.tokenize(statement, textKey, retain);
-
-                    KeySet tokenizedKeys = tokenized.getKeys();
-
-                    tokenKey = tokenizedKeys.get(textKey + Tokenizer.SUFFIX);
-
-                    placeNameSpansKey = Key.of("placeName", RuntimeType.listSpans(String.class));
-
-                    NER2Datum ner2Datum = new NER2Datum(
-                            tokenKey,
-                            ImmutableSet.of("placeName"),
-                            placeNameSpansKey,
-                            true
-                    );
-
-                    String text = String.join(" ", tokenized.get(tokenKey));
-
-                    String ner = StanfordNER.get(text);
-
-//                    System.out.println(ner);
-                    Datum nerd = ner2Datum.toDatum(ner);
 
                     //retain original crime date / offcat spans - tokenisation not required
                     tokenized = tokenized.with(crimeDateKey, statement.get(crimeDateKey));
                     tokenized = tokenized.with(offenceCategoryKey, statement.get(offenceCategoryKey));
                     tokenized = tokenized.with(offenceSubcategoryKey, statement.get(offenceSubcategoryKey));
 
-                    if (tokenized.get(tokenKey).size() != nerd.get(tokenKey).size()) {
+                    KeySet tokenizedKeys = tokenized.getKeys();
 
-                        System.err.println("tokenised mismatch! Expected " + tokenized.get(tokenKey).size() + " got " + nerd.get(tokenKey).size());
+                    tokenKey = tokenizedKeys.get(textKey + Tokenizer.SUFFIX);
+
+                    placeNameSpansKey = Key.of("placeName", RuntimeType.listSpans(String.class));
+                    pubSpansKey = Key.of("pub", RuntimeType.listSpans(String.class));
+
+                    NER2Datum ner2Datum = new NER2Datum(
+                            tokenKey,
+                            ImmutableSet.of("placeName", "pub"),
+                            placeNameSpansKey,
+                            true
+                    );
+
+                    String text = String.join(" ", tokenized.get(tokenKey));
+
+                    String placeNer = placeNerService.get(text);
+
+//                    System.out.println(ner);
+                    Datum placeNerd = ner2Datum.toDatum(placeNer);
+
+                    if (tokenized.get(tokenKey).size() != placeNerd.get(tokenKey).size()) {
+
+                        System.err.println("tokenised mismatch! Expected " + tokenized.get(tokenKey).size() + " got " + placeNerd.get(tokenKey).size());
                     } else {
 
                         tokenized = tokenized
-                                .with(nerd.getKeys().get("placeName"), nerd.get(placeNameSpansKey))
+                                .with(placeNerd.getKeys().get("placeName"), placeNerd.get(placeNameSpansKey))
                         ;
 
                         statements.add(tokenized);
@@ -471,7 +476,7 @@ public class OBTrials {
 
                         String text = String.join(" ", tokenized.get(tokenKey));
 
-                        String ner = StanfordNER.get(text);
+                        String ner = placeNerService.get(text);
 
 //                    System.out.println(ner);
                         Datum nerd = ner2Datum.toDatum(ner);
@@ -661,7 +666,7 @@ public class OBTrials {
 
                     String text = String.join(" ", tokenized.get(tokenKey));
 
-                    String ner = StanfordNER.get(text);
+                    String ner = placeNerService.get(text);
 
 //                    System.out.println(ner);
                     Datum nerd = ner2Datum.toDatum(ner);

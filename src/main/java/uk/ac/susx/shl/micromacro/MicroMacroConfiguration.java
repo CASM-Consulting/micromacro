@@ -9,6 +9,7 @@ import io.dropwizard.db.DataSourceFactory;
 
 import javax.validation.Valid;
 import javax.validation.constraints.*;
+import java.util.Map;
 
 public class MicroMacroConfiguration extends Configuration implements AssetsBundleConfiguration {
 
@@ -29,6 +30,14 @@ public class MicroMacroConfiguration extends Configuration implements AssetsBund
     @NotNull
     @JsonProperty
     String geoJsonPath;
+
+    @NotNull
+    @JsonProperty
+    int pubNerPort;
+
+    @NotNull
+    @JsonProperty
+    int placeNerPort;
 
     @Valid
     @NotNull

@@ -184,37 +184,48 @@ public class PubMatcher {
 
 
     private void matchPubs() {
-
         int matched = 0;
-
         for(Pub pub : pubs) {
 
-            String pubName = pub.name;
+            Optional<Match> maybePub = matchPub(pub);
+            if(maybePub.isPresent()) {
+                pub.match = maybePub.get();
 
-            List<Match> candidates = lookup.getMatches(pubName);
-
-            if(candidates.isEmpty()) {
-
-                String addr = trimNumbers(pub.addr.get(0));
-
-                candidates = lookup.getMatches(addr);
-            }
-
-            if(candidates.isEmpty()) {
-
-                String addr = trimNumbers(pub.addr.get(1));
-
-                candidates = lookup.getMatches(addr);
-            }
-
-            if(!candidates.isEmpty()) {
-                pub.match = candidates.get(0);
                 ++matched;
+
             }
 
         }
-
         LOG.info(matched + " of " + pubs.size() + " matched" );
+    }
+
+    private Optional<Match> matchPub(Pub pub) {
+
+        Optional maybeMatched = Optional.empty();
+
+        String pubName = pub.name;
+
+        List<Match> candidates = lookup.getMatches(pubName);
+
+        if(candidates.isEmpty()) {
+
+            String addr = trimNumbers(pub.addr.get(0));
+
+            candidates = lookup.getMatches(addr);
+        }
+
+        if(candidates.isEmpty()) {
+
+            String addr = trimNumbers(pub.addr.get(1));
+
+            candidates = lookup.getMatches(addr);
+        }
+
+        if(!candidates.isEmpty()) {
+            maybeMatched = Optional.of(candidates.get(0));
+        }
+
+        return maybeMatched;
     }
 
 
