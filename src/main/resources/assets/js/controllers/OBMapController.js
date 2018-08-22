@@ -123,10 +123,13 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
                     id : val
                 }
             }).then(function(response) {
-                var matchedMap = {};
-                var unmatchedMap = {};
+                var matchedPlaceMap = {};
+                var unmatchedPlaceMap = {};
+
+                var matchedPubMap = {};
+                var unmatchedPubMap = {};
                 for(var i = 0; i < response.data.data.length; ++i) {
-                    matchedMap[i] = {};
+                    matchedPlaceMap[i] = {};
                     for(var j = 0; j < response.data.data[i].spans.placeNameMatch.length; ++j) {
                         var span = response.data.data[i].spans.placeNameMatch[j];
                         for(var k = span.from; k < span.to; ++k) {
@@ -134,20 +137,41 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
                         }
                     }
 
-                    unmatchedMap[i] = {};
+                    unmatchedPlaceMap[i] = {};
                     for(var j = 0; j < response.data.data[i].spans.placeName.length; ++j) {
                         var span = response.data.data[i].spans.placeName[j];
                         for(var k = span.from; k < span.to; ++k) {
+                            if(!matchedPlaceMap[i][k]) {
+                                unmatchedPlaceMap[i][k] = true;
+                            }
+                        }
+                    }
+
+                    matchedPubMap[i] = {};
+                    for(var j = 0; j < response.data.data[i].spans.pubMatch.length; ++j) {
+                        var span = response.data.data[i].spans.pubMatch[j];
+                        for(var k = span.from; k < span.to; ++k) {
+                            matchedPub[i][k] = span.value;
+                        }
+                    }
+
+                    unmatchedPubMap[i] = {};
+                    for(var j = 0; j < response.data.data[i].spans.pubs.length; ++j) {
+                        var span = response.data.data[i].spans.pubs[j];
+                        for(var k = span.from; k < span.to; ++k) {
                             if(!matchedMap[i][k]) {
-                                unmatchedMap[i][k] = true;
+                                unmatchedPubMap[i][k] = true;
                             }
                         }
                     }
 
                 }
                 $scope.selectedTrial = response.data;
-                $scope.selectedTrial.matchedMap = matchedMap;
-                $scope.selectedTrial.unmatchedMap = unmatchedMap;
+                $scope.selectedTrial.matchedPlaceMap = matchedPlaceMap;
+                $scope.selectedTrial.unmatchedPlaceMap = unmatchedPlaceMap;
+
+                $scope.selectedTrial.matchedPubMap = matchedPubMap;
+                $scope.selectedTrial.unmatchedPubMap = unmatchedPubMap;
                 drawMatches($scope.matchesByTrial[val] || []);
             });
         }
