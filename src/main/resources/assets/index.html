@@ -178,28 +178,28 @@
             <div class="col-md-2">
                 <span>Intensity</span>
                 <span>
-                    <input ng-model="heatmapIntensity" step="1" type="number">
+                    <input ng-model="config.heatmap.intensity" step="1" type="number">
                 </span>
             </div>
 
             <div class="col-md-2">
                 <span>Decay</span>
                 <span>
-                    <input ng-model="heatmapDecay" step="1" type="number">
+                    <input ng-model="config.heatmap.decay" step="1" type="number">
                 </span>
             </div>
 
             <div class="col-md-2">
                 <span>Radius</span>
                 <span>
-                    <input ng-model="heatmapRadius" step="1" type="number">
+                    <input ng-model="config.heatmap.radius" step="1" type="number">
                 </span>
             </div>
 
             <div class="col-md-2">
                 <span>Blur</span>
                 <span>
-                    <input ng-model="heatmapBlur" step="1" type="number">
+                    <input ng-model="config.heatmap.blur" step="1" type="number">
                 </span>
             </div>
 
@@ -212,9 +212,9 @@
         </div>
         <div class="row">
             <div class="col-md-2">
-                <span>Intensity</span>
+                <span>Threshold</span>
                 <span>
-                    <input ng-model="heatmapIntensity" step="1" type="number">
+                    <input ng-model="config.scoreThresh" step="0.1" min="0" max="1" type="number">
                 </span>
             </div>
 
@@ -225,6 +225,7 @@
                 <span class="">Score</span>
             </div>
         </div>
+
         <div class="row">
             <div class="col-md-3">
                 <span>Type</span>

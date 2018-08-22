@@ -59,7 +59,7 @@ public class SimpleDocument implements Serializable {
     }
 
     public SimpleDocument with(String key, String value) {
-        return new SimpleDocument(id, data,new ImmutableMap.Builder<String,String>().put(key, value).build());
+        return new SimpleDocument(id, data, new ImmutableMap.Builder<String,String>().putAll(metadata).put(key, value).build());
     }
 
     public int size() {

@@ -12,9 +12,6 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
         startingDay: 1
     };
 
-    $scope.heatmapOptions = {
-        //do local storage stuff ^^
-    };
 
     var restoreConfig = function() {
 
@@ -33,7 +30,14 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
                 to: new Date(1803, 12, 31),
                 scoreThresh : 0,
                 filter: {
-
+                    pubs : true,
+                    places : true
+                },
+                heatmap : {
+                    intensity : 1,
+                    decay : 20,
+                    radius : 10,
+                    blur : 15
                 }
             };
         }
@@ -62,13 +66,10 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
         initDate: $scope.config.to
     });
 
-    $scope.heatmapIntensity = 1;
-    $scope.heatmapDecay = 20;
-    $scope.timelineDuration = 100;
-    $scope.heatmapRadius = 10;
-    $scope.heatmapBlur = 15;
 
-    $scope.$watch("heatmapRadius", function(val, old ) {
+    $scope.timelineDuration = 100;
+
+    $scope.$watch("config.heatmap.radius", function(val, old ) {
         if(val && val != old) {
             leafletData.getLayers().then(function(layers) {
                 layers.overlays.heat.setOptions({radius:val})
@@ -76,7 +77,7 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
         }
     });
 
-    $scope.$watch("heatmapBlur", function(val, old ) {
+    $scope.$watch("config.heatmap.blur", function(val, old ) {
         if(val && val != old) {
             leafletData.getLayers().then(function(layers) {
                 layers.overlays.heat.setOptions({blur:val})
@@ -240,7 +241,7 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
                 $scope.config.filter.places && $scope.matchesByTrial[trialId][idx].metadata.type == "place";
         }
 
-        var from = moment(date).subtract($scope.heatmapDecay, 'days').format(DATE_FORMAT);
+        var from = moment(date).subtract($scope.config.heatmap.decay, 'days').format(DATE_FORMAT);
         var to = moment(date).format(DATE_FORMAT);
 
         var data = [];
@@ -249,7 +250,7 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
             var dayDate = moment(d).format(DATE_FORMAT);
             var dayData = $scope.matchLLByDate[dayDate] || [];
 
-            var intensity = (i / $scope.heatmapDecay) * $scope.heatmapIntensity;
+            var intensity = (i / $scope.config.heatmap.decay) * $scope.config.heatmap.intensity;
 
             for(var j = 0; j < dayData.length; ++j) {
                 var trialId = dayData[j].trialId;
@@ -275,8 +276,8 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
                         type: 'heat',
                         data: data,
                         layerOptions: {
-                            radius: $scope.heatmapRadius,
-                            blur: $scope.heatmapBlur
+                            radius: $scope.config.heatmap.radius,
+                            blur: $scope.config.heatmap.blur
                         },
                         visible: true
                     }
