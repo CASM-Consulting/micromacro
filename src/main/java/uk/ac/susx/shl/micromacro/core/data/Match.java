@@ -2,12 +2,14 @@ package uk.ac.susx.shl.micromacro.core.data;
 
 import uk.ac.susx.shl.micromacro.core.data.text.Candidate;
 
+import java.io.Serializable;
 import java.util.Map;
 
 /**
  * Created by sw206 on 16/04/2018.
  */
-public class Match {
+public class Match implements Serializable {
+
 
     private final String match;
     private final Candidate candidate;

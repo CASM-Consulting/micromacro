@@ -419,7 +419,9 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
                 end: moment(to).add(1000, "y").toDate().getTime(),
                 getInterval: getInterval,
                 pointToLayer: function(data, latlng) {
-                    return L.circleMarker(latlng,{radius:5, color:"green"}).bindPopup(function(l) {
+                    var colour = data.metadata.type == 'pub' ? 'purple' : 'green';
+
+                    return L.circleMarker(latlng,{radius:5, color:colour}).bindPopup(function(l) {
                         $scope.selectedTrialId = data.metadata.trialId;
                         return "<ul>" +
                         "<li>Match: " + data.metadata.text + "</li>"+

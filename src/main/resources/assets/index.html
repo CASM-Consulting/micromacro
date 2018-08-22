@@ -257,7 +257,7 @@
                 <p ng-repeat="sentence in selectedTrial.data track by $index">
                 <span
                     ng-repeat="token in sentence.tokens track by $index"
-                    ng-class="{matched: selectedTrial.matchedMap[$parent.$index][$index], unmatched: selectedTrial.unmatchedMap[$parent.$index][$index]}"
+                    ng-class="{matchedPlace: selectedTrial.matchedMap[$parent.$index][$index], unmatchedPlace: selectedTrial.unmatchedMap[$parent.$index][$index]}"
                 >
                     {{token}}
                 </span>

@@ -1,9 +1,11 @@
 package uk.ac.susx.shl.micromacro.core.data.text;
 
+import java.io.Serializable;
+
 /**
  * Created by sw206 on 16/04/2018.
  */
-public class Candidate {
+public class Candidate implements Serializable {
 
     private final String text;
 

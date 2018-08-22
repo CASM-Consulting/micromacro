@@ -38,12 +38,24 @@ public class PubMatcher {
         public final List<String> addr;
         public final String parish;
 
-        public Match match;
+        public final Match match;
 
         public Pub(String name, String parish, String addr1, String addr2, String addr3, String addr4, String addr5, String addr6) {
             this.name = name;
             this.parish = parish;
             addr = ImmutableList.of(addr1, addr2, addr3, addr4, addr5, addr6);
+            match = null;
+        }
+
+        private Pub(String name, String parish, List<String> addr, Match match) {
+            this.name = name;
+            this.parish = parish;
+            this.addr = ImmutableList.copyOf(addr);
+            this.match = match;
+        }
+
+        public Pub match(Match match) {
+            return new Pub(name, parish, addr, match);
         }
     }
 
@@ -84,8 +96,6 @@ public class PubMatcher {
             pubHash.clear();
             pubHash.putAll(pub2Hash(pubs));
 
-            matchPubs();
-
             db.commit();
         }
     }
@@ -99,18 +109,20 @@ public class PubMatcher {
         for(CSVRecord record : records) {
 
             String name = record.get("pub_name");
-            name = trimNumbers(name);
+            name = clean(name);
 
             Pub pub = new Pub(
                 name,
                 record.get("parish"),
-                trimNumbers(record.get("pub_add_1")),
+                clean(record.get("pub_add_1")),
                 record.get("pub_add_2"),
                 record.get("pub_add_3"),
                 record.get("pub_add_4"),
                 record.get("pub_add_5"),
                 record.get("pub_add_6")
             );
+            pub = matchPub(pub);
+
             pubs.computeIfAbsent(name, k-> new ArrayList<>()).add(pub);
 
             Matcher m = andPattern.matcher(name);
@@ -119,13 +131,16 @@ public class PubMatcher {
                 Pub andPub = new Pub(
                         andName,
                         record.get("parish"),
-                        trimNumbers(record.get("pub_add_1")),
+                        clean(record.get("pub_add_1")),
                         record.get("pub_add_2"),
                         record.get("pub_add_3"),
                         record.get("pub_add_4"),
                         record.get("pub_add_5"),
                         record.get("pub_add_6")
                 );
+
+                andPub = matchPub(andPub);
+
                 pubs.computeIfAbsent(andName, k-> new ArrayList<>()).add(andPub);
             }
 
@@ -135,13 +150,15 @@ public class PubMatcher {
                 Pub andPub = new Pub(
                         andName,
                         record.get("parish"),
-                        trimNumbers(record.get("pub_add_1")),
+                        clean(record.get("pub_add_1")),
                         record.get("pub_add_2"),
                         record.get("pub_add_3"),
                         record.get("pub_add_4"),
                         record.get("pub_add_5"),
                         record.get("pub_add_6")
                 );
+
+                andPub = matchPub(andPub);
                 pubs.computeIfAbsent(andName, k-> new ArrayList<>()).add(andPub);
             }
         }
@@ -180,9 +197,11 @@ public class PubMatcher {
     private Pattern andPattern = Pattern.compile("\\b[aA]nd\\b");
     private Pattern ampersandPattern = Pattern.compile("\\b&\\b");
 
-    private String trimNumbers(String original) {
+    private String clean(String original) {
 
-        String trimmed = leadingNumbers.matcher(original).replaceFirst("$1");
+        String trimmed = leadingNumbers.matcher(original)
+                .replaceFirst("$1")
+                .replaceAll("[()\\]\\[]", "");
 
         return trimmed;
     }
@@ -197,20 +216,15 @@ public class PubMatcher {
         int matched = 0;
         for(Pub pub : pubs.values().stream().flatMap(Collection::stream).collect(Collectors.toList())) {
 
-            Optional<Match> maybePub = matchPub(pub);
-            if(maybePub.isPresent()) {
-                pub.match = maybePub.get();
-
-                ++matched;
-            }
+            ++matched;
 
         }
         LOG.info(matched + " of " + pubs.size() + " matched" );
     }
 
-    private Optional<Match> matchPub(Pub pub) {
+    private Pub matchPub(Pub pub) {
 
-        Optional maybeMatched = Optional.empty();
+        Match match = null;
 
         String pubName = pub.name;
 
@@ -220,27 +234,28 @@ public class PubMatcher {
 
         if(candidates.isEmpty()) {
 
-            String addr = trimNumbers(pub.addr.get(0));
+            String addr = clean(pub.addr.get(0));
 
             LOG.info(addr);
 
             candidates = lookup.getMatches(addr);
         }
-
-        if(candidates.isEmpty()) {
-
-            String addr = trimNumbers(pub.addr.get(1));
-
-            LOG.info(addr);
-
-            candidates = lookup.getMatches(addr);
-        }
+//
+//        if(candidates.isEmpty()) {
+//
+//            String addr = clean(pub.addr.get(1));
+//
+//            LOG.info(addr);
+//
+//            candidates = lookup.getMatches(addr);
+//        }
 
         if(!candidates.isEmpty()) {
-            maybeMatched = Optional.of(candidates.get(0));
+            LOG.info("---MATCH---");
+            match = candidates.get(0);
         }
 
-        return maybeMatched;
+        return pub.match(match);
     }
 
 
