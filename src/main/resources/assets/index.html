@@ -209,6 +209,14 @@
                     <!--<input ng-model="timelineDuration" step="100" type="number">-->
                 <!--</span>-->
             <!--</div>-->
+        </div>
+        <div class="row">
+            <div class="col-md-2">
+                <span>Intensity</span>
+                <span>
+                    <input ng-model="heatmapIntensity" step="1" type="number">
+                </span>
+            </div>
 
         </div>
 
@@ -218,10 +226,11 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-md-2">
-                <span>Threshold</span>
+            <div class="col-md-3">
+                <span>Type</span>
                 <span>
-                    <input ng-model="config.scoreThresh" step="0.1" min="0" max="1" type="number">
+                    <input type="checkbox" ng-model="config.filter.pubs"> pubs
+                    <input type="checkbox" ng-model="config.filter.places"> places
                 </span>
             </div>
 

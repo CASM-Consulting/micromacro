@@ -31,7 +31,10 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
             $scope.config = {
                 from: new Date(1803 ,1, 1),
                 to: new Date(1803, 12, 31),
-                scoreThresh : 0
+                scoreThresh : 0,
+                filter: {
+
+                }
             };
         }
     };
@@ -59,7 +62,7 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
         initDate: $scope.config.to
     });
 
-    $scope.heatmapIntensity = 10;
+    $scope.heatmapIntensity = 1;
     $scope.heatmapDecay = 20;
     $scope.timelineDuration = 100;
     $scope.heatmapRadius = 10;
@@ -216,6 +219,27 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
 
     var drawHeat = function(date) {
 
+        function scoreThresh(trialId) {
+            var pass = false;
+            if($scope.scores) {
+                var trialId = dayData[j].trialId;
+                var score = $scope.scoresByTrialId[trialId];
+                if(score > $scope.config.scoreThresh) {
+                    pass = true;
+                } else {
+                    console.log(trialId + " under thresh with " + score);
+                }
+            } else {
+                pass = true;
+            }
+            return pass;
+        }
+
+        function pointType(trialId, idx) {
+            return $scope.config.filter.pubs && $scope.matchesByTrial[trialId][idx].metadata.type == "pub" ||
+                $scope.config.filter.places && $scope.matchesByTrial[trialId][idx].metadata.type == "place";
+        }
+
         var from = moment(date).subtract($scope.heatmapDecay, 'days').format(DATE_FORMAT);
         var to = moment(date).format(DATE_FORMAT);
 
@@ -228,18 +252,10 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
             var intensity = (i / $scope.heatmapDecay) * $scope.heatmapIntensity;
 
             for(var j = 0; j < dayData.length; ++j) {
+                var trialId = dayData[j].trialId;
+                var idx = dayData[j].idx;
                 var point = dayData[j].latlng;
-                if($scope.scores) {
-                    var trialId = dayData[j].trialId;
-                    var score = $scope.scoresByTrialId[trialId];
-                    if(score > $scope.config.scoreThresh) {
-
-
-                        data.push(point.concat(intensity));
-                    } else {
-                        console.log(trialId + " under thresh with " + score);
-                    }
-                } else {
+                if( scoreThresh(trialId) && pointType(trialId, idx) ) {
                     data.push(point.concat(intensity));
                 }
             }
@@ -443,7 +459,7 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
                 end: moment(to).add(1000, "y").toDate().getTime(),
                 getInterval: getInterval,
                 pointToLayer: function(data, latlng) {
-                    var colour = data.metadata.type == 'pub' ? 'blue' : 'green';
+                    var colour = data.metadata.type == 'pub' ? 'purple' : 'green';
 
                     return L.circleMarker(latlng,{radius:5, color:colour}).bindPopup(function(l) {
                         $scope.selectedTrialId = data.metadata.trialId;
@@ -548,6 +564,7 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
 
                 $scope.matchLLByDate[date].push({
                     trialId : trialId,
+                    idx : $scope.matchesByTrial[trialId].length - 1,
                     latlng : [match.lat, match.lng]
                 });
 
