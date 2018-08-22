@@ -44,8 +44,10 @@ public class OBTrials {
     private final List<Map<String, String>> matches;
 
     private final GeoJsonKnowledgeBase lookup;
+    private final PubMatcher pubMatcher;
 
     private final Key<Spans<List<String>, Map>> placeMatchKey;
+    private final Key<Spans<List<String>, Map>> pubMatchKey;
 
     private final Path start;
 
@@ -77,11 +79,15 @@ public class OBTrials {
     private final StanfordNER placeNerService;
     private final StanfordNER pubNerService;
 
+
     public OBTrials(String sessionsPath, String geoJsonPath, String obMapPath, StanfordNER placeNer, StanfordNER pubNer) throws IOException {
         lookup = new GeoJsonKnowledgeBase(Paths.get(geoJsonPath));
         placeMatchKey = Key.of("placeNameMatch", RuntimeType.listSpans(Map.class));
-        keys = KeySet.of(placeMatchKey);
+        pubMatchKey = Key.of("pubMatch", RuntimeType.listSpans(Map.class));
+        keys = KeySet.of(placeMatchKey, pubMatchKey);
         start = Paths.get(sessionsPath);
+
+        pubMatcher = new PubMatcher(false, false);
 
         this.placeNerService = placeNer;
         this.pubNerService = pubNer;
@@ -220,6 +226,7 @@ public class OBTrials {
 //                stream.forEach(trial -> {
 
                 KeySet keys = trial.getKeys();
+
 //                Key<Spans<String, String>> statementKey = keys.get("statement");
                 Key<String> textKey = keys.get("text");
 
@@ -232,9 +239,14 @@ public class OBTrials {
 //                        .with(crimeDate)
                         ;
 
-                Key<List<String>> tokenKey = null;
-                Key<Spans<List<String>, String>> placeNameSpansKey = null;
-                Key<Spans<List<String>, String>> pubSpansKey = null;
+                Key<Spans<List<String>, String>> placeNameSpansKey = Key.of("placeName", RuntimeType.listSpans(String.class));
+                Key<Spans<List<String>, String>> pubSpansKey = Key.of("pub", RuntimeType.listSpans(String.class));
+
+                keys = keys
+                        .with(placeNameSpansKey)
+                        .with(pubSpansKey);
+
+                Key<List<String>> tokensKey = Key.of(textKey + Tokenizer.SUFFIX, RuntimeType.list(RuntimeType.STRING));
 
                 for (Datum statement : trial.getSpannedData(statementsKey, retain)) {
 
@@ -247,41 +259,48 @@ public class OBTrials {
 
                     KeySet tokenizedKeys = tokenized.getKeys();
 
-                    tokenKey = tokenizedKeys.get(textKey + Tokenizer.SUFFIX);
-
-                    placeNameSpansKey = Key.of("placeName", RuntimeType.listSpans(String.class));
-                    pubSpansKey = Key.of("pub", RuntimeType.listSpans(String.class));
+                    keys = keys.with(tokenizedKeys);
 
                     NER2Datum ner2Datum = new NER2Datum(
-                            tokenKey,
-                            ImmutableSet.of("placeName", "pub"),
+                            tokensKey,
+                            ImmutableSet.of("placeName"),
                             placeNameSpansKey,
                             true
                     );
 
-                    String text = String.join(" ", tokenized.get(tokenKey));
+                    String text = String.join(" ", tokenized.get(tokensKey));
 
+                    //merge ner places
                     String placeNer = placeNerService.get(text);
-
-//                    System.out.println(ner);
+//                    System.out.println(placeNer);
                     Datum placeNerd = ner2Datum.toDatum(placeNer);
 
-                    if (tokenized.get(tokenKey).size() != placeNerd.get(tokenKey).size()) {
+                    boolean error = false;
+                    if (tokenized.get(tokensKey).size() != placeNerd.get(tokensKey).size()) {
 
-                        System.err.println("tokenised mismatch! Expected " + tokenized.get(tokenKey).size() + " got " + placeNerd.get(tokenKey).size());
+                        System.err.println("tokenised mismatch! Expected " + tokenized.get(tokensKey).size() + " got " + placeNerd.get(tokensKey).size());
+                        error = true;
                     } else {
-
                         tokenized = tokenized
-                                .with(placeNerd.getKeys().get("placeName"), placeNerd.get(placeNameSpansKey))
-                        ;
-
-                        statements.add(tokenized);
-
-                        keys = keys
-                                .with(tokenizedKeys)
-                                .with(placeNameSpansKey);
+                                .with(placeNerd.getKeys().get("placeName"), placeNerd.get(placeNameSpansKey));
                     }
 
+                    //merge ner pubs
+                    String pubNer = pubNerService.get(text);
+//                    System.out.println(pubNer);
+                    Datum pubNerd = ner2Datum.toDatum(pubNer, ImmutableSet.of("pub"), pubSpansKey);
+                    if (tokenized.get(tokensKey).size() != pubNerd.get(tokensKey).size()) {
+
+                        System.err.println("tokenised mismatch! Expected " + tokenized.get(tokensKey).size() + " got " + pubNerd.get(tokensKey).size());
+                        error = true;
+                    } else {
+                        tokenized = tokenized
+                                .with(pubNerd.getKeys().get("pub"), pubNerd.get(pubSpansKey));
+                    }
+
+                    if(!error) {
+                        statements.add(tokenized);
+                    }
                 }
 
                 if (!statements.isEmpty()) {
@@ -319,16 +338,19 @@ public class OBTrials {
                     while (jtr.hasNext()) {
                         Datum statement = jtr.next();
 
-                        statement = processPlaceNames(statement, placeNameSpansKey, tokenKey, id, i, date);
+                        statement = processPlaceNames(statement, placeNameSpansKey, tokensKey, id, i, date);
+
+                        statement = processPubs(statement, pubSpansKey, tokensKey, id, i, date);
 
                         jtr.set(statement);
 
                         ++i;
                     }
 
-                    Datum2SimpleDocument<?> datum2SimpleDocument = new Datum2SimpleDocument(tokenKey, ImmutableList.of(
+                    Datum2SimpleDocument<?> datum2SimpleDocument = new Datum2SimpleDocument(tokensKey, ImmutableList.of(
                             placeNameSpansKey,
                             placeMatchKey,
+                            pubMatchKey,
                             Key.of("crimeDate-token", RuntimeType.listSpans(String.class))
                     ));
 
@@ -466,6 +488,8 @@ public class OBTrials {
                         KeySet tokenizedKeys = tokenized.getKeys();
 
                         tokenKey = tokenizedKeys.get(textKey + Tokenizer.SUFFIX);
+
+
 
                         NER2Datum ner2Datum = new NER2Datum(
                                 tokenKey,
@@ -797,6 +821,51 @@ public class OBTrials {
         return date;
     }
 
+    private Datum processPubs(Datum datum, Key<Spans<List<String>, String>> pubSpanKey,
+                                    Key<List<String>> tokenKey, String trialId, int statementIdx, LocalDate date) {
+        Spans<List<String>, String> pubSpans = datum.get(pubSpanKey);
+
+        Spans<List<String>, Map> pubMatchSpans = Spans.annotate(tokenKey, Map.class);
+
+        int j = 0;
+
+        for (Span<List<String>, String> span : pubSpans) {
+
+            String candidate = String.join(" ", span.getSpanned(datum));
+
+//          System.out.println(candidate);
+
+            List<PubMatcher.Pub> matches = pubMatcher.getPubs(candidate);
+
+            if (!(matches == null || matches.isEmpty() || matches.get(0).match == null)) {
+
+                String spanId = trialId + "-" + statementIdx + "-" + j;
+
+                Match match = matches.get(0).match;
+
+                Map<String, String> metadata = match.getMetadata();
+                String spanned = String.join(" ", span.getSpanned(datum));
+
+                metadata.put("trialId", trialId);
+                metadata.put("id", spanId);
+                metadata.put("spanned", spanned);
+                metadata.put("text", match.getText());
+                metadata.put("date", date.format(date2JS));
+                metadata.put("type", "pub");
+
+                Span<List<String>, Map> placeNameMatchSpan = Span.annotate(tokenKey, span.from(), span.to(), metadata);
+
+                this.matches.add(metadata);
+
+                pubMatchSpans = pubMatchSpans.with(placeNameMatchSpan);
+            }
+            ++j;
+        }
+
+        datum = datum.with(pubMatchKey, pubMatchSpans);
+        return datum;
+    }
+
     private Datum processPlaceNames(Datum datum, Key<Spans<List<String>, String>> placeNameSpansKey,
                                     Key<List<String>> tokenKey, String trialId, int statementIdx, LocalDate date) {
         Spans<List<String>, String> placeNameSpans = datum.get(placeNameSpansKey);
@@ -827,6 +896,7 @@ public class OBTrials {
                 metadata.put("spanned", spanned);
                 metadata.put("text", match.getText());
                 metadata.put("date", date.format(date2JS));
+                metadata.put("type", "place");
 
                 Span<List<String>, Map> placeNameMatchSpan = Span.annotate(tokenKey, span.from(), span.to(), metadata);
 

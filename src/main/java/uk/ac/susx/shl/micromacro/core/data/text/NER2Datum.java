@@ -27,6 +27,10 @@ public class NER2Datum {
     }
 
     public Datum toDatum(String ner) {
+        return toDatum(ner, labels, spansKey);
+    }
+
+    public Datum toDatum(String ner, Set<String> labels, Key<Spans<List<String>, String>> spansKey) {
 
         Datum datum = new Datum();
 

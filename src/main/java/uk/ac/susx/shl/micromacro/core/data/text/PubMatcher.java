@@ -16,6 +16,7 @@ import uk.ac.susx.tag.method51.core.meta.span.Spans;
 import uk.ac.susx.tag.method51.core.meta.types.RuntimeType;
 
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.Serializable;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
@@ -26,6 +27,7 @@ import java.util.*;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class PubMatcher {
     private static final Logger LOG = Logger.getLogger(PubMatcher.class.getName());
@@ -48,14 +50,16 @@ public class PubMatcher {
 
     private final GeoJsonKnowledgeBase lookup;
 
-    private List<Pub> pubs;
+    private Map<String, List<Pub>> pubs;
 
     private Map<String, List<Pub>> pubHash;
 
+    private final DB db;
+
     private boolean lc;
 
-    public PubMatcher (boolean clear, boolean lc) throws Exception {
-        DB db = DBMaker
+    public PubMatcher (boolean clear, boolean lc) throws IOException {
+        db = DBMaker
                 .fileDB("data/pubDB")
                 .fileMmapEnable()
                 .closeOnJvmShutdown()
@@ -65,29 +69,32 @@ public class PubMatcher {
 
         lookup = new GeoJsonKnowledgeBase(Paths.get("LL_PL_PA_WA_POINTS_FeaturesT.json"));
 
-//        pubs = (List) db.indexTreeList("pubs").createOrOpen();
-//        pubHash = (Map)db.hashMap("trials-by-date").createOrOpen();
+        pubs = (Map)db.hashMap("pubs-by-name").createOrOpen();
+        pubHash = (Map)db.hashMap("pubs-by-1st-token").createOrOpen();
 
-        pubs = new ArrayList<>();
-        pubHash = new HashMap<>();
+//        pubs = new HashMap<>();
+//        pubHash = new HashMap<>();
 
         this.lc = lc;
 
         if(clear) {
             pubs.clear();
-            pubs.addAll(csv2Pubs("oldbailey-alex_1800-pubs.csv"));
+            pubs.putAll(csv2Pubs("oldbailey-alex_1800-pubs.csv"));
 
             pubHash.clear();
             pubHash.putAll(pub2Hash(pubs));
-        }
 
+            matchPubs();
+
+            db.commit();
+        }
     }
 
-    private List<Pub> csv2Pubs(String path) throws Exception {
+    private Map<String, List<Pub>> csv2Pubs(String path) throws IOException {
 
         Iterable<CSVRecord> records = CSVFormat.EXCEL.withFirstRecordAsHeader().parse(new FileReader(path));
 
-        List<Pub> pubs = new ArrayList<>();
+        Map<String, List<Pub>> pubs = new HashMap<>();
 
         for(CSVRecord record : records) {
 
@@ -104,7 +111,7 @@ public class PubMatcher {
                 record.get("pub_add_5"),
                 record.get("pub_add_6")
             );
-            pubs.add(pub);
+            pubs.computeIfAbsent(name, k-> new ArrayList<>()).add(pub);
 
             Matcher m = andPattern.matcher(name);
             if(m.find()) {
@@ -119,7 +126,7 @@ public class PubMatcher {
                         record.get("pub_add_5"),
                         record.get("pub_add_6")
                 );
-                pubs.add(andPub);
+                pubs.computeIfAbsent(andName, k-> new ArrayList<>()).add(andPub);
             }
 
             m = ampersandPattern.matcher(name);
@@ -135,18 +142,18 @@ public class PubMatcher {
                         record.get("pub_add_5"),
                         record.get("pub_add_6")
                 );
-                pubs.add(andPub);
+                pubs.computeIfAbsent(andName, k-> new ArrayList<>()).add(andPub);
             }
         }
 
         return pubs;
     }
 
-    private Map<String, List<Pub>> pub2Hash(List<Pub> pubs) {
+    private Map<String, List<Pub>> pub2Hash(Map<String, List<Pub>> pubs) {
 
         Map<String, List<Pub>> pubHash = new HashMap<>();
 
-        for(Pub pub : pubs) {
+        for(Pub pub : pubs.values().stream().flatMap(Collection::stream).collect(Collectors.toList())) {
 
             String name = pub.name;
 
@@ -164,8 +171,6 @@ public class PubMatcher {
             tmp.add(pub);
 
             pubHash.put(first, tmp);
-
-
         }
 
         return pubHash;
@@ -183,16 +188,20 @@ public class PubMatcher {
     }
 
 
+    public List<Pub> getPubs(String candidate) {
+
+        return pubs.get(candidate);
+    }
+
     private void matchPubs() {
         int matched = 0;
-        for(Pub pub : pubs) {
+        for(Pub pub : pubs.values().stream().flatMap(Collection::stream).collect(Collectors.toList())) {
 
             Optional<Match> maybePub = matchPub(pub);
             if(maybePub.isPresent()) {
                 pub.match = maybePub.get();
 
                 ++matched;
-
             }
 
         }
@@ -205,11 +214,15 @@ public class PubMatcher {
 
         String pubName = pub.name;
 
+        LOG.info(pubName);
+
         List<Match> candidates = lookup.getMatches(pubName);
 
         if(candidates.isEmpty()) {
 
             String addr = trimNumbers(pub.addr.get(0));
+
+            LOG.info(addr);
 
             candidates = lookup.getMatches(addr);
         }
@@ -217,6 +230,8 @@ public class PubMatcher {
         if(candidates.isEmpty()) {
 
             String addr = trimNumbers(pub.addr.get(1));
+
+            LOG.info(addr);
 
             candidates = lookup.getMatches(addr);
         }
@@ -239,7 +254,6 @@ public class PubMatcher {
         if(lc) {
             raster = raster.toLowerCase();
         }
-
 
         Map<Integer, Integer> indexMap = new HashMap<>();
 
@@ -322,10 +336,15 @@ public class PubMatcher {
         return pubSpans;
     }
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args ) throws Exception {
 
         PubMatcher pm = new PubMatcher(true, false);
 
+    }
+
+    public static void process2Columns() throws Exception {
+
+        PubMatcher pm = new PubMatcher(true, false);
 
         Path outDir = Paths.get("data","obNerPub");
 

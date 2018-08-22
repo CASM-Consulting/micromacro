@@ -16,9 +16,8 @@ obMapPath: data/cache2
 obCacheTable: obcache
 geoJsonPath: data/LL_PL_PA_WA_POINTS_FeaturesT.json
 
-nerPorts:
-  places: 9191
-  pubs: 9192
+placeNerPort: 9191
+pubNerPort: 9192
 
 database:
   # the name of your JDBC driver
