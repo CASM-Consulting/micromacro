@@ -133,7 +133,7 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
                     for(var j = 0; j < response.data.data[i].spans.placeNameMatch.length; ++j) {
                         var span = response.data.data[i].spans.placeNameMatch[j];
                         for(var k = span.from; k < span.to; ++k) {
-                            matchedMap[i][k] = span.value;
+                            matchedPlaceMap[i][k] = span.value;
                         }
                     }
 
@@ -151,15 +151,15 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
                     for(var j = 0; j < response.data.data[i].spans.pubMatch.length; ++j) {
                         var span = response.data.data[i].spans.pubMatch[j];
                         for(var k = span.from; k < span.to; ++k) {
-                            matchedPub[i][k] = span.value;
+                            matchedPubMap[i][k] = span.value;
                         }
                     }
 
                     unmatchedPubMap[i] = {};
-                    for(var j = 0; j < response.data.data[i].spans.pubs.length; ++j) {
-                        var span = response.data.data[i].spans.pubs[j];
+                    for(var j = 0; j < response.data.data[i].spans.pub.length; ++j) {
+                        var span = response.data.data[i].spans.pub[j];
                         for(var k = span.from; k < span.to; ++k) {
-                            if(!matchedMap[i][k]) {
+                            if(!matchedPubMap[i][k]) {
                                 unmatchedPubMap[i][k] = true;
                             }
                         }
@@ -443,7 +443,7 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
                 end: moment(to).add(1000, "y").toDate().getTime(),
                 getInterval: getInterval,
                 pointToLayer: function(data, latlng) {
-                    var colour = data.metadata.type == 'pub' ? 'purple' : 'green';
+                    var colour = data.metadata.type == 'pub' ? 'blue' : 'green';
 
                     return L.circleMarker(latlng,{radius:5, color:colour}).bindPopup(function(l) {
                         $scope.selectedTrialId = data.metadata.trialId;

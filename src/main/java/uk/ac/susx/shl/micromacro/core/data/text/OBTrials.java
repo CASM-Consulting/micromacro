@@ -41,7 +41,7 @@ public class OBTrials {
 
     private final Map<LocalDate, List<SimpleDocument>> trialsByDate;
     private final Map<String, SimpleDocument> trialsById;
-    private final List<Map<String, String>> matches;
+    private final Map<LocalDate, List<Map<String, String>>> matchesByDate;
 
     private final GeoJsonKnowledgeBase lookup;
     private final PubMatcher pubMatcher;
@@ -79,6 +79,7 @@ public class OBTrials {
     private final StanfordNER placeNerService;
     private final StanfordNER pubNerService;
 
+    private final DB db;
 
     public OBTrials(String sessionsPath, String geoJsonPath, String obMapPath, StanfordNER placeNer, StanfordNER pubNer) throws IOException {
         lookup = new GeoJsonKnowledgeBase(Paths.get(geoJsonPath));
@@ -92,7 +93,7 @@ public class OBTrials {
         this.placeNerService = placeNer;
         this.pubNerService = pubNer;
 
-        DB db = DBMaker
+        db = DBMaker
                 .fileDB(obMapPath)
                 .fileMmapEnable()
                 .closeOnJvmShutdown()
@@ -101,13 +102,13 @@ public class OBTrials {
 
         trialsByDate =  (Map<LocalDate, List<SimpleDocument>>) db.hashMap("trials-by-date").createOrOpen();
         trialsById = (Map<String, SimpleDocument>) db.hashMap("trials-by-id").createOrOpen();
-        matches = (List) db.indexTreeList("matches").createOrOpen();
+        matchesByDate = (Map<LocalDate, List<Map<String, String>>>) db.hashMap("matchesByDate").createOrOpen();
     }
 
     public void clear() {
         trialsByDate.clear();
         trialsById.clear();
-        matches.clear();
+        matchesByDate.clear();
     }
 
 
@@ -350,6 +351,7 @@ public class OBTrials {
                     Datum2SimpleDocument<?> datum2SimpleDocument = new Datum2SimpleDocument(tokensKey, ImmutableList.of(
                             placeNameSpansKey,
                             placeMatchKey,
+                            pubSpansKey,
                             pubMatchKey,
                             Key.of("crimeDate-token", RuntimeType.listSpans(String.class))
                     ));
@@ -379,6 +381,7 @@ public class OBTrials {
 //                });
 //            });
             }
+            db.commit();
 
         } catch (Throwable err) {
             err.printStackTrace ();
@@ -855,8 +858,10 @@ public class OBTrials {
 
                 Span<List<String>, Map> placeNameMatchSpan = Span.annotate(tokenKey, span.from(), span.to(), metadata);
 
-                this.matches.add(metadata);
-
+                matchesByDate.computeIfAbsent(date, k -> new ArrayList<>());
+                List tmp = matchesByDate.get(date);
+                tmp.add(metadata);
+                matchesByDate.put(date, tmp);
                 pubMatchSpans = pubMatchSpans.with(placeNameMatchSpan);
             }
             ++j;
@@ -900,7 +905,10 @@ public class OBTrials {
 
                 Span<List<String>, Map> placeNameMatchSpan = Span.annotate(tokenKey, span.from(), span.to(), metadata);
 
-                this.matches.add(metadata);
+                matchesByDate.computeIfAbsent(date, k -> new ArrayList<>());
+                List tmp = matchesByDate.get(date);
+                tmp.add(metadata);
+                matchesByDate.put(date, tmp);
 
                 placeNameMatchSpans = placeNameMatchSpans.with(placeNameMatchSpan);
             }
@@ -916,12 +924,7 @@ public class OBTrials {
         for (LocalDate date = from; date.isBefore(to); date = date.plusDays(1))
         {
             if(trialsByDate.containsKey(date)) {
-                if(!trials.containsKey(date)) {
-                    trials.put(date, new ArrayList<>());
-                }
-                List<SimpleDocument> ts = trials.get(date);
-                ts.addAll(trialsByDate.get(date));
-                trials.put(date, ts);
+                trials.computeIfAbsent(date, k->new ArrayList<>()).addAll(trialsByDate.get(date));
             }
         }
         return trials;
@@ -931,7 +934,14 @@ public class OBTrials {
         return trialsById;
     }
 
-    public List<Map<String, String>> getMatches() {
+    public Map<LocalDate, List<Map<String, String>>> getMatches(LocalDate from, LocalDate to) {
+        Map<LocalDate, List<Map<String, String>>> matches = new HashMap<>();
+        for (LocalDate date = from; date.isBefore(to); date = date.plusDays(1))
+        {
+            if (matchesByDate.containsKey(date)) {
+                matches.computeIfAbsent(date, k -> new ArrayList<>()).addAll(matchesByDate.get(date));
+            }
+        }
         return matches;
     }
 

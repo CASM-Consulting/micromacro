@@ -25,6 +25,7 @@ import java.sql.Connection;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 @Path("ob")
 @Produces(MediaType.APPLICATION_JSON)
@@ -48,7 +49,7 @@ public class OBResource {
 
         this.jdbi = jdbi;
 
-        obTrials.clear();
+//        obTrials.clear();
 //        trialsByDate = obTrials.getDocumentsByDate();
         trialsId = obTrials.getDocumentsById();
 
@@ -75,6 +76,15 @@ public class OBResource {
     }
 
     @GET
+    @Path("clear-cache")
+    public Response clearCache(@QueryParam("id") String idParam) {
+
+        obTrials.clear();
+
+        return Response.status(Response.Status.OK).build();
+    }
+
+    @GET
     @Path("trials-by-id")
     public Response trialsById(@QueryParam("id") String idParam) {
 
@@ -89,23 +99,15 @@ public class OBResource {
     }
 
     @GET
-    @Path("matches")
-    public Response matches() {
-
-        List<Map<String, String>> matches = obTrials.getMatches();
-
-        return Response.status(Response.Status.OK).entity(
-                gson.toJson(matches)
-        ).build();
-    }
-
-
-    @GET
     @Path("load")
     public Response load(@QueryParam("from") LocalDateParam from, @QueryParam("to") LocalDateParam to) {
 
         obTrials.load(from.get(), to.get());
-        List<Map<String, String>> matches = obTrials.getMatches();
+        List<Map<String, String>> matches = obTrials.getMatches(from.get(), to.get())
+                .values()
+                .stream()
+                .flatMap(List::stream)
+                .collect(Collectors.toList());
 
         return Response.status(Response.Status.OK).entity(
                 gson.toJson(matches)

@@ -50,6 +50,12 @@
       .matchedPlace {
         color: green;
       }
+      .unmatchedPub {
+        color: yellow;
+      }
+      .matchedPub {
+        color: blue;
+      }
       .trial {
         height:800px
       }
@@ -263,7 +269,7 @@
                 <p ng-repeat="sentence in selectedTrial.data track by $index">
                 <span
                     ng-repeat="token in sentence.tokens track by $index"
-                    ng-class="{matchedPlace: selectedTrial.matchedMap[$parent.$index][$index], unmatchedPlace: selectedTrial.unmatchedMap[$parent.$index][$index]}"
+                    ng-class="{ matchedPlace: selectedTrial.matchedPlaceMap[$parent.$index][$index], unmatchedPlace: selectedTrial.unmatchedPlaceMap[$parent.$index][$index], matchedPub: selectedTrial.matchedPubMap[$parent.$index][$index], unmatchedPub: selectedTrial.unmatchedPubMap[$parent.$index][$index] }"
                 >
                     {{token}}
                 </span>
