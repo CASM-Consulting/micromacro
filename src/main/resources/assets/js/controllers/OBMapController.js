@@ -26,8 +26,8 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
             $scope.config = stored;
         } else {
             $scope.config = {
-                from: new Date(1803 ,1, 1),
-                to: new Date(1803, 12, 31),
+                from: new Date(1803,0, 1),
+                to: new Date(1803, 5, 30),
                 scoreThresh : 0,
                 filter: {
                     pubs : true,

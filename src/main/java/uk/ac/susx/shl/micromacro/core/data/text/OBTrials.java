@@ -153,6 +153,8 @@ public class OBTrials {
      */
     public void load(LocalDate from, LocalDate to) {
 
+        Key<String> statementIdKey = Key.of("statementId", RuntimeType.STRING);
+
         Key<Spans<String, String>> sessionsKey = Key.of("sessionsPaper", RuntimeType.stringSpans(String.class));
         Key<Spans<String, String>> trialsKey = Key.of("trialAccount", RuntimeType.stringSpans(String.class));
         Key<Spans<String, String>> statementsKey = Key.of("statement", RuntimeType.stringSpans(String.class));
@@ -188,17 +190,7 @@ public class OBTrials {
 //                new XML2Datum.Element("placeName", ImmutableMap.of(), "placeName"),
                 new XML2Datum.Element("rs", ImmutableMap.of("type", "crimeDate"), "crimeDate"))
         );
-//        interestingElements.add(new XML2Datum.Element("div1", ImmutableMap.of("type", "frontMatter"), "frontMatter"));
 
-//        List<XML2Datum.Element> interestingElements = new ArrayList<>();
-//
-//        interestingElements.add(new XML2Datum.Element("div0", ImmutableMap.of("type", "sessionsPaper"), "sessionsPaper").isContainer(true));
-//
-//        interestingElements.add(new XML2Datum.Element("div1", ImmutableMap.of("type", "trialAccount"), "trialAccount").valueAttribute("id"));
-//
-//        interestingElements.add(new XML2Datum.Element("p", ImmutableMap.of(), "statement"));
-
-//        KeySet keys = XML2Datum.getKeys(interestingElements);
 
         try {
 
@@ -206,52 +198,52 @@ public class OBTrials {
 
             Iterator<Datum> itr = XML2Datum.getData(start, files, interestingElements, "trialAccount", "-id").iterator();
 
-//            ForkJoinPool forkJoinPool = new ForkJoinPool(4);
-//
-//            forkJoinPool.submit(() -> {
-//                Iterable<Datum> iterable = () -> itr;
+
             while(itr.hasNext()) {
                 Datum trial = itr.next();
 
-                String id = trial.get("trialAccount-id");
+                String trialId = trial.get("trialAccount-id");
 
-                if(trialsById.containsKey(id)) {
+                if(trialsById.containsKey(trialId)) {
                     continue;
                 }
 
-                LocalDate sessionDate = getDate(id);
+                LocalDate sessionDate = getDate(trialId);
                 Date refDate = Date.from(sessionDate.atTime(0,0,0).toInstant(ZoneOffset.UTC));
 
 
-//                Stream<Datum> stream = StreamSupport.stream(iterable.spliterator(),true);
-
-//                stream.forEach(trial -> {
 
                 KeySet keys = trial.getKeys();
 
-//                Key<Spans<String, String>> statementKey = keys.get("statement");
                 Key<String> textKey = keys.get("text");
 
-                Key<String> idKey = trial.getKeys().get("trialAccount-id");
+                Key<String> trialIdKey = trial.getKeys().get("trialAccount-id");
 
                 List<Datum> statements = new ArrayList<>();
-
-                KeySet retain = keys
-                        .with(idKey)
-//                        .with(crimeDate)
-                        ;
 
                 Key<Spans<List<String>, String>> placeNameSpansKey = Key.of("placeName", RuntimeType.listSpans(String.class));
                 Key<Spans<List<String>, String>> pubSpansKey = Key.of("pub", RuntimeType.listSpans(String.class));
 
                 keys = keys
+                        .with(trialIdKey)
+                        .with(statementsKey)
                         .with(placeNameSpansKey)
                         .with(pubSpansKey);
+
+                KeySet retain = keys
+//                        .with(crimeDate)
+                        ;
 
                 Key<List<String>> tokensKey = Key.of(textKey + Tokenizer.SUFFIX, RuntimeType.list(RuntimeType.STRING));
 
                 int i = 0;
                 for (Datum statement : trial.getSpannedData(statementsKey, retain)) {
+
+                    String statementId = trialId+"-"+i;
+
+                    statement = statement.with(statementIdKey, statementId);
+
+                    statement = Sentizer.annotateSents(statement, textKey);
 
                     Datum tokenized = Tokenizer.tokenize(statement, textKey, retain);
 
@@ -308,9 +300,9 @@ public class OBTrials {
 
                 if (!statements.isEmpty()) {
 
-                    System.out.println(id);
+                    System.out.println(trialId);
 
-                    int i = 0;
+                    int idx= 0;
 
                     //figure out date first
                     Optional<LocalDate> crimeDate = Optional.empty();
@@ -343,13 +335,13 @@ public class OBTrials {
                     while (jtr.hasNext()) {
                         Datum statement = jtr.next();
 
-                        statement = processPlaceNames(statement, placeNameSpansKey, tokensKey, id, i, date, offenceCategory, offenceSubcategory);
+                        statement = processPlaceNames(statement, placeNameSpansKey, tokensKey, trialId, idx, date, offenceCategory, offenceSubcategory);
 
-                        statement = processPubs(statement, pubSpansKey, tokensKey, id, i, date, offenceCategory, offenceSubcategory);
+                        statement = processPubs(statement, pubSpansKey, tokensKey, trialId, idx, date, offenceCategory, offenceSubcategory);
 
                         jtr.set(statement);
 
-                        ++i;
+                        ++idx;
                     }
 
                     Datum2SimpleDocument<?> datum2SimpleDocument = new Datum2SimpleDocument(tokensKey, ImmutableList.of(
@@ -360,7 +352,7 @@ public class OBTrials {
                             Key.of("crimeDate-token", RuntimeType.listSpans(String.class))
                     ));
 
-                    SimpleDocument document = datum2SimpleDocument.toDocument(id, statements);
+                    SimpleDocument document = datum2SimpleDocument.toDocument(trialId, statements);
 
                     if(offenceCategory.isPresent()) {
                         document = document.with("offCat", offenceCategory.get());
@@ -379,10 +371,10 @@ public class OBTrials {
                         List<SimpleDocument> trialsForDate = trialsByDate.get(date);
                         trialsForDate.add(document);
                         trialsByDate.put(date, trialsForDate);
-                        if (trialsById.containsKey(id)) {
-                            System.err.println(id + " already exists");
+                        if (trialsById.containsKey(trialId)) {
+                            System.err.println(trialId + " already exists");
                         }
-                        trialsById.put(id, document);
+                        trialsById.put(trialId, document);
                     }
                 }
 //                });

@@ -36,14 +36,15 @@ public class Sentizer {
     }
 
     public final static String SUFFIX = "-sent";
-    public final static Key<Spans<String,String>> SENT_KEY = Key.of("sents", RuntimeType.stringSpans(String.class));
+    public final static Key<Spans<String,Integer>> SENT_KEY = Key.of("sents", RuntimeType.stringSpans(Integer.class));
 
-    public static List<Datum> sentize(Datum datum, Key<String> textKey, KeySet retain) {
+    public static Datum annotateSents(Datum datum, Key<String> textKey) {
         String text = datum.get(textKey);
         opennlp.tools.util.Span[] sentizerSpans = get().sentPosDetect(text);
 
-        Spans<String, String> sentSpans = Spans.annotate(textKey, String.class);
+        Spans<String, Integer> sentSpans = Spans.annotate(textKey, Integer.class);
 
+        int i = 0;
         for(opennlp.tools.util.Span sent : sentizerSpans) {
 
             int start = sent.getStart();
@@ -51,10 +52,18 @@ public class Sentizer {
 
 //            String t = text.substring(start, end);
 
-            sentSpans = sentSpans.with(start, end, "sent");
+            sentSpans = sentSpans.with(start, end, 0);
+            ++i;
         }
 
         datum = datum.with(SENT_KEY, sentSpans);
+
+        return datum;
+    }
+
+    public static List<Datum> sentize(Datum datum, Key<String> textKey, KeySet retain) {
+
+        datum = annotateSents(datum, textKey);
 
         List<Datum> sentences = datum.getSpannedData(SENT_KEY, retain, SUFFIX);
 
