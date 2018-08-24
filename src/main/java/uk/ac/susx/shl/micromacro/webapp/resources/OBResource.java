@@ -108,7 +108,7 @@ public class OBResource {
                 .stream()
                 .flatMap(List::stream)
                 .collect(Collectors.toList());
-
+        
         return Response.status(Response.Status.OK).entity(
                 gson.toJson(matches)
         ).build();

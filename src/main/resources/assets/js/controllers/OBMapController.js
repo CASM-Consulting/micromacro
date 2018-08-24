@@ -31,7 +31,9 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
                 scoreThresh : 0,
                 filter: {
                     pubs : true,
-                    places : true
+                    places : true,
+                    cat: {},
+                    subCat: {}
                 },
                 heatmap : {
                     intensity : 1,
@@ -52,11 +54,15 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
     }, true);
 
     $scope.$watch("config", function(val, old) {
-        if(val && val != old) {
-            $window.localStorage.setItem("config", JSON.stringify(val) );
+        if(!angular.equals(val, old)) {
+            $scope.persistConfig()
         }
     }, true);
 
+
+    $scope.persistConfig = function() {
+        $window.localStorage.setItem( "config", JSON.stringify($scope.config) );
+    }
 
     $scope.fromDateOptions = angular.extend({}, dateOptions, {
         initDate: $scope.config.from
@@ -241,6 +247,15 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
                 $scope.config.filter.places && $scope.matchesByTrial[trialId][idx].metadata.type == "place";
         }
 
+        function crimeType(trialId, idx) {
+            var cat = $scope.matchesByTrial[trialId][idx].metadata.offCat;
+            var subCat = $scope.matchesByTrial[trialId][idx].metadata.offSubCat;
+
+            return !($scope.config.filter.cat[cat]
+//            || $scope.config.filter.subCat[subCat]
+            );
+        }
+
         var from = moment(date).subtract($scope.config.heatmap.decay, 'days').format(DATE_FORMAT);
         var to = moment(date).format(DATE_FORMAT);
 
@@ -256,7 +271,7 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
                 var trialId = dayData[j].trialId;
                 var idx = dayData[j].idx;
                 var point = dayData[j].latlng;
-                if( scoreThresh(trialId) && pointType(trialId, idx) ) {
+                if( scoreThresh(trialId) && pointType(trialId, idx) && crimeType(trialId, idx) ) {
                     data.push(point.concat(intensity));
                 }
             }
@@ -536,6 +551,10 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
             }
         }).then(function(response) {
             $scope.matchesByTrial = {};
+            $scope.offences = {
+                cats : {},
+                subCats : {}
+            };
 
             var features = [];
 
@@ -551,6 +570,17 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
                 }
 
                 var trialId = feature.metadata.trialId;
+
+                var offCat =  match.offCat;
+                var offSubCat =  match.offSubCat;
+
+                $scope.offences.cats[offCat] = {};
+                $scope.offences.subCats[offSubCat] = {cat : offCat};
+//                $scope.offences.cats[offCat] = $scope.offences.cats[offCat] || {};
+//                $scope.offences.cats[offCat][trialId] = true;
+//                $scope.offences.subCats[offSubCat] = $scope.offences.subCats[offSubCat] || {};
+//                $scope.offences.subCats[offSubCat][trialId] = offCat;
+
 
                 if(!(trialId in $scope.matchesByTrial)) {
                     $scope.matchesByTrial[trialId] = [];

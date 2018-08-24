@@ -227,13 +227,46 @@
         </div>
 
         <div class="row">
-            <div class="col-md-3">
-                <span>Type</span>
+            <div class="col-md-1">
+                <span>Place Type</span>
                 <span>
-                    <input type="checkbox" ng-model="config.filter.pubs"> pubs
-                    <input type="checkbox" ng-model="config.filter.places"> places
+                    <div>
+                        <input type="checkbox" ng-model="config.filter.pubs"> pubs
+                    </div>
+                    <div>
+                        <input type="checkbox" ng-model="config.filter.places"> places
+                    </div>
                 </span>
             </div>
+
+            <div class="col-md-3">
+                <span>Crime Type</span>
+                <span>
+                    <div ng-repeat="cat in offences.cats | toArray | orderBy:'$key' ">
+                        <input type="checkbox"
+                               inverted-checkbox="cat.$key"
+                               inverted-checkbox-model="config.filter.cat"
+                               inverted-checkbox-change="persistConfig"
+                        > {{cat.$key}}
+                    </div>
+                </span>
+            </div>
+
+            <!--<div class="col-md-4">-->
+                <!--<span>Crime Sub Type</span>-->
+                <!--<span  >-->
+                    <!--<div style="max-height:400px;overflow:scroll;">-->
+                        <!--<div ng-repeat="subCat in offences.subCats | toArray | orderBy:'cat' ">-->
+                            <!--<input-->
+                                <!--inverted-checkbox="subCat.$key"-->
+                                <!--inverted-checkbox-model="config.filter.subCat"-->
+                                <!--inverted-checkbox-change="persistConfig"-->
+                                <!--type="checkbox"-->
+                            <!--&gt; {{subCat.cat}} - {{subCat.$key}}-->
+                        <!--</div>-->
+                    <!--</div>-->
+                <!--</span>-->
+            <!--</div>-->
 
         </div>
 

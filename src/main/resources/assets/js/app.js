@@ -73,4 +73,26 @@ app.directive('loading', ['$http' ,function ($http)
         }
     };
 }]);
-8
+
+app.directive('invertedCheckbox', function ()
+{
+    return {
+        restrict: 'A',
+        scope : {
+            "key" : "=invertedCheckbox",
+            "model" : "=invertedCheckboxModel",
+            "change" : "=?invertedCheckboxChange"
+        },
+        link: function (scope, elm, attrs)
+        {
+            var onChange =
+            elm.prop("checked",!scope.model[scope.key]);
+            elm.change(function() {
+                scope.model[scope.key] = !this.checked;
+                if(attrs.invertedCheckboxChange) {
+                    scope.change();
+                }
+            });
+        }
+    };
+});

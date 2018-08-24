@@ -218,9 +218,7 @@ public class OBTrials {
 
                 LocalDate sessionDate = getDate(id);
                 Date refDate = Date.from(sessionDate.atTime(0,0,0).toInstant(ZoneOffset.UTC));
-//                if(trialsByDate.containsKey(date)) {
-//                    continue;
-//                }
+
 
 //                Stream<Datum> stream = StreamSupport.stream(iterable.spliterator(),true);
 
@@ -339,9 +337,9 @@ public class OBTrials {
                     while (jtr.hasNext()) {
                         Datum statement = jtr.next();
 
-                        statement = processPlaceNames(statement, placeNameSpansKey, tokensKey, id, i, date);
+                        statement = processPlaceNames(statement, placeNameSpansKey, tokensKey, id, i, date, offenceCategory, offenceSubcategory);
 
-                        statement = processPubs(statement, pubSpansKey, tokensKey, id, i, date);
+                        statement = processPubs(statement, pubSpansKey, tokensKey, id, i, date, offenceCategory, offenceSubcategory);
 
                         jtr.set(statement);
 
@@ -825,7 +823,8 @@ public class OBTrials {
     }
 
     private Datum processPubs(Datum datum, Key<Spans<List<String>, String>> pubSpanKey,
-                                    Key<List<String>> tokenKey, String trialId, int statementIdx, LocalDate date) {
+                                    Key<List<String>> tokenKey, String trialId, int statementIdx, LocalDate date,
+                                    Optional<String> offenceCategory, Optional<String> offenceSubcategory) {
         Spans<List<String>, String> pubSpans = datum.get(pubSpanKey);
 
         Spans<List<String>, Map> pubMatchSpans = Spans.annotate(tokenKey, Map.class);
@@ -855,6 +854,8 @@ public class OBTrials {
                 metadata.put("text", match.getText());
                 metadata.put("date", date.format(date2JS));
                 metadata.put("type", "pub");
+                metadata.put("offCat", offenceCategory.isPresent() ? offenceCategory.get() : null);
+                metadata.put("offSubCat", offenceSubcategory.isPresent() ? offenceSubcategory.get() : null);
 
                 Span<List<String>, Map> placeNameMatchSpan = Span.annotate(tokenKey, span.from(), span.to(), metadata);
 
@@ -872,7 +873,8 @@ public class OBTrials {
     }
 
     private Datum processPlaceNames(Datum datum, Key<Spans<List<String>, String>> placeNameSpansKey,
-                                    Key<List<String>> tokenKey, String trialId, int statementIdx, LocalDate date) {
+                                    Key<List<String>> tokenKey, String trialId, int statementIdx, LocalDate date,
+                                    Optional<String> offenceCategory, Optional<String> offenceSubcategory) {
         Spans<List<String>, String> placeNameSpans = datum.get(placeNameSpansKey);
 
         Spans<List<String>, Map> placeNameMatchSpans = Spans.annotate(tokenKey, Map.class);
@@ -902,6 +904,9 @@ public class OBTrials {
                 metadata.put("text", match.getText());
                 metadata.put("date", date.format(date2JS));
                 metadata.put("type", "place");
+                metadata.put("offCat", offenceCategory.isPresent() ? offenceCategory.get() : null);
+                metadata.put("offSubCat", offenceSubcategory.isPresent() ? offenceSubcategory.get() : null);
+
 
                 Span<List<String>, Map> placeNameMatchSpan = Span.annotate(tokenKey, span.from(), span.to(), metadata);
 
