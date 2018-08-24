@@ -51,6 +51,8 @@ public class OBTrials {
 
     private final Path start;
 
+    private final boolean onlyTrialDates;
+
     private KeySet keys;
 
     private final DateTimeFormatter id2Date = new DateTimeFormatterBuilder()
@@ -92,6 +94,8 @@ public class OBTrials {
 
         this.placeNerService = placeNer;
         this.pubNerService = pubNer;
+
+        onlyTrialDates = true;
 
         db = DBMaker
                 .fileDB(obMapPath)
@@ -326,10 +330,12 @@ public class OBTrials {
                     }
 
                     LocalDate date;
+                    boolean usingSessionDate = false;
                     if(crimeDate.isPresent()) {
                         date = crimeDate.get();
                     } else {
                         date = sessionDate;
+                        usingSessionDate = true;
                     }
 
 
@@ -364,17 +370,20 @@ public class OBTrials {
                         document = document.with("offSubcat", offenceSubcategory.get());
                     }
 
-                    if (!trialsByDate.containsKey(date)) {
-                        trialsByDate.put(date, new ArrayList<>());
-                    }
+                    if(onlyTrialDates && !usingSessionDate || !onlyTrialDates) {
 
-                    List<SimpleDocument> trialsForDate = trialsByDate.get(date);
-                    trialsForDate.add(document);
-                    trialsByDate.put(date, trialsForDate);
-                    if (trialsById.containsKey(id)) {
-                        System.err.println(id + " already exists");
+                        if (!trialsByDate.containsKey(date)) {
+                            trialsByDate.put(date, new ArrayList<>());
+                        }
+
+                        List<SimpleDocument> trialsForDate = trialsByDate.get(date);
+                        trialsForDate.add(document);
+                        trialsByDate.put(date, trialsForDate);
+                        if (trialsById.containsKey(id)) {
+                            System.err.println(id + " already exists");
+                        }
+                        trialsById.put(id, document);
                     }
-                    trialsById.put(id, document);
                 }
 //                });
 //            });
@@ -795,6 +804,8 @@ public class OBTrials {
 
     private Optional<LocalDate> getFirstDate(Datum datum, Key<Spans<String, String>> datesKey, Date refDate) {
 
+        LocalDate _refDate = refDate.toInstant().atOffset(ZoneOffset.UTC).toLocalDate();
+
         Spans<String, String> dateSpans = datum.get(datesKey);
 
         Optional<LocalDate> date = Optional.empty();
@@ -814,7 +825,13 @@ public class OBTrials {
 
                 if(parsed.size() == 1) {
 
-                    date = Optional.of(parsed.get(0).toInstant().atOffset(ZoneOffset.UTC).toLocalDate());
+                    LocalDate d = parsed.get(0).toInstant().atOffset(ZoneOffset.UTC).toLocalDate();
+
+                    if(d.isAfter(_refDate)) {
+                        d = d.minusYears(1);
+                    }
+
+                    date = Optional.of(d);
                 }
             }
         }
