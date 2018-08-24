@@ -210,7 +210,6 @@ public class OBTrials {
 //
 //            forkJoinPool.submit(() -> {
 //                Iterable<Datum> iterable = () -> itr;
-            int idx = 0;
             while(itr.hasNext()) {
                 Datum trial = itr.next();
 
@@ -251,6 +250,7 @@ public class OBTrials {
 
                 Key<List<String>> tokensKey = Key.of(textKey + Tokenizer.SUFFIX, RuntimeType.list(RuntimeType.STRING));
 
+                int i = 0;
                 for (Datum statement : trial.getSpannedData(statementsKey, retain)) {
 
                     Datum tokenized = Tokenizer.tokenize(statement, textKey, retain);

@@ -64,6 +64,12 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
         $window.localStorage.setItem( "config", JSON.stringify($scope.config) );
     }
 
+    $scope.resetConfig = function() {
+        $window.localStorage.clear();
+        restoreConfig();
+    }
+
+
     $scope.fromDateOptions = angular.extend({}, dateOptions, {
         initDate: $scope.config.from
     });

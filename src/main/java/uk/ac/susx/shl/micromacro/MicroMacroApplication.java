@@ -41,8 +41,8 @@ public class MicroMacroApplication extends Application<MicroMacroConfiguration> 
 
         JdbiFactory factory = new JdbiFactory();
 
-//        Jdbi jdbi = factory.build(environment, configuration.getDataSourceFactory(), "postgresql");
-        Jdbi jdbi = null;
+        Jdbi jdbi = factory.build(environment, configuration.getDataSourceFactory(), "postgresql");
+//        Jdbi jdbi = null;
 
         final PlacesResource places = new PlacesResource(configuration.geoJsonPath);
         environment.jersey().register(places);
@@ -60,7 +60,7 @@ public class MicroMacroApplication extends Application<MicroMacroConfiguration> 
                 .build(getName());
 
 
-//        environment.jersey().register(new Method52Resouce(jdbi));
+        environment.jersey().register(new Method52Resouce(jdbi));
     }
 
 }

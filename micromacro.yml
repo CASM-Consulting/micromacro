@@ -30,7 +30,7 @@ database:
   password: postgres
 
   # the JDBC URL
-  url: jdbc:postgresql://127.0.0.1/ob-data
+  url: jdbc:postgresql://127.0.0.1/oldbailey-alex
 
   # any properties specific to your JDBC driver:
   properties:

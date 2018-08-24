@@ -79,7 +79,7 @@ public class PubMatcher {
                 .make();
 
 
-        lookup = new GeoJsonKnowledgeBase(Paths.get("LL_PL_PA_WA_POINTS_FeaturesT.json"));
+        lookup = new GeoJsonKnowledgeBase(Paths.get("data/LL_PL_PA_WA_POINTS_FeaturesT.json"));
 
         pubs = (Map)db.hashMap("pubs-by-name").createOrOpen();
         pubHash = (Map)db.hashMap("pubs-by-1st-token").createOrOpen();
@@ -91,7 +91,7 @@ public class PubMatcher {
 
         if(clear) {
             pubs.clear();
-            pubs.putAll(csv2Pubs("oldbailey-alex_1800-pubs.csv"));
+            pubs.putAll(csv2Pubs("data/oldbailey-alex_1800-pubs.csv"));
 
             pubHash.clear();
             pubHash.putAll(pub2Hash(pubs));
@@ -353,7 +353,7 @@ public class PubMatcher {
 
     public static void main(String[] args ) throws Exception {
 
-//        PubMatcher pm = new PubMatcher(true, false);
+        PubMatcher pm = new PubMatcher(true, false);
 
     }
 

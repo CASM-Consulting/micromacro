@@ -85,6 +85,11 @@
     <div class="container">
         <div class="row">
             <div class="col-md-3">
+                <button ng-click="resetConfig()" class="btn btn-default">Reset Config</button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
                 <span>From</span>
                 <p class="input-group">
                     <input type="text"
@@ -133,23 +138,30 @@
                         <option ng-repeat="tbl in tables" ng-value="tbl">{{tbl}}</option>
                     </select>
                 </span>
+                <div>
+                    <button ng-click="loadData()" class="btn btn-default">Load</button>
+                </div>
             </div>
 
             <div class="col-md-3">
-                <span>Select keys</span>
+                <span>Select Index</span>
                 <span>
-                    <select ng-model="config.key" >
+                    <select ng-model="config.indexKey" >
                         <option ng-repeat="key in keys | toArray | orderBy:'$key' " ng-value="key.$key">{{key.$key}}</option>
                     </select>
                 </span>
             </div>
 
-            <div class="col-md-1">
-                <span>
-                    <button ng-click="loadData()" class="btn btn-default">Load</button>
-                </span>
+            <div class="col-md-3">
+                <span>Select Index</span>
+                <div>
+                    <label ng-repeat="key in keys | toArray | orderBy:'$key' "><input type="checkbox" ng-model="config.tableKeys"> {{key.$key}}</label>
+                </div>
             </div>
+
+
         </div>
+
 
         <div class="row">
             <div class="col-md-3">
@@ -210,31 +222,25 @@
                 <!--</span>-->
             <!--</div>-->
         </div>
-        <div class="row">
-            <div class="col-md-2">
-                <span>Threshold</span>
-                <span>
-                    <input ng-model="config.scoreThresh" step="0.1" min="0" max="1" type="number">
-                </span>
-            </div>
+        <!--<div class="row">-->
+            <!--<div class="col-md-2">-->
+                <!--<span>Threshold</span>-->
+                <!--<span>-->
+                    <!--<input ng-model="config.scoreThresh" step="0.1" min="0" max="1" type="number">-->
+                <!--</span>-->
+            <!--</div>-->
 
-        </div>
-
-        <div class="row">
-            <div class="col-md-12">
-                <span class="">Score</span>
-            </div>
-        </div>
+        <!--</div>-->
 
         <div class="row">
             <div class="col-md-1">
                 <span>Place Type</span>
                 <span>
                     <div>
-                        <input type="checkbox" ng-model="config.filter.pubs"> pubs
+                        <label><input type="checkbox" ng-model="config.filter.pubs"> pubs</label>
                     </div>
                     <div>
-                        <input type="checkbox" ng-model="config.filter.places"> places
+                        <label><input type="checkbox" ng-model="config.filter.places"> places</label>
                     </div>
                 </span>
             </div>
@@ -243,11 +249,13 @@
                 <span>Crime Type</span>
                 <span>
                     <div ng-repeat="cat in offences.cats | toArray | orderBy:'$key' ">
-                        <input type="checkbox"
+                        <label>
+                            <input type="checkbox"
                                inverted-checkbox="cat.$key"
                                inverted-checkbox-model="config.filter.cat"
                                inverted-checkbox-change="persistConfig"
-                        > {{cat.$key}}
+                            > {{cat.$key}}
+                        </label>
                     </div>
                 </span>
             </div>
