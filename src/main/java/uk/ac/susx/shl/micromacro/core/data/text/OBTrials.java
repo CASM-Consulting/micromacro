@@ -259,9 +259,9 @@ public class OBTrials {
                         Datum tokenized = Tokenizer.tokenize(sentence, textKey, retain);
 
                         //retain original crime date / offcat spans - tokenisation not required
-//                        tokenized = tokenized.with(crimeDateKey, sentence.get(crimeDateKey));
-//                        tokenized = tokenized.with(offenceCategoryKey, sentence.get(offenceCategoryKey));
-//                        tokenized = tokenized.with(offenceSubcategoryKey, sentence.get(offenceSubcategoryKey));
+                        tokenized = tokenized.with(crimeDateKey, sentence.get(crimeDateKey));
+                        tokenized = tokenized.with(offenceCategoryKey, sentence.get(offenceCategoryKey));
+                        tokenized = tokenized.with(offenceSubcategoryKey, sentence.get(offenceSubcategoryKey));
 
                         KeySet tokenizedKeys = tokenized.getKeys();
 
