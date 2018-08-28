@@ -280,7 +280,8 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
             for(var i in $scope.config.annotationKeys) {
                 var annotationKey = $scope.config.annotationKeys[i];
 
-                if($scope.keys[annotationKey].type.class == 'java.lang.String') {
+                if($scope.keys[annotationKey].type.class == 'java.lang.String'  ||
+                $scope.keys[annotationKey].type.class == 'uk.ac.susx.tag.method51.twitter.LabelDecision') {
 
                     if(!$scope.annotationsByTrialId  ||
                     (!$scope.config.filter.annotations[annotationKey] &&
