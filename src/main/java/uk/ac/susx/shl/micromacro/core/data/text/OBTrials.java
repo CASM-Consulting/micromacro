@@ -51,7 +51,7 @@ public class OBTrials {
 
     private final Path start;
 
-    private final boolean onlyTrialDates;
+    private final boolean allowSessionDates;
 
     private KeySet keys;
 
@@ -95,7 +95,7 @@ public class OBTrials {
         this.placeNerService = placeNer;
         this.pubNerService = pubNer;
 
-        onlyTrialDates = true;
+        allowSessionDates = false;
 
         db = DBMaker
                 .fileDB(obMapPath)
@@ -227,6 +227,7 @@ public class OBTrials {
 
                 keys = keys
                         .with(trialIdKey)
+                        .with(sentenceIdKey)
                         .with(statementsKey)
                         .with(placeNameSpansKey)
                         .with(pubSpansKey)
@@ -347,9 +348,11 @@ public class OBTrials {
                     while (jtr.hasNext()) {
                         Datum sentence = jtr.next();
 
-                        sentence = processPlaceNames(sentence, placeNameSpansKey, tokensKey, trialId, idx, date, offenceCategory, offenceSubcategory);
+                        String sentenceId = sentence.get(sentenceIdKey);
 
-                        sentence = processPubs(sentence, pubSpansKey, tokensKey, trialId, idx, date, offenceCategory, offenceSubcategory);
+                        sentence = processPlaceNames(sentence, placeNameSpansKey, tokensKey, trialId, sentenceId, date, offenceCategory, offenceSubcategory);
+
+                        sentence = processPubs(sentence, pubSpansKey, tokensKey, trialId, sentenceId, date, offenceCategory, offenceSubcategory);
 
                         jtr.set(sentence);
 
@@ -374,8 +377,7 @@ public class OBTrials {
                         document = document.with("offSubcat", offenceSubcategory.get());
                     }
 
-                    if(onlyTrialDates && !usingSessionDate || !onlyTrialDates) {
-
+                    if(allowSessionDates || !allowSessionDates && !usingSessionDate) {
                         if (!trialsByDate.containsKey(date)) {
                             trialsByDate.put(date, new ArrayList<>());
                         }
@@ -844,7 +846,7 @@ public class OBTrials {
     }
 
     private Datum processPubs(Datum datum, Key<Spans<List<String>, String>> pubSpanKey,
-                                    Key<List<String>> tokenKey, String trialId, int statementIdx, LocalDate date,
+                                    Key<List<String>> tokenKey, String trialId, String sentenceId, LocalDate date,
                                     Optional<String> offenceCategory, Optional<String> offenceSubcategory) {
         Spans<List<String>, String> pubSpans = datum.get(pubSpanKey);
 
@@ -862,15 +864,14 @@ public class OBTrials {
 
             if (!(matches == null || matches.isEmpty() || matches.get(0).match == null)) {
 
-                String spanId = trialId + "-" + statementIdx + "-" + j;
-
                 Match match = matches.get(0).match;
 
                 Map<String, String> metadata = match.getMetadata();
                 String spanned = String.join(" ", span.getSpanned(datum));
 
                 metadata.put("trialId", trialId);
-                metadata.put("id", spanId);
+                metadata.put("sentenceId", sentenceId);
+                metadata.put("spanIdx", Integer.toString(j));
                 metadata.put("spanned", spanned);
                 metadata.put("text", match.getText());
                 metadata.put("date", date.format(date2JS));
@@ -894,7 +895,7 @@ public class OBTrials {
     }
 
     private Datum processPlaceNames(Datum datum, Key<Spans<List<String>, String>> placeNameSpansKey,
-                                    Key<List<String>> tokenKey, String trialId, int statementIdx, LocalDate date,
+                                    Key<List<String>> tokenKey, String trialId, String sentenceId, LocalDate date,
                                     Optional<String> offenceCategory, Optional<String> offenceSubcategory) {
         Spans<List<String>, String> placeNameSpans = datum.get(placeNameSpansKey);
 
@@ -912,15 +913,14 @@ public class OBTrials {
 
             if (!matches.isEmpty()) {
 
-                String spanId = trialId + "-" + statementIdx + "-" + j;
-
                 Match match = matches.get(0);
 
                 Map<String, String> metadata = match.getMetadata();
                 String spanned = String.join(" ", span.getSpanned(datum));
 
                 metadata.put("trialId", trialId);
-                metadata.put("id", spanId);
+                metadata.put("sentenceId", sentenceId);
+                metadata.put("spanIdx", Integer.toString(j));
                 metadata.put("spanned", spanned);
                 metadata.put("text", match.getText());
                 metadata.put("date", date.format(date2JS));

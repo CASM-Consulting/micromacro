@@ -33,7 +33,8 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
                     pubs : true,
                     places : true,
                     cat: {},
-                    subCat: {}
+                    subCat: {},
+                    annotations: {}
                 },
                 heatmap : {
                     intensity : 1,
@@ -255,11 +256,29 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
 
         function crimeType(trialId, idx) {
             var cat = $scope.matchesByTrial[trialId][idx].metadata.offCat;
-            var subCat = $scope.matchesByTrial[trialId][idx].metadata.offSubCat;
+//            var subCat = $scope.matchesByTrial[trialId][idx].metadata.offSubCat;
 
             return !($scope.config.filter.cat[cat]
 //            || $scope.config.filter.subCat[subCat]
             );
+        }
+
+        function annotations(trialId, idx) {
+            var match = $scope.matchesByTrial[trialId][idx];
+            var sentenceId = match.metadata['sentenceId'];
+            var pass = false;
+
+            for(var i in $scope.config.annotationKeys) {
+                var annotationKey = $scope.config.annotationKeys[i];
+
+                if($scope.config.filter.annotations[annotationKey] &&
+                $scope.annotationsByTrialId[trialId][sentenceId][annotationKey] )  {
+                    pass = pass || true;
+                }
+            }
+
+            return pass;
+
         }
 
         var from = moment(date).subtract($scope.config.heatmap.decay, 'days').format(DATE_FORMAT);
@@ -277,7 +296,12 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
                 var trialId = dayData[j].trialId;
                 var idx = dayData[j].idx;
                 var point = dayData[j].latlng;
-                if( scoreThresh(trialId) && pointType(trialId, idx) && crimeType(trialId, idx) ) {
+                if(
+                    scoreThresh(trialId) &&
+                    pointType(trialId, idx) &&
+                    crimeType(trialId, idx) &&
+                    annotations(trialId, idx)
+                ) {
                     data.push(point.concat(intensity));
                 }
             }
@@ -607,7 +631,7 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
 
             }
 
-            getScores(Object.keys($scope.matchesByTrial));
+            getAnnotations(Object.keys($scope.matchesByTrial));
 
             drawTimeline({
                 type : "FeatureCollection",
@@ -655,33 +679,37 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
         });
     }
 
-    var getScores = function(ids) {
+    var getAnnotations = function(ids) {
         var table = $scope.config.table;
-        var key = $scope.config.key;
+        var trialIdKey = $scope.config.trialIdKey;
+        var sentenceIdKey = $scope.config.sentenceIdKey;
+        var annotationKeys = $scope.config.annotationKeys;
 
 
-        if(table && key) {
-            var scores = {};
+        if(table && trialIdKey  && sentenceIdKey) {
+            var annotations = {};
 
-            $http.post("api/m52/get-scores", JSON.stringify(
+            $http.post("api/m52/get-annotations", JSON.stringify(
                 ids
             ),{
                 params: {
                     table : table,
-                    key : key
+                    trialIdKey : trialIdKey,
+                    sentenceIdKey : sentenceIdKey,
+                    annotationKeys : annotationKeys
                 }
             }).then(function(response) {
 
-    //            var scorePath = table+"/"+key;
-
-
                 for(var i = 0; i < response.data.length; ++i) {
                     var datum = response.data[i];
-                    var id = datum[TRIAL_ID_KEY];
-                    scores[id] = datum[key];
+                    var trialId = datum[trialIdKey];
+
+                    annotations[trialId] = annotations[trialId] || {};
+
+                    annotations[trialId][datum[sentenceIdKey]] = datum;
                 }
 
-                $scope.scoresByTrialId = scores;
+                $scope.annotationsByTrialId = annotations;
 
     //            console.log(response.status);
             });

@@ -144,19 +144,29 @@
             </div>
 
             <div class="col-md-3">
-                <span>Select Index</span>
-                <span>
-                    <select ng-model="config.indexKey" >
+                <div>
+                    <span>Trial Id Key</span>
+                    <span>
+                    <select ng-model="config.trialIdKey">
                         <option ng-repeat="key in keys | toArray | orderBy:'$key' " ng-value="key.$key">{{key.$key}}</option>
                     </select>
-                </span>
+                    </span>
+                </div>
+                <div>
+                    <span>Sentence Id Key</span>
+                    <span>
+                        <select ng-model="config.sentenceIdKey" >
+                            <option ng-repeat="key in keys | toArray | orderBy:'$key' " ng-value="key.$key">{{key.$key}}</option>
+                        </select>
+                    </span>
+                </div>
             </div>
 
             <div class="col-md-3">
-                <span>Select Index</span>
-                <div>
-                    <label ng-repeat="key in keys | toArray | orderBy:'$key' "><input type="checkbox" ng-model="config.tableKeys"> {{key.$key}}</label>
-                </div>
+                <span>Select Keys</span>
+                <select multiple ng-model="config.annotationKeys">
+                    <option ng-repeat="key in keys | toArray | orderBy:'$key' " ng-value="key.$key">{{key.$key}}</option>
+                </select>
             </div>
 
 
@@ -245,7 +255,7 @@
                 </span>
             </div>
 
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <span>Crime Type</span>
                 <span>
                     <div ng-repeat="cat in offences.cats | toArray | orderBy:'$key' ">
@@ -255,6 +265,21 @@
                                inverted-checkbox-model="config.filter.cat"
                                inverted-checkbox-change="persistConfig"
                             > {{cat.$key}}
+                        </label>
+                    </div>
+                </span>
+            </div>
+
+            <div class="col-md-3">
+                <span>Annotation</span>
+                <span>
+                    <div ng-repeat="anno in config.annotationKeys">
+                        <label>
+                            <input type="checkbox"
+                                   inverted-checkbox="anno"
+                                   inverted-checkbox-model="config.filter.annotations"
+                                   inverted-checkbox-change="persistConfig"
+                            > {{anno}}
                         </label>
                     </div>
                 </span>
