@@ -154,6 +154,7 @@ public class OBTrials {
     public void load(LocalDate from, LocalDate to) {
 
         Key<String> statementIdKey = Key.of("statementId", RuntimeType.STRING);
+        Key<String> sentenceIdKey = Key.of("sentenceId", RuntimeType.STRING);
 
         Key<Spans<String, String>> sessionsKey = Key.of("sessionsPaper", RuntimeType.stringSpans(String.class));
         Key<Spans<String, String>> trialsKey = Key.of("trialAccount", RuntimeType.stringSpans(String.class));
@@ -219,7 +220,7 @@ public class OBTrials {
 
                 Key<String> trialIdKey = trial.getKeys().get("trialAccount-id");
 
-                List<Datum> statements = new ArrayList<>();
+                List<Datum> sentences = new ArrayList<>();
 
                 Key<Spans<List<String>, String>> placeNameSpansKey = Key.of("placeName", RuntimeType.listSpans(String.class));
                 Key<Spans<List<String>, String>> pubSpansKey = Key.of("pub", RuntimeType.listSpans(String.class));
@@ -228,7 +229,8 @@ public class OBTrials {
                         .with(trialIdKey)
                         .with(statementsKey)
                         .with(placeNameSpansKey)
-                        .with(pubSpansKey);
+                        .with(pubSpansKey)
+                ;
 
                 KeySet retain = keys
 //                        .with(crimeDate)
@@ -239,66 +241,76 @@ public class OBTrials {
                 int i = 0;
                 for (Datum statement : trial.getSpannedData(statementsKey, retain)) {
 
-                    String statementId = trialId+"-"+i;
+                    String statementId = trialId + "-" + i;
 
                     statement = statement.with(statementIdKey, statementId);
 
-                    statement = Sentizer.annotateSents(statement, textKey);
-
-                    Datum tokenized = Tokenizer.tokenize(statement, textKey, retain);
-
-                    //retain original crime date / offcat spans - tokenisation not required
-                    tokenized = tokenized.with(crimeDateKey, statement.get(crimeDateKey));
-                    tokenized = tokenized.with(offenceCategoryKey, statement.get(offenceCategoryKey));
-                    tokenized = tokenized.with(offenceSubcategoryKey, statement.get(offenceSubcategoryKey));
-
-                    KeySet tokenizedKeys = tokenized.getKeys();
-
-                    keys = keys.with(tokenizedKeys);
-
-                    NER2Datum ner2Datum = new NER2Datum(
-                            tokensKey,
-                            ImmutableSet.of("placeName"),
-                            placeNameSpansKey,
-                            true
+                    List<Datum> sents = Sentizer.sentize(statement, textKey, retain
+                        .with(crimeDateKey)
+                        .with(offenceCategoryKey)
+                        .with(offenceSubcategoryKey)
                     );
 
-                    String text = String.join(" ", tokenized.get(tokensKey));
+                    int j = 0;
+                    for (Datum sentence : sents) {
 
-                    //merge ner places
-                    String placeNer = placeNerService.get(text);
-//                    System.out.println(placeNer);
-                    Datum placeNerd = ner2Datum.toDatum(placeNer);
+                        sentence = sentence.with(sentenceIdKey, statement.get(statementIdKey) + "-" + j);
 
-                    boolean error = false;
-                    if (tokenized.get(tokensKey).size() != placeNerd.get(tokensKey).size()) {
+                        Datum tokenized = Tokenizer.tokenize(sentence, textKey, retain);
 
-                        System.err.println("tokenised mismatch! Expected " + tokenized.get(tokensKey).size() + " got " + placeNerd.get(tokensKey).size());
-                        error = true;
-                    } else {
-                        tokenized = tokenized
-                                .with(placeNerd.getKeys().get("placeName"), placeNerd.get(placeNameSpansKey));
-                    }
+                        //retain original crime date / offcat spans - tokenisation not required
+//                        tokenized = tokenized.with(crimeDateKey, sentence.get(crimeDateKey));
+//                        tokenized = tokenized.with(offenceCategoryKey, sentence.get(offenceCategoryKey));
+//                        tokenized = tokenized.with(offenceSubcategoryKey, sentence.get(offenceSubcategoryKey));
 
-                    //merge ner pubs
-                    String pubNer = pubNerService.get(text);
-//                    System.out.println(pubNer);
-                    Datum pubNerd = ner2Datum.toDatum(pubNer, ImmutableSet.of("pub"), pubSpansKey);
-                    if (tokenized.get(tokensKey).size() != pubNerd.get(tokensKey).size()) {
+                        KeySet tokenizedKeys = tokenized.getKeys();
 
-                        System.err.println("tokenised mismatch! Expected " + tokenized.get(tokensKey).size() + " got " + pubNerd.get(tokensKey).size());
-                        error = true;
-                    } else {
-                        tokenized = tokenized
-                                .with(pubNerd.getKeys().get("pub"), pubNerd.get(pubSpansKey));
-                    }
+                        keys = keys.with(tokenizedKeys);
 
-                    if(!error) {
-                        statements.add(tokenized);
+                        NER2Datum ner2Datum = new NER2Datum(
+                                tokensKey,
+                                ImmutableSet.of("placeName"),
+                                placeNameSpansKey,
+                                true
+                        );
+
+                        String text = String.join(" ", tokenized.get(tokensKey));
+
+                        //merge ner places
+                        String placeNer = placeNerService.get(text);
+    //                    System.out.println(placeNer);
+                        Datum placeNerd = ner2Datum.toDatum(placeNer);
+
+                        boolean error = false;
+                        if (tokenized.get(tokensKey).size() != placeNerd.get(tokensKey).size()) {
+
+                            System.err.println("tokenised mismatch! Expected " + tokenized.get(tokensKey).size() + " got " + placeNerd.get(tokensKey).size());
+                            error = true;
+                        } else {
+                            tokenized = tokenized
+                                    .with(placeNerd.getKeys().get("placeName"), placeNerd.get(placeNameSpansKey));
+                        }
+
+                        //merge ner pubs
+                        String pubNer = pubNerService.get(text);
+    //                    System.out.println(pubNer);
+                        Datum pubNerd = ner2Datum.toDatum(pubNer, ImmutableSet.of("pub"), pubSpansKey);
+                        if (tokenized.get(tokensKey).size() != pubNerd.get(tokensKey).size()) {
+
+                            System.err.println("tokenised mismatch! Expected " + tokenized.get(tokensKey).size() + " got " + pubNerd.get(tokensKey).size());
+                            error = true;
+                        } else {
+                            tokenized = tokenized
+                                    .with(pubNerd.getKeys().get("pub"), pubNerd.get(pubSpansKey));
+                        }
+
+                        if (!error) {
+                            sentences.add(tokenized);
+                        }
                     }
                 }
 
-                if (!statements.isEmpty()) {
+                if (!sentences.isEmpty()) {
 
                     System.out.println(trialId);
 
@@ -309,15 +321,15 @@ public class OBTrials {
                     Optional<String> offenceCategory = Optional.empty();
                     Optional<String> offenceSubcategory = Optional.empty();
 
-                    for(Datum statement : statements) {
+                    for(Datum sentence : sentences) {
                         if(!crimeDate.isPresent()) {
-                            crimeDate = getFirstDate(statement, crimeDateKey, refDate);
+                            crimeDate = getFirstDate(sentence, crimeDateKey, refDate);
                         }
                         if(!offenceCategory.isPresent()) {
-                            offenceCategory = getCrimeCat(statement, offenceCategoryKey);
+                            offenceCategory = getCrimeCat(sentence, offenceCategoryKey);
                         }
                         if(!offenceSubcategory.isPresent()) {
-                            offenceSubcategory = getCrimeCat(statement, offenceSubcategoryKey);
+                            offenceSubcategory = getCrimeCat(sentence, offenceSubcategoryKey);
                         }
                     }
 
@@ -331,15 +343,15 @@ public class OBTrials {
                     }
 
 
-                    ListIterator<Datum> jtr = statements.listIterator();
+                    ListIterator<Datum> jtr = sentences.listIterator();
                     while (jtr.hasNext()) {
-                        Datum statement = jtr.next();
+                        Datum sentence = jtr.next();
 
-                        statement = processPlaceNames(statement, placeNameSpansKey, tokensKey, trialId, idx, date, offenceCategory, offenceSubcategory);
+                        sentence = processPlaceNames(sentence, placeNameSpansKey, tokensKey, trialId, idx, date, offenceCategory, offenceSubcategory);
 
-                        statement = processPubs(statement, pubSpansKey, tokensKey, trialId, idx, date, offenceCategory, offenceSubcategory);
+                        sentence = processPubs(sentence, pubSpansKey, tokensKey, trialId, idx, date, offenceCategory, offenceSubcategory);
 
-                        jtr.set(statement);
+                        jtr.set(sentence);
 
                         ++idx;
                     }
@@ -352,7 +364,7 @@ public class OBTrials {
                             Key.of("crimeDate-token", RuntimeType.listSpans(String.class))
                     ));
 
-                    SimpleDocument document = datum2SimpleDocument.toDocument(trialId, statements);
+                    SimpleDocument document = datum2SimpleDocument.toDocument(trialId, sentences);
 
                     if(offenceCategory.isPresent()) {
                         document = document.with("offCat", offenceCategory.get());

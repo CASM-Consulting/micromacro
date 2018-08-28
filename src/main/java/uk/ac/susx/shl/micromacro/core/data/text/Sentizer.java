@@ -52,7 +52,7 @@ public class Sentizer {
 
 //            String t = text.substring(start, end);
 
-            sentSpans = sentSpans.with(start, end, 0);
+            sentSpans = sentSpans.with(start, end, i);
             ++i;
         }
 
