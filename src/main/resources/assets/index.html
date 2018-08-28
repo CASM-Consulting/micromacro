@@ -275,7 +275,7 @@
                 <span>
                     <div ng-repeat="anno in config.annotationKeys">
                         <label>
-                            <span ng-if="keys[anno].type.class == 'java.lang.String'">
+                            <span ng-if="keys[anno].type.class == 'java.lang.String' || keys[anno].type.class == 'uk.ac.susx.tag.method51.twitter.LabelDecision' ">
                                 <input type="checkbox"
                                        inverted-checkbox="anno"
                                        inverted-checkbox-model="config.filter.annotations"
