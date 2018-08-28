@@ -28,6 +28,8 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static java.time.temporal.ChronoField.DAY_OF_MONTH;
@@ -212,8 +214,6 @@ public class OBTrials {
                 LocalDate sessionDate = getDate(trialId);
                 Date refDate = Date.from(sessionDate.atTime(0,0,0).toInstant(ZoneOffset.UTC));
 
-
-
                 KeySet keys = trial.getKeys();
 
                 Key<String> textKey = keys.get("text");
@@ -242,7 +242,7 @@ public class OBTrials {
                 int i = 0;
                 for (Datum statement : trial.getSpannedData(statementsKey, retain)) {
 
-                    String statementId = trialId + "-" + i;
+                    String statementId = trialId + "-" + i++;
 
                     statement = statement.with(statementIdKey, statementId);
 
@@ -255,7 +255,10 @@ public class OBTrials {
                     int j = 0;
                     for (Datum sentence : sents) {
 
-                        sentence = sentence.with(sentenceIdKey, statement.get(statementIdKey) + "-" + j);
+                        String sentenceId = statement.get(statementIdKey) + "-" + j++;
+//                        System.out.println(sentenceId);
+
+                        sentence = sentence.with(sentenceIdKey, sentenceId);
 
                         Datum tokenized = Tokenizer.tokenize(sentence, textKey, retain);
 
@@ -315,8 +318,6 @@ public class OBTrials {
 
                     System.out.println(trialId);
 
-                    int idx= 0;
-
                     //figure out date first
                     Optional<LocalDate> crimeDate = Optional.empty();
                     Optional<String> offenceCategory = Optional.empty();
@@ -344,6 +345,8 @@ public class OBTrials {
                     }
 
 
+                    boolean addByDate = allowSessionDates || !allowSessionDates && !usingSessionDate;
+
                     ListIterator<Datum> jtr = sentences.listIterator();
                     while (jtr.hasNext()) {
                         Datum sentence = jtr.next();
@@ -354,9 +357,27 @@ public class OBTrials {
 
                         sentence = processPubs(sentence, pubSpansKey, tokensKey, trialId, sentenceId, date, offenceCategory, offenceSubcategory);
 
+                        if(addByDate) {
+
+                            for(Span<List<String>, Map> match : sentence.get(placeMatchKey) ) {
+                                Map metadata = match.get();
+                                matchesByDate.computeIfAbsent(date, k -> new ArrayList<>());
+                                List tmp = matchesByDate.get(date);
+                                tmp.add(metadata);
+                                matchesByDate.put(date, tmp);
+                            }
+
+                            for(Span<List<String>, Map> match : sentence.get(pubMatchKey) ){
+                                Map metadata = match.get();
+                                matchesByDate.computeIfAbsent(date, k -> new ArrayList<>());
+                                List tmp = matchesByDate.get(date);
+                                tmp.add(metadata);
+                                matchesByDate.put(date, tmp);
+                            }
+                        }
+
                         jtr.set(sentence);
 
-                        ++idx;
                     }
 
                     Datum2SimpleDocument<?> datum2SimpleDocument = new Datum2SimpleDocument(tokensKey, ImmutableList.of(
@@ -377,7 +398,7 @@ public class OBTrials {
                         document = document.with("offSubcat", offenceSubcategory.get());
                     }
 
-                    if(allowSessionDates || !allowSessionDates && !usingSessionDate) {
+                    if(addByDate) {
                         if (!trialsByDate.containsKey(date)) {
                             trialsByDate.put(date, new ArrayList<>());
                         }
@@ -388,8 +409,8 @@ public class OBTrials {
                         if (trialsById.containsKey(trialId)) {
                             System.err.println(trialId + " already exists");
                         }
-                        trialsById.put(trialId, document);
                     }
+                    trialsById.put(trialId, document);
                 }
 //                });
 //            });
@@ -808,6 +829,21 @@ public class OBTrials {
         return crime;
     }
 
+    private final Pattern dateFix = Pattern.compile("(\\d{1,2})d" );
+
+    private String fixDate(String broken ) {
+
+        Matcher m = dateFix.matcher(broken);
+
+        String fixed = broken;
+
+        if(m.find()) {
+            fixed = m.replaceAll("$1");
+        }
+
+        return fixed;
+    }
+
     private Optional<LocalDate> getFirstDate(Datum datum, Key<Spans<String, String>> datesKey, Date refDate) {
 
         LocalDate _refDate = refDate.toInstant().atOffset(ZoneOffset.UTC).toLocalDate();
@@ -819,7 +855,7 @@ public class OBTrials {
         if(dateSpans.get().size() >= 1) {
             Span<String, String> span = dateSpans.get(0);
 
-            String dateText = span.getSpanned(datum);
+            String dateText = fixDate(span.getSpanned(datum));
 
             System.out.println(dateText);
 
@@ -846,8 +882,8 @@ public class OBTrials {
     }
 
     private Datum processPubs(Datum datum, Key<Spans<List<String>, String>> pubSpanKey,
-                                    Key<List<String>> tokenKey, String trialId, String sentenceId, LocalDate date,
-                                    Optional<String> offenceCategory, Optional<String> offenceSubcategory) {
+                                Key<List<String>> tokenKey, String trialId, String sentenceId, LocalDate date,
+                                Optional<String> offenceCategory, Optional<String> offenceSubcategory) {
         Spans<List<String>, String> pubSpans = datum.get(pubSpanKey);
 
         Spans<List<String>, Map> pubMatchSpans = Spans.annotate(tokenKey, Map.class);
@@ -881,10 +917,10 @@ public class OBTrials {
 
                 Span<List<String>, Map> placeNameMatchSpan = Span.annotate(tokenKey, span.from(), span.to(), metadata);
 
-                matchesByDate.computeIfAbsent(date, k -> new ArrayList<>());
-                List tmp = matchesByDate.get(date);
-                tmp.add(metadata);
-                matchesByDate.put(date, tmp);
+//                matchesByDate.computeIfAbsent(date, k -> new ArrayList<>());
+//                List tmp = matchesByDate.get(date);
+//                tmp.add(metadata);
+//                matchesByDate.put(date, tmp);
                 pubMatchSpans = pubMatchSpans.with(placeNameMatchSpan);
             }
             ++j;
@@ -928,13 +964,12 @@ public class OBTrials {
                 metadata.put("offCat", offenceCategory.isPresent() ? offenceCategory.get() : null);
                 metadata.put("offSubCat", offenceSubcategory.isPresent() ? offenceSubcategory.get() : null);
 
-
                 Span<List<String>, Map> placeNameMatchSpan = Span.annotate(tokenKey, span.from(), span.to(), metadata);
 
-                matchesByDate.computeIfAbsent(date, k -> new ArrayList<>());
-                List tmp = matchesByDate.get(date);
-                tmp.add(metadata);
-                matchesByDate.put(date, tmp);
+//                matchesByDate.computeIfAbsent(date, k -> new ArrayList<>());
+//                List tmp = matchesByDate.get(date);
+//                tmp.add(metadata);
+//                matchesByDate.put(date, tmp);
 
                 placeNameMatchSpans = placeNameMatchSpans.with(placeNameMatchSpan);
             }

@@ -271,7 +271,9 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
             for(var i in $scope.config.annotationKeys) {
                 var annotationKey = $scope.config.annotationKeys[i];
 
-                if($scope.config.filter.annotations[annotationKey] &&
+                if(!$scope.config.filter.annotations[annotationKey] &&
+                $scope.annotationsByTrialId[trialId] &&
+                $scope.annotationsByTrialId[trialId][sentenceId] &&
                 $scope.annotationsByTrialId[trialId][sentenceId][annotationKey] )  {
                     pass = pass || true;
                 }
@@ -485,7 +487,7 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
             timelineControl = L.timelineSliderControl({
                 steps: daysCovered,
                 duration : daysCovered * $scope.timelineDuration,
-                enableKeyboardControls: true,
+//                enableKeyboardControls: true,
                 formatOutput: function(date){
                     return moment(date).subtract(1000, "y").format(DATE_FORMAT);
                 }
