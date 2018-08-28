@@ -12,6 +12,15 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
         startingDay: 1
     };
 
+//
+//    $scope.geojson = {
+//        pointToLayer: function(feature, latlng) {
+//          return L.circleMarker(latlng, {
+//            fillColor: '#f00',
+//            color: '#000',
+//          });
+//        }
+//    };
 
     var restoreConfig = function() {
 
@@ -221,28 +230,14 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
             wheelDebounceTime: 100,
             scrollWheelZoom:false
         },
+
         tiles: tilesDict.oldlondon,
-        layers: {}
+
+        layers: {
+            baselayers : {}
+        }
 
     });
-
-//    $scope.layers.overlays = {
-//            heat: {
-//                name: 'Heat Map',
-//                type: 'heat',
-//                data: [
-//                    [51.5074, 0.1278, 20],
-//                    [51.5075, 0.1279, 20],
-//                    [51.5086, 0.1290, 20],
-//                    [51.5087, 0.1291, 20]
-//                ],
-//                layerOptions: {
-//                    radius: 10,
-//                    blur: 5
-//                },
-//                visible: true
-//            }
-//        };
 
     var drawHeat = function(date) {
 
@@ -280,18 +275,37 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
             var match = $scope.matchesByTrial[trialId][idx];
             var sentenceId = match.metadata['sentenceId'];
             var pass = false;
+            var overridePass = false;
 
             for(var i in $scope.config.annotationKeys) {
                 var annotationKey = $scope.config.annotationKeys[i];
 
-                if(!$scope.annotationsByTrialId  ||
-                (!$scope.config.filter.annotations[annotationKey] &&
-                $scope.annotationsByTrialId[trialId] &&
-                $scope.annotationsByTrialId[trialId][sentenceId] &&
-                $scope.annotationsByTrialId[trialId][sentenceId][annotationKey])
-                )  {
-                    pass = pass || true;
+                if($scope.keys[annotationKey].type.class == 'java.lang.String') {
+
+                    if(!$scope.annotationsByTrialId  ||
+                    (!$scope.config.filter.annotations[annotationKey] &&
+                    $scope.annotationsByTrialId[trialId] &&
+                    $scope.annotationsByTrialId[trialId][sentenceId] &&
+                    $scope.annotationsByTrialId[trialId][sentenceId][annotationKey])
+                    )  {
+                        pass = pass || true;
+                    }
+
+                } else if("java.lang.Double") {
+
+                    if(!$scope.annotationsByTrialId  ||
+                    ($scope.annotationsByTrialId[trialId] &&
+                    $scope.annotationsByTrialId[trialId][sentenceId] &&
+                    $scope.annotationsByTrialId[trialId][sentenceId][annotationKey] < $scope.config.filter.annotations[annotationKey])
+                    )  {
+                        overridePass = true;
+                    }
                 }
+
+            }
+
+            if(overridePass) {
+                pass = false;
             }
 
             return pass;
@@ -422,6 +436,7 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
 
     var drawMatches = function(matches) {
         $scope.markers = {};
+
         for(var i = 0; i < matches.length; ++i) {
             var match = matches[i];
             var lat = parseFloat(match.metadata.lat);
@@ -588,9 +603,12 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
 
     $scope.loading = false;
     $scope.loadData = function()  {
-        $scope.loading = true;
+        $scope.loadingData = true;
         var from = $scope.config.from.toISOString().split('T')[0];
         var to = $scope.config.to.toISOString().split('T')[0]
+
+        $scope.pubs = {};
+
         $http.get("api/ob/load", {
             params : {
                 from : from,
@@ -640,6 +658,11 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
                     $scope.matchLLByDate[date] = [];
                 }
 
+                if(match.type == 'pub') {
+                    $scope.pubs[match.pubId] = true;
+                }
+
+
                 $scope.matchLLByDate[date].push({
                     trialId : trialId,
                     idx : $scope.matchesByTrial[trialId].length - 1,
@@ -648,13 +671,15 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
 
             }
 
+            $scope.loadPubs();
+
             getAnnotations(Object.keys($scope.matchesByTrial));
 
             drawTimeline({
                 type : "FeatureCollection",
                 features : features
             }, from, to);
-            $scope.loading = false;
+            $scope.loadingData = false;
         });
     };
 
@@ -678,7 +703,7 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
     };
 
     $scope.saveStatements2Table = function()  {
-        $scope.loading = true;
+        $scope.loadingData = true;
         var from = $scope.config.from.toISOString().split('T')[0];
         var to = $scope.config.to.toISOString().split('T')[0]
         $http.get("api/ob/saveStatements2Table", {
@@ -689,10 +714,10 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
             }
         }).then(function(response) {
             alert("saved");
-            $scope.loading = false;
+            $scope.loadingData = false;
         }, function(response){
             alert("failed " + response.data);
-            $scope.loading = false;
+            $scope.loadingData = false;
         });
     }
 
@@ -735,8 +760,64 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
         } else {
             $scope.scores = false;
         }
-
     };
+
+
+    $scope.loadPubs = function() {
+
+        $scope.loadingPubs = true;
+
+
+        $http.get("api/places/pubs").then(function(response) {
+
+            var pubs = response.data;
+
+            var pubMarkers = [];
+
+            for(var i in response.data) {
+
+                var pub = response.data[i];
+
+                if(!(pub.id in $scope.pubs) )  {
+                    continue;
+                }
+
+                var metadata = pub.match.metadata;
+
+                var lat = parseFloat(metadata.lat);
+                var lng = parseFloat(metadata.lng);
+
+                var marker = L.circleMarker([lat, lng],{radius:3, color:'purple', pub:pub}).bindPopup(function(l) {
+                    return "<ul>" +
+                    "<li>Name: " + l.options.pub.name + "</li>"+
+                    "<li>Addr1: " + l.options.pub.addr[0] + "</li>"+
+                    "<li>Addr2: " + l.options.pub.addr[1] + "</li>"+
+                    "<li>Addr3: " + l.options.pub.addr[2] + "</li>"+
+                    "<li>Lat: " + l.options.pub.match.metadata.lat + "</li>"+
+                    "<li>Lng: " + l.options.pub.match.metadata.lng + "</li>"+
+                    "</ul>";
+                });
+
+                pubMarkers.push(marker);
+
+            }
+
+
+            var pubsLayer = L.layerGroup(pubMarkers);
+
+//            $scope.layers.baselayers['pubs'] = pubsLayer;
+
+            leafletData.getMap().then(function(map) {
+                pubsLayer.addTo(map);
+            });
+
+            $scope.loadingPubs = false;
+        }, function(response){
+            alert("failed " + response.data);
+            $scope.loadingPubs = false;
+        });
+    }
+
 
 
     $scope.listTables();

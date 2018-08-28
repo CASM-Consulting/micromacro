@@ -34,20 +34,23 @@ public class PubMatcher {
 
 
     public static class Pub implements Serializable {
+        public final String id;
         public final String name;
         public final List<String> addr;
         public final String parish;
 
         public final Match match;
 
-        public Pub(String name, String parish, String addr1, String addr2, String addr3, String addr4, String addr5, String addr6) {
+        public Pub(String id, String name, String parish, String addr1, String addr2, String addr3, String addr4, String addr5, String addr6) {
+            this.id = id;
             this.name = name;
             this.parish = parish;
             addr = ImmutableList.of(addr1, addr2, addr3, addr4, addr5, addr6);
             match = null;
         }
 
-        private Pub(String name, String parish, List<String> addr, Match match) {
+        private Pub(String id, String name, String parish, List<String> addr, Match match) {
+            this.id = id;
             this.name = name;
             this.parish = parish;
             this.addr = ImmutableList.copyOf(addr);
@@ -55,7 +58,7 @@ public class PubMatcher {
         }
 
         public Pub match(Match match) {
-            return new Pub(name, parish, addr, match);
+            return new Pub(id, name, parish, addr, match);
         }
     }
 
@@ -106,12 +109,15 @@ public class PubMatcher {
 
         Map<String, List<Pub>> pubs = new HashMap<>();
 
+        int i = 0;
+
         for(CSVRecord record : records) {
 
             String name = record.get("pub_name");
             name = clean(name);
-
+            String id = Integer.toString(i);
             Pub pub = new Pub(
+                id,
                 name,
                 record.get("parish"),
                 clean(record.get("pub_add_1")),
@@ -129,6 +135,7 @@ public class PubMatcher {
             if(m.find()) {
                 String andName = m.replaceAll("&");
                 Pub andPub = new Pub(
+                        id,
                         andName,
                         record.get("parish"),
                         clean(record.get("pub_add_1")),
@@ -148,6 +155,7 @@ public class PubMatcher {
             if(m.find()) {
                 String andName = m.replaceAll("and");
                 Pub andPub = new Pub(
+                        id,
                         andName,
                         record.get("parish"),
                         clean(record.get("pub_add_1")),
@@ -161,6 +169,8 @@ public class PubMatcher {
                 andPub = matchPub(andPub);
                 pubs.computeIfAbsent(andName, k-> new ArrayList<>()).add(andPub);
             }
+
+            ++i;
         }
 
         return pubs;
@@ -207,20 +217,19 @@ public class PubMatcher {
     }
 
 
+    public List<Pub> getMatchedPubs() {
+
+        List<Pub> matchedPubs = pubs.values().stream().flatMap(Collection::stream).filter(pub->pub.match != null).collect(Collectors.toList());
+
+        return matchedPubs;
+    }
+
     public List<Pub> getPubs(String candidate) {
 
         return pubs.get(candidate);
     }
 
-    private void matchPubs() {
-        int matched = 0;
-        for(Pub pub : pubs.values().stream().flatMap(Collection::stream).collect(Collectors.toList())) {
 
-            ++matched;
-
-        }
-        LOG.info(matched + " of " + pubs.size() + " matched" );
-    }
 
     private Pub matchPub(Pub pub) {
 

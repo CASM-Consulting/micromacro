@@ -8,6 +8,7 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 
 import org.jdbi.v3.core.Jdbi;
+import uk.ac.susx.shl.micromacro.core.data.text.PubMatcher;
 import uk.ac.susx.shl.micromacro.db.JdbiProvider;
 import uk.ac.susx.shl.micromacro.webapp.health.DefaultHealthCheck;
 import uk.ac.susx.shl.micromacro.webapp.resources.Method52Resouce;
@@ -37,6 +38,7 @@ public class MicroMacroApplication extends Application<MicroMacroConfiguration> 
     public void run(final MicroMacroConfiguration configuration,
                     final Environment environment) throws IOException {
 
+        PubMatcher pubMatcher = new PubMatcher(false, false);
 
 
         JdbiFactory factory = new JdbiFactory();
@@ -44,12 +46,14 @@ public class MicroMacroApplication extends Application<MicroMacroConfiguration> 
         Jdbi jdbi = factory.build(environment, configuration.getDataSourceFactory(), "postgresql");
 //        Jdbi jdbi = null;
 
-        final PlacesResource places = new PlacesResource(configuration.geoJsonPath);
+        final PlacesResource places = new PlacesResource(configuration.geoJsonPath, pubMatcher);
         environment.jersey().register(places);
 
         final OBResource ob = new OBResource(configuration.sessionsPath, configuration.geoJsonPath,
                 configuration.obMapPath, configuration.obCacheTable, jdbi,
-                configuration.placeNerPort, configuration.pubNerPort);
+                configuration.placeNerPort, configuration.pubNerPort,
+                pubMatcher);
+
         environment.jersey().register(ob);
 
         final DefaultHealthCheck healthCheck = new DefaultHealthCheck();

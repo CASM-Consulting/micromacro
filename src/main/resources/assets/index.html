@@ -275,11 +275,18 @@
                 <span>
                     <div ng-repeat="anno in config.annotationKeys">
                         <label>
-                            <input type="checkbox"
-                                   inverted-checkbox="anno"
-                                   inverted-checkbox-model="config.filter.annotations"
-                                   inverted-checkbox-change="persistConfig"
-                            > {{anno}}
+                            <span ng-if="keys[anno].type.class == 'java.lang.String'">
+                                <input type="checkbox"
+                                       inverted-checkbox="anno"
+                                       inverted-checkbox-model="config.filter.annotations"
+                                       inverted-checkbox-change="persistConfig"
+                                >
+                            </span>
+                            <span ng-if="keys[anno].type.class == 'java.lang.Double'">
+                                <input type="number" ng-model="config.filter.annotations[anno]" min="0" max="1" step="0.01" style="width:50px">
+                            </span>
+
+                            {{anno}}
                         </label>
                     </div>
                 </span>
@@ -307,8 +314,9 @@
         <div class="row" >
 
             <div class="map col-md-10">
-                <span ng-show="loading" class="flashing">LOADING</span>
+                <span ng-show="loadingData" class="flashing">LOADING DATA</span>
                 <span ng-show="loadingAnnotations" class="flashing">LOADING ANNOTATIONS</span>
+                <span ng-show="loadingPubs" class="flashing">LOADING PUBS</span>
 
 
                 <leaflet

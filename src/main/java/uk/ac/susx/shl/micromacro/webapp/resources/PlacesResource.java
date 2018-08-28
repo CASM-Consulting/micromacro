@@ -6,6 +6,7 @@ import uk.ac.susx.shl.micromacro.core.data.geo.GeoJsonKnowledgeBase;
 import uk.ac.susx.shl.micromacro.core.data.text.Candidate;
 import uk.ac.susx.shl.micromacro.core.data.text.Document;
 import uk.ac.susx.shl.micromacro.core.data.text.IOBColumn2Document;
+import uk.ac.susx.shl.micromacro.core.data.text.PubMatcher;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -24,9 +25,11 @@ public class PlacesResource {
     private static final Logger LOG = Logger.getLogger(PlacesResource.class.getName());
 
     private final GeoJsonKnowledgeBase lookup;
+    private final PubMatcher pubMatcher;
 
-    public PlacesResource(String geoJsonPath) throws IOException{
+    public PlacesResource(String geoJsonPath, PubMatcher pubMatcher) throws IOException{
         lookup = new GeoJsonKnowledgeBase(Paths.get(geoJsonPath));
+        this.pubMatcher = pubMatcher;
     }
 
     @GET
@@ -57,5 +60,12 @@ public class PlacesResource {
             }
         }
         return matches;
+    }
+
+    @GET
+    @Path("pubs")
+    public List<PubMatcher.Pub> getPubs() throws IOException {
+
+        return pubMatcher.getMatchedPubs();
     }
 }

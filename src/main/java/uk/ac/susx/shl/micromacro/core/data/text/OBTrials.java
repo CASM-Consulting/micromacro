@@ -85,14 +85,14 @@ public class OBTrials {
 
     private final DB db;
 
-    public OBTrials(String sessionsPath, String geoJsonPath, String obMapPath, StanfordNER placeNer, StanfordNER pubNer) throws IOException {
+    public OBTrials(String sessionsPath, String geoJsonPath, String obMapPath, StanfordNER placeNer, StanfordNER pubNer, PubMatcher pubMatcher) throws IOException {
         lookup = new GeoJsonKnowledgeBase(Paths.get(geoJsonPath));
         placeMatchKey = Key.of("placeNameMatch", RuntimeType.listSpans(Map.class));
         pubMatchKey = Key.of("pubMatch", RuntimeType.listSpans(Map.class));
         keys = KeySet.of(placeMatchKey, pubMatchKey);
         start = Paths.get(sessionsPath);
 
-        pubMatcher = new PubMatcher(false, false);
+        this.pubMatcher = pubMatcher;
 
         this.placeNerService = placeNer;
         this.pubNerService = pubNer;
@@ -899,8 +899,8 @@ public class OBTrials {
             List<PubMatcher.Pub> matches = pubMatcher.getPubs(candidate);
 
             if (!(matches == null || matches.isEmpty() || matches.get(0).match == null)) {
-
-                Match match = matches.get(0).match;
+                PubMatcher.Pub pub = matches.get(0);
+                Match match = pub.match;
 
                 Map<String, String> metadata = match.getMetadata();
                 String spanned = String.join(" ", span.getSpanned(datum));
@@ -912,6 +912,8 @@ public class OBTrials {
                 metadata.put("text", match.getText());
                 metadata.put("date", date.format(date2JS));
                 metadata.put("type", "pub");
+                metadata.put("pubId", pub.id);
+
                 metadata.put("offCat", offenceCategory.isPresent() ? offenceCategory.get() : null);
                 metadata.put("offSubCat", offenceSubcategory.isPresent() ? offenceSubcategory.get() : null);
 

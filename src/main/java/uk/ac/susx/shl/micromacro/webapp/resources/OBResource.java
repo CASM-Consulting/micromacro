@@ -7,6 +7,7 @@ import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.Jdbi;
 import uk.ac.susx.shl.micromacro.client.StanfordNER;
 import uk.ac.susx.shl.micromacro.core.data.text.OBTrials;
+import uk.ac.susx.shl.micromacro.core.data.text.PubMatcher;
 import uk.ac.susx.shl.micromacro.core.data.text.SimpleDocument;
 import uk.ac.susx.tag.method51.core.data.PostgreSQLConnection;
 import uk.ac.susx.tag.method51.core.data.StoreException;
@@ -43,9 +44,10 @@ public class OBResource {
     private final Gson gson;
 
     public OBResource(String sessionsPath, String geoJsonPath, String obMapPath, String obCacheTable, Jdbi jdbi,
-                      int placeNerPort, int pubNerPort) throws IOException {
+                      int placeNerPort, int pubNerPort, PubMatcher pubMatcher) throws IOException {
 
-        obTrials = new OBTrials(sessionsPath, geoJsonPath, obMapPath, new StanfordNER(placeNerPort), new StanfordNER(pubNerPort));
+        obTrials = new OBTrials(sessionsPath, geoJsonPath, obMapPath,
+                new StanfordNER(placeNerPort), new StanfordNER(pubNerPort), pubMatcher);
 
         this.jdbi = jdbi;
 
