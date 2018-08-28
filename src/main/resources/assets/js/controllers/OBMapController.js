@@ -82,6 +82,19 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
 
     $scope.timelineDuration = 100;
 
+
+
+    $scope.$watch("config.filter", function(val, old ) {
+        var date = moment($scope.selectedDate).format(DATE_FORMAT);
+        drawHeat(date);
+    }, true);
+
+    $scope.$watch("config.heatmap", function(val, old ) {
+        var date = moment($scope.selectedDate).format(DATE_FORMAT);
+        drawHeat(date);
+    }, true);
+
+
     $scope.$watch("config.heatmap.radius", function(val, old ) {
         if(val && val != old) {
             leafletData.getLayers().then(function(layers) {
@@ -271,10 +284,12 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
             for(var i in $scope.config.annotationKeys) {
                 var annotationKey = $scope.config.annotationKeys[i];
 
-                if(!$scope.config.filter.annotations[annotationKey] &&
+                if(!$scope.annotationsByTrialId  ||
+                (!$scope.config.filter.annotations[annotationKey] &&
                 $scope.annotationsByTrialId[trialId] &&
                 $scope.annotationsByTrialId[trialId][sentenceId] &&
-                $scope.annotationsByTrialId[trialId][sentenceId][annotationKey] )  {
+                $scope.annotationsByTrialId[trialId][sentenceId][annotationKey])
+                )  {
                     pass = pass || true;
                 }
             }
@@ -682,6 +697,7 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
     }
 
     var getAnnotations = function(ids) {
+        $scope.loadingAnnotations = true;
         var table = $scope.config.table;
         var trialIdKey = $scope.config.trialIdKey;
         var sentenceIdKey = $scope.config.sentenceIdKey;
@@ -713,6 +729,7 @@ app.controller('OBMapController', function($scope, $rootScope, $http, $compile, 
 
                 $scope.annotationsByTrialId = annotations;
 
+                $scope.loadingAnnotations = false;
     //            console.log(response.status);
             });
         } else {

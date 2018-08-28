@@ -33,7 +33,7 @@ public class OBFiles {
 
     public Set<Path> getFiles(LocalDate from, LocalDate to) throws IOException {
 
-        LocalDate searchTo = to.minus(2, ChronoUnit.MONTHS);
+        LocalDate searchTo = to.plus(2, ChronoUnit.MONTHS);
 
         Set<Path> paths = new HashSet<>(java.nio.file.Files.walk(start).filter(path -> {
             if(!path.toString().endsWith(".xml")) {

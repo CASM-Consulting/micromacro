@@ -197,7 +197,7 @@ public class OBTrials {
 
         try {
 
-            Set<Path> files = getFiles(from, to);
+            Set<Path> files = new OBFiles(start).getFiles(from, to);
 
             Iterator<Datum> itr = XML2Datum.getData(start, files, interestingElements, "trialAccount", "-id").iterator();
 

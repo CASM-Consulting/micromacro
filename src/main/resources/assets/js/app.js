@@ -91,6 +91,7 @@ app.directive('invertedCheckbox', function ()
                 scope.model[scope.key] = !this.checked;
                 if(attrs.invertedCheckboxChange) {
                     scope.change();
+                     scope.$apply()
                 }
             });
         }
