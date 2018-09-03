@@ -119,6 +119,8 @@ public class XML2Column {
 
     public static void obNer() throws Exception {
 
+        Path outDir = Paths.get("data","obPlaceNer");
+
         Key<Spans<String, String>> sessions = Key.of("sessionsPaper", RuntimeType.stringSpans(String.class));
         Key<Spans<String, String>> trials = Key.of("trialAccount", RuntimeType.stringSpans(String.class));
         Key<Spans<String, String>> statements = Key.of("statement", RuntimeType.stringSpans(String.class));
@@ -141,9 +143,9 @@ public class XML2Column {
         ));
 
         interestingElements.put(entities, ImmutableList.of(
-            new XML2Datum.Element("placeName", ImmutableMap.of(), "placeName"),
-            new XML2Datum.Element("rs", ImmutableMap.of("type", "crimeDate"), "crimeDate"))
-        );
+            new XML2Datum.Element("placeName", ImmutableMap.of(), "placeName")
+//            ,new XML2Datum.Element("rs", ImmutableMap.of("type", "crimeDate"), "crimeDate")
+        ));
 
 
 //        interestingElements.add(new XML2Datum.Element("persName", ImmutableMap.of(), "persName"));
@@ -161,7 +163,7 @@ public class XML2Column {
         SAXParserFactory factory = SAXParserFactory.newInstance();
 
         try {
-            Files.createDirectory(Paths.get("data","obNer"));
+            Files.createDirectory(outDir);
         } catch (FileAlreadyExistsException e) {
             //pass
         }
@@ -201,7 +203,7 @@ public class XML2Column {
                     if(sb.length() > 0) {
                         String trialId = trial.get(trials).get(0).get();
 
-                        Files.write(Paths.get("data", "obNer", trialId+".col"), ImmutableList.of(sb));
+                        Files.write(outDir.resolve(trialId+".col"), ImmutableList.of(sb));
                     }
                 }
 

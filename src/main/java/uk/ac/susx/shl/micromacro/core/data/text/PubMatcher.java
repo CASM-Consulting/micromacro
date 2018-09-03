@@ -15,6 +15,7 @@ import uk.ac.susx.tag.method51.core.meta.KeySet;
 import uk.ac.susx.tag.method51.core.meta.span.Spans;
 import uk.ac.susx.tag.method51.core.meta.types.RuntimeType;
 
+import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Serializable;
@@ -75,7 +76,7 @@ public class PubMatcher {
 
     public PubMatcher (boolean clear, boolean lc) throws IOException {
         db = DBMaker
-                .fileDB("data/pubDB")
+                .fileDB("data/pubDB3")
                 .fileMmapEnable()
                 .closeOnJvmShutdown()
 //                .readOnly()
@@ -94,7 +95,7 @@ public class PubMatcher {
 
         if(clear) {
             pubs.clear();
-            pubs.putAll(csv2Pubs("data/oldbailey-alex_1800-pubs.csv"));
+            pubs.putAll(csv2Pubs("data/oldbailey-alex_1800-pubs-2.csv"));
 
             pubHash.clear();
             pubHash.putAll(pub2Hash(pubs));
@@ -116,16 +117,25 @@ public class PubMatcher {
             String name = record.get("pub_name");
             name = clean(name);
             String id = Integer.toString(i);
+
+            String parish = clean(record.get("parish"));
+            String add1 = clean(record.get("pub_add_1"));
+            String add2 = clean(record.get("pub_add_2"));
+            String add3 = clean(record.get("pub_add_3"));
+            String add4 = clean(record.get("pub_add_4"));
+            String add5 = clean(record.get("pub_add_5"));
+            String add6 = clean(record.get("pub_add_6"));
+
             Pub pub = new Pub(
                 id,
                 name,
-                record.get("parish"),
-                clean(record.get("pub_add_1")),
-                record.get("pub_add_2"),
-                record.get("pub_add_3"),
-                record.get("pub_add_4"),
-                record.get("pub_add_5"),
-                record.get("pub_add_6")
+                parish,
+                add1,
+                add2,
+                add3,
+                add4,
+                add5,
+                add6
             );
             pub = matchPub(pub);
 
@@ -137,13 +147,13 @@ public class PubMatcher {
                 Pub andPub = new Pub(
                         id,
                         andName,
-                        record.get("parish"),
-                        clean(record.get("pub_add_1")),
-                        record.get("pub_add_2"),
-                        record.get("pub_add_3"),
-                        record.get("pub_add_4"),
-                        record.get("pub_add_5"),
-                        record.get("pub_add_6")
+                        parish,
+                        add1,
+                        add2,
+                        add3,
+                        add4,
+                        add5,
+                        add6
                 );
 
                 andPub = matchPub(andPub);
@@ -157,13 +167,13 @@ public class PubMatcher {
                 Pub andPub = new Pub(
                         id,
                         andName,
-                        record.get("parish"),
-                        clean(record.get("pub_add_1")),
-                        record.get("pub_add_2"),
-                        record.get("pub_add_3"),
-                        record.get("pub_add_4"),
-                        record.get("pub_add_5"),
-                        record.get("pub_add_6")
+                        parish,
+                        add1,
+                        add2,
+                        add3,
+                        add4,
+                        add5,
+                        add6
                 );
 
                 andPub = matchPub(andPub);
@@ -206,12 +216,16 @@ public class PubMatcher {
     private Pattern leadingNumbers = Pattern.compile("^[\\d\\s\\p{Punct}a]+(.*)");
     private Pattern andPattern = Pattern.compile("\\b[aA]nd\\b");
     private Pattern ampersandPattern = Pattern.compile("\\b&\\b");
+    private Pattern whitespace = Pattern.compile("\\h+");
 
     private String clean(String original) {
 
-        String trimmed = leadingNumbers.matcher(original)
+        String trimmed = whitespace.matcher(original).replaceAll(" ").trim();
+
+        trimmed = leadingNumbers.matcher(original)
                 .replaceFirst("$1")
                 .replaceAll("[()\\]\\[]", "");
+
 
         return trimmed;
     }
@@ -223,6 +237,19 @@ public class PubMatcher {
 
         return matchedPubs;
     }
+
+    public List<Pub> getUnmatchedPubs() {
+
+        List<Pub> matchedPubs = pubs.values().stream().flatMap(Collection::stream).filter(pub->pub.match == null).collect(Collectors.toList());
+
+        return matchedPubs;
+    }
+
+    public List<Pub> getPubs() {
+
+        List<Pub> matchedPubs = pubs.values().stream().flatMap(Collection::stream).collect(Collectors.toList());
+
+        return matchedPubs;    }
 
     public List<Pub> getPubs(String candidate) {
 
@@ -362,13 +389,60 @@ public class PubMatcher {
 
     public static void main(String[] args ) throws Exception {
 
-        PubMatcher pm = new PubMatcher(true, false);
+//        getUnmatched();
+        rebuildIndex();
 
+//        process2Columns();
+    }
+
+
+    public static void rebuildIndex() throws  Exception {
+        PubMatcher pm = new PubMatcher(true, false);
+    }
+
+    public static void getUnmatched() throws Exception {
+
+        PubMatcher pm = new PubMatcher(false, false);
+
+        try (
+            BufferedWriter writer = Files.newBufferedWriter(Paths.get("unmatchedPubs.csv"))
+        ) {
+            writer.write("id,");
+            writer.write("name,");
+            writer.write("parish,");
+            writer.write("pub_add_1,");
+            writer.write("pub_add_2,");
+            writer.write("pub_add_3,");
+            writer.write("pub_add_4,");
+            writer.write("pub_add_5,");
+            writer.write("pub_add_6");
+            writer.newLine();
+            for(Pub pub : pm.getUnmatchedPubs()) {
+                writer.write(pub.id);
+                writer.write( ",");
+                writer.write(pub.name);
+                writer.write( ",");
+                writer.write(pub.parish);
+                writer.write( ",");
+                writer.write(pub.addr.get(0));
+                writer.write( ",");
+                writer.write(pub.addr.get(1));
+                writer.write( ",");
+                writer.write(pub.addr.get(2));
+                writer.write( ",");
+                writer.write(pub.addr.get(3));
+                writer.write( ",");
+                writer.write(pub.addr.get(4));
+                writer.write( ",");
+                writer.write(pub.addr.get(5));
+                writer.newLine();
+            }
+        }
     }
 
     public static void process2Columns() throws Exception {
 
-        PubMatcher pm = new PubMatcher(true, false);
+        PubMatcher pm = new PubMatcher(false, false);
 
         Path outDir = Paths.get("data","obNerPub");
 
