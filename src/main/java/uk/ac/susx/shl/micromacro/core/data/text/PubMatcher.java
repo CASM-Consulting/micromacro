@@ -3,6 +3,7 @@ package uk.ac.susx.shl.micromacro.core.data.text;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.mapdb.DB;
@@ -12,6 +13,7 @@ import uk.ac.susx.shl.micromacro.core.data.geo.GeoJsonKnowledgeBase;
 import uk.ac.susx.tag.method51.core.meta.Datum;
 import uk.ac.susx.tag.method51.core.meta.Key;
 import uk.ac.susx.tag.method51.core.meta.KeySet;
+import uk.ac.susx.tag.method51.core.meta.span.Span;
 import uk.ac.susx.tag.method51.core.meta.span.Spans;
 import uk.ac.susx.tag.method51.core.meta.types.RuntimeType;
 
@@ -32,6 +34,7 @@ import java.util.stream.Collectors;
 
 public class PubMatcher {
     private static final Logger LOG = Logger.getLogger(PubMatcher.class.getName());
+
 
 
     public static class Pub implements Serializable {
@@ -72,7 +75,8 @@ public class PubMatcher {
 
     private final DB db;
 
-    private boolean lc;
+    private final boolean lc;
+
 
     public PubMatcher (boolean clear, boolean lc) throws IOException {
         db = DBMaker
@@ -137,7 +141,7 @@ public class PubMatcher {
                 add5,
                 add6
             );
-            pub = matchPub(pub);
+            pub = lookupPub(pub);
 
             pubs.computeIfAbsent(name, k-> new ArrayList<>()).add(pub);
 
@@ -156,7 +160,7 @@ public class PubMatcher {
                         add6
                 );
 
-                andPub = matchPub(andPub);
+                andPub = lookupPub(andPub);
 
                 pubs.computeIfAbsent(andName, k-> new ArrayList<>()).add(andPub);
             }
@@ -176,7 +180,7 @@ public class PubMatcher {
                         add6
                 );
 
-                andPub = matchPub(andPub);
+                andPub = lookupPub(andPub);
                 pubs.computeIfAbsent(andName, k-> new ArrayList<>()).add(andPub);
             }
 
@@ -216,7 +220,7 @@ public class PubMatcher {
     private Pattern leadingNumbers = Pattern.compile("^[\\d\\s\\p{Punct}a]+(.*)");
     private Pattern andPattern = Pattern.compile("\\b[aA]nd\\b");
     private Pattern ampersandPattern = Pattern.compile("\\b&\\b");
-    private Pattern whitespace = Pattern.compile("\\h+");
+    private Pattern whitespace = Pattern.compile("req");
 
     private String clean(String original) {
 
@@ -258,7 +262,7 @@ public class PubMatcher {
 
 
 
-    private Pub matchPub(Pub pub) {
+    private Pub lookupPub(Pub pub) {
 
         Match match = null;
 
@@ -371,7 +375,17 @@ public class PubMatcher {
 
                     if(candidates.size() >= 1) {
 
-                        pubSpans = pubSpans.with(indexMap.get(j+i), indexMap.get(j+i+candidates.get(0).name.length()-1), "pub");
+                        Pub p = candidates.get(0);
+
+                        int f = indexMap.get(j+i);
+
+                        int t = indexMap.get(j+i+p.name.length()-1)+1;
+
+                        t = Math.min(t, tokens.size());
+
+                        String match = String.join(" ", tokens.subList(f,t));
+
+                        pubSpans = pubSpans.with(f, t, "pub");
                     }
 
 
@@ -386,15 +400,6 @@ public class PubMatcher {
 
         return pubSpans;
     }
-
-    public static void main(String[] args ) throws Exception {
-
-//        getUnmatched();
-        rebuildIndex();
-
-//        process2Columns();
-    }
-
 
     public static void rebuildIndex() throws  Exception {
         PubMatcher pm = new PubMatcher(true, false);
@@ -435,6 +440,128 @@ public class PubMatcher {
                 writer.write(pub.addr.get(4));
                 writer.write( ",");
                 writer.write(pub.addr.get(5));
+                writer.newLine();
+            }
+        }
+    }
+
+
+    public static void getMatchedOverTime() throws Exception {
+
+        PubMatcher pm = new PubMatcher(false, false);
+
+        Path start = Paths.get("data/sessionsPapers");
+
+        Set<Path> paths = new OBFiles(start)
+//            .getFiles(LocalDate.of(1800,1,1), LocalDate.of(1801,12,31));
+                .getFiles(LocalDate.of(1686,1,1), LocalDate.of(1914,12,31));
+
+        Map<Key<Spans<String, String>>, List<XML2Datum.Element>> interestingElements = new HashMap<>();
+
+        Key<Spans<String, String>> sessionsKey = Key.of("sessionsPaper", RuntimeType.stringSpans(String.class));
+        Key<Spans<String, String>> trialsKey = Key.of("trialAccount", RuntimeType.stringSpans(String.class));
+        Key<Spans<String, String>> statementsKey = Key.of("statement", RuntimeType.stringSpans(String.class));
+
+
+        interestingElements.put(sessionsKey, ImmutableList.of(
+                new XML2Datum.Element("div0", ImmutableMap.of("type", "sessionsPaper"), "sessionsPaper").isContainer(true)
+        ));
+
+        interestingElements.put(trialsKey, ImmutableList.of(
+                new XML2Datum.Element("div1", ImmutableMap.of("type", "trialAccount"), "trialAccount").valueAttribute("id")
+        ));
+
+        interestingElements.put(statementsKey, ImmutableList.of(
+                new XML2Datum.Element("p", ImmutableMap.of(), "statement")
+        ));
+
+        Iterator<Datum> itr = XML2Datum.getData(start, paths, interestingElements, "trialAccount", "-id").iterator();
+
+        Key<Spans<List<String>, String>> pubSpansKey = Key.of("pubs", RuntimeType.listSpans(String.class));
+
+
+        Map<String, Map<String, Integer>> matchedPubs = new HashMap<>();
+
+        List<Pub> pubs = pm.getPubs();
+
+        while(itr.hasNext()) {
+            Datum trial = itr.next();
+
+            String trialId = trial.get("trialAccount-id");
+
+            String year = trialId.substring(1, 5);
+
+            System.out.println(year);
+
+            KeySet keys = trial.getKeys();
+
+            Key<String> textKey = keys.get("text");
+
+            for (Datum statement : trial.getSpannedData(statementsKey, keys)) {
+
+                List<Datum> sents = Sentizer.sentize(statement, textKey, keys);
+
+                for(Datum sentence : sents ) {
+
+                    Datum tokenized = Tokenizer.tokenize(sentence, textKey, keys);
+                    KeySet tokenizedKeys = tokenized.getKeys();
+                    Key<List<String>> tokenKey = tokenizedKeys.get(textKey + Tokenizer.SUFFIX);
+
+                    Spans<List<String>, String> pubSpans = pm.matchPubs(tokenized, tokenKey);
+
+
+                    for(Span<List<String>, String> span : pubSpans.get()) {
+                        List<String> spanned = span.getSpanned(tokenized);
+                        String pub =  String.join(" ", spanned);
+
+                        Map<String, Integer> countEntry = matchedPubs.computeIfAbsent(year, (e1)->new HashMap<>());
+                        countEntry.computeIfAbsent(pub, e->0);
+                        countEntry.put(pub, countEntry.get(pub)+1);
+                    }
+
+                }
+            }
+        }
+
+
+        List<String> pubNames = new ArrayList<>(pubs.stream().map(p->p.name).collect(Collectors.toSet()));
+
+        Collections.sort(pubNames);
+
+        try(
+            BufferedWriter writer = Files.newBufferedWriter(Paths.get("pubsOverTime.csv"))
+        ) {
+            writer.write("year");
+            writer.write(",");
+            for (String name : pubNames) {
+                writer.write(name);
+                writer.write(",");
+            }
+            writer.newLine();
+
+            List<String> years = new ArrayList<>(matchedPubs.keySet());
+            Collections.sort(years);
+
+            for (String year : years) {
+                Map<String, Integer> mentioneds = matchedPubs.get(year);
+
+                writer.write(year);
+                writer.write(",");
+
+
+                for (String name : pubNames) {
+
+                    if(mentioneds.containsKey(name)) {
+
+                        writer.write(Integer.toString(mentioneds.get(name)));
+                    } else {
+
+                        writer.write("0");
+                    }
+
+                    writer.write(",");
+                }
+
                 writer.newLine();
             }
         }
@@ -521,4 +648,12 @@ public class PubMatcher {
             }
         }
     }
+    public static void main(String[] args ) throws Exception {
+
+//        getUnmatched();
+//        rebuildIndex();
+        getMatchedOverTime();
+//        process2Columns();
+    }
+
 }

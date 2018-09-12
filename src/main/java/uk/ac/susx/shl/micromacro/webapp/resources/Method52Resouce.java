@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import io.dropwizard.jersey.params.LocalDateParam;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.Jdbi;
+import uk.ac.susx.shl.micromacro.client.Method52Data;
 import uk.ac.susx.shl.micromacro.core.data.text.SimpleDocument;
 import uk.ac.susx.shl.micromacro.db.JdbiProvider;
 import uk.ac.susx.tag.method51.core.data.PostgreSQLConnection;
@@ -36,11 +37,11 @@ import java.util.Optional;
 @Produces(MediaType.APPLICATION_JSON)
 public class Method52Resouce {
 
-    private final Jdbi jdbi;
+    private final Method52Data data;
 
-    public Method52Resouce(Jdbi jdbi) {
+    public Method52Resouce(Method52Data data) {
 
-        this.jdbi = jdbi;
+        this.data = data;
     }
 
 
@@ -48,14 +49,12 @@ public class Method52Resouce {
     @Path("list-tables")
     public Response listTables() throws SQLException {
 
-        try (Handle handle  = jdbi.open()) {
-            Connection con = handle.getConnection();
-            //no need to close - hadle does it
-            List<String> dbs = PostgresUtils.getTableNames(con);
-            return Response.status(Response.Status.OK).entity(
-                    dbs
-            ).build();
-        }
+        List<String> tables = data.listTables();
+
+        return Response.status(Response.Status.OK).entity(
+            tables
+        ).build();
+
     }
 
     @GET
@@ -64,79 +63,30 @@ public class Method52Resouce {
 
         Gson gson = GsonBuilderFactory.get().create();
 
-        try (Handle handle  = jdbi.open()) {
-            Connection con = handle.getConnection();
-            //no need to close - hadle does it
-            JsonElement keysMeta = gson.fromJson(PostgresUtils.getComment(con, table), JsonObject.class).get("keys");
+        KeySet keys = data.listKeys(table);
 
-            KeySet keys = gson.fromJson(keysMeta, KeySet.class);
+        return Response.status(Response.Status.OK).entity(
+                gson.toJson(keys)
+        ).build();
 
-            return Response.status(Response.Status.OK).entity(
-                    gson.toJson(keys)
-            ).build();
-        }
     }
 
     @POST
     @Path("get-annotations")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response getScores(@QueryParam("table") String table,
-                              @QueryParam("trialIdKey") String _trialIdKey,
-                              @QueryParam("sentenceIdKey") String _sentenceIdKey,
-                              @QueryParam("annotationKeys") List<String> annotationKeys,  List<String> ids) throws SQLException, StoreException {
-
-
-        //change back to native id format
-        ListIterator<String> itr = ids.listIterator();
-//        while(itr.hasNext()) {
-//            String id = itr.next();
-//            itr.set(id.replaceAll("-", "."));
-//        }
+                              @QueryParam("trialIdKey") String trialIdKey,
+                              @QueryParam("sentenceIdKey") String sentenceIdKey,
+                              @QueryParam("annotationKeys") List<String> annotationKeys,
+                              List<String> ids) throws SQLException, StoreException {
 
         Gson gson = GsonBuilderFactory.get().create();
 
-        try (Handle handle  = jdbi.open()) {
-            Connection con = handle.getConnection();
-            //no need to close - handle does it
+        List<Datum> results = data.getScores(table, trialIdKey, sentenceIdKey, annotationKeys, ids);
 
-            JsonElement keysMeta = gson.fromJson(PostgresUtils.getComment(con, table), JsonObject.class).get("keys");
-
-            KeySet keys = gson.fromJson(keysMeta, KeySet.class);
-
-            Key<String> trialIdKey = keys.get(_trialIdKey);
-
-            Key<String> idKey = keys.get(_sentenceIdKey);
-
-            gson = GsonBuilderFactory.get(keys).create();
-
-            KeySet getKeys = KeySet.of(idKey);
-
-            for(String k : annotationKeys) {
-                getKeys = getKeys.with(keys.get(k));
-            }
-
-
-            PostgreSQLConnection connectionParams = new PostgreSQLConnection().setConnection(con);
-            PostgreSQLDatumStore store = new PostgreSQLDatumStore.Builder(connectionParams, table)
-                    .incoming(getKeys)
-                    .uniqueIndex(idKey)
-                    .lookup(trialIdKey)
-                    .build();
-
-            store.connect();
-
-            List<Datum> results = store.get(ids);
-
-            ListIterator<Datum> jtr = results.listIterator();
-//            while(jtr.hasNext()) {
-//                Datum datum = jtr.next();
-//                jtr.set(datum.with(idKey, datum.get(idKey).replaceAll("\\.", "-")));
-//            }
-
-            return Response.status(Response.Status.OK).entity(
-                    gson.toJson(results)
-            ).build();
-        }
+        return Response.status(Response.Status.OK).entity(
+                gson.toJson(results)
+        ).build();
     }
 
 }

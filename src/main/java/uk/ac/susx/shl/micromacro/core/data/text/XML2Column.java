@@ -119,12 +119,12 @@ public class XML2Column {
 
     public static void obNer() throws Exception {
 
-        Path outDir = Paths.get("data","obPlaceNer");
+        Path outDir = Paths.get("data","obPlaceNer2-filtered");
 
         Key<Spans<String, String>> sessions = Key.of("sessionsPaper", RuntimeType.stringSpans(String.class));
         Key<Spans<String, String>> trials = Key.of("trialAccount", RuntimeType.stringSpans(String.class));
         Key<Spans<String, String>> statements = Key.of("statement", RuntimeType.stringSpans(String.class));
-        Key<Spans<String, String>> entities = Key.of("entities", RuntimeType.stringSpans(String.class));
+        Key<Spans<String, String>> placeName = Key.of("placeName", RuntimeType.stringSpans(String.class));
 //        Key<Spans<String, String>> crimeDate = Key.of("crimeDate", RuntimeType.stringSpans(String.class));
 
         Map<Key<Spans<String, String>>, List<XML2Datum.Element>> interestingElements = new HashMap<>();
@@ -142,7 +142,7 @@ public class XML2Column {
             new XML2Datum.Element("p", ImmutableMap.of(), "statement")
         ));
 
-        interestingElements.put(entities, ImmutableList.of(
+        interestingElements.put(placeName, ImmutableList.of(
             new XML2Datum.Element("placeName", ImmutableMap.of(), "placeName")
 //            ,new XML2Datum.Element("rs", ImmutableMap.of("type", "crimeDate"), "crimeDate")
         ));
@@ -189,22 +189,32 @@ public class XML2Column {
 
                     StringBuilder sb = new StringBuilder();
 
+                    int i = 0;
                     for(Datum statement : trial.getSpannedData(statements, keys)) {
 
-                        //Optional<Spans<String,String>> places = statement.maybeGet(placeNames);
+                        List<Datum> sents = Sentizer.sentize(statement, textKey, keys);
+                        int j = 0;
+                        for (Datum sentence : sents) {
 
-                        Datum2Column columns = new Datum2Column(statement, textKey, ImmutableList.of(entities));
+                            //Optional<Spans<String,String>> places = statement.maybeGet(placeNames);
 
-                        String s = columns.columnise();
+                            Datum2Column columns = new Datum2Column(sentence, textKey, ImmutableList.of(placeName));
+
+                            String s = columns.columnise();
 //                        System.out.println(s);
-                        sb.append(s);
+                            sb.append(s);
+
+
+                            if(!sentence.maybeGet(placeName).or(Spans.annotate(textKey,String.class)).get().isEmpty()) {
+                                String trialId = trial.get(trials).get(0).get();
+
+                                Files.write(outDir.resolve(trialId+"-"+i+"-"+j+".col"), ImmutableList.of(sb));
+                            }
+                            ++j;
+                        }
+                        ++i;
                     }
 
-                    if(sb.length() > 0) {
-                        String trialId = trial.get(trials).get(0).get();
-
-                        Files.write(outDir.resolve(trialId+".col"), ImmutableList.of(sb));
-                    }
                 }
 
             }
