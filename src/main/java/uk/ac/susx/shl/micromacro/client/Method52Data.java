@@ -58,8 +58,8 @@ public class Method52Data {
 
 
     public List<Datum>  getScores(String table,
-                                  String _trialIdKey,
-                                  String _sentenceIdKey,
+                                  String trialIdKey,
+                                  String sentenceIdKey,
                                   List<String> annotationKeys, List<String> ids) throws SQLException, StoreException {
 
         boolean convertIds = false;
@@ -82,9 +82,9 @@ public class Method52Data {
 
             KeySet keys = gson.fromJson(keysMeta, KeySet.class);
 
-            Key<String> trialIdKey = keys.get(_trialIdKey);
+            Key<String> _trialIdKey = keys.get(trialIdKey);
 
-            Key<String> idKey = keys.get(_sentenceIdKey);
+            Key<String> idKey = keys.get(sentenceIdKey);
 
             gson = GsonBuilderFactory.get(keys).create();
 
@@ -99,7 +99,7 @@ public class Method52Data {
             PostgreSQLDatumStore store = new PostgreSQLDatumStore.Builder(connectionParams, table)
                     .incoming(getKeys)
                     .uniqueIndex(idKey)
-                    .lookup(trialIdKey)
+                    .lookup(_trialIdKey)
                     .build();
 
             store.connect();

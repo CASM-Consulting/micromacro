@@ -8,6 +8,7 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 
 import org.jdbi.v3.core.Jdbi;
+import uk.ac.susx.shl.micromacro.client.Method52Data;
 import uk.ac.susx.shl.micromacro.core.data.text.PubMatcher;
 import uk.ac.susx.shl.micromacro.db.JdbiProvider;
 import uk.ac.susx.shl.micromacro.webapp.health.DefaultHealthCheck;
@@ -38,13 +39,13 @@ public class MicroMacroApplication extends Application<MicroMacroConfiguration> 
     public void run(final MicroMacroConfiguration configuration,
                     final Environment environment) throws IOException {
 
-        PubMatcher pubMatcher = new PubMatcher(false, false);
-
-
         JdbiFactory factory = new JdbiFactory();
 
         Jdbi jdbi = factory.build(environment, configuration.getDataSourceFactory(), "postgresql");
 //        Jdbi jdbi = null;
+
+        PubMatcher pubMatcher = new PubMatcher(false, false);
+        Method52Data method52Data = new Method52Data(jdbi);
 
         final PlacesResource places = new PlacesResource(configuration.geoJsonPath, pubMatcher);
         environment.jersey().register(places);
@@ -59,12 +60,10 @@ public class MicroMacroApplication extends Application<MicroMacroConfiguration> 
         final DefaultHealthCheck healthCheck = new DefaultHealthCheck();
         environment.healthChecks().register("default", healthCheck);
 
+//        final Client client = new JerseyClientBuilder(environment).using(configuration.getJerseyClientConfiguration()).build(getName());
 
-        final Client client = new JerseyClientBuilder(environment).using(configuration.getJerseyClientConfiguration())
-                .build(getName());
+        environment.jersey().register(new Method52Resouce(method52Data));
 
-
-        environment.jersey().register(new Method52Resouce(jdbi));
     }
 
 }

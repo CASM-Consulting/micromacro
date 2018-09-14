@@ -6,8 +6,11 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
+import org.jdbi.v3.core.Jdbi;
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
+import org.postgresql.ds.PGSimpleDataSource;
+import uk.ac.susx.shl.micromacro.client.Method52Data;
 import uk.ac.susx.shl.micromacro.core.data.Match;
 import uk.ac.susx.shl.micromacro.core.data.geo.GeoJsonKnowledgeBase;
 import uk.ac.susx.tag.method51.core.meta.Datum;
@@ -17,6 +20,7 @@ import uk.ac.susx.tag.method51.core.meta.span.Span;
 import uk.ac.susx.tag.method51.core.meta.span.Spans;
 import uk.ac.susx.tag.method51.core.meta.types.RuntimeType;
 
+import javax.sql.DataSource;
 import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.IOException;
@@ -63,6 +67,19 @@ public class PubMatcher {
 
         public Pub match(Match match) {
             return new Pub(id, name, parish, addr, match);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Pub pub = (Pub) o;
+            return Objects.equals(name, pub.name);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(name);
         }
     }
 
@@ -448,19 +465,33 @@ public class PubMatcher {
 
     public static void getMatchedOverTime() throws Exception {
 
+        PGSimpleDataSource dataSource = new PGSimpleDataSource();
+        dataSource.setUrl("jdbc:postgresql://127.0.0.1/oldbailey-alex");
+
+        String table = "1750-1825-sent-placeNames-2";
+        String trialIdKey = "general/trialAccount-id";
+        String _sentenceIdKey = "general/sentenceId";
+        List<String> annotationKeys = ImmutableList.of("classify/1750-1825-places2-publocation");
+
+
+        Jdbi jdbi = Jdbi.create(dataSource);
+
+        Method52Data method52Data = new Method52Data(jdbi);
+
         PubMatcher pm = new PubMatcher(false, false);
 
         Path start = Paths.get("data/sessionsPapers");
 
         Set<Path> paths = new OBFiles(start)
-//            .getFiles(LocalDate.of(1800,1,1), LocalDate.of(1801,12,31));
-                .getFiles(LocalDate.of(1686,1,1), LocalDate.of(1914,12,31));
+            .getFiles(LocalDate.of(1800,1,1), LocalDate.of(1801,12,31));
+//            .getFiles(LocalDate.of(1686,1,1), LocalDate.of(1914,12,31));
 
         Map<Key<Spans<String, String>>, List<XML2Datum.Element>> interestingElements = new HashMap<>();
 
         Key<Spans<String, String>> sessionsKey = Key.of("sessionsPaper", RuntimeType.stringSpans(String.class));
         Key<Spans<String, String>> trialsKey = Key.of("trialAccount", RuntimeType.stringSpans(String.class));
         Key<Spans<String, String>> statementsKey = Key.of("statement", RuntimeType.stringSpans(String.class));
+        Key<String> sentenceIdKey = Key.of("sentenceId", RuntimeType.STRING);
 
 
         interestingElements.put(sessionsKey, ImmutableList.of(
@@ -488,6 +519,8 @@ public class PubMatcher {
             Datum trial = itr.next();
 
             String trialId = trial.get("trialAccount-id");
+
+            List<Datum> classified = method52Data.getScores(table, trialIdKey, _sentenceIdKey, annotationKeys, ImmutableList.of(trialId));
 
             String year = trialId.substring(1, 5);
 
@@ -529,7 +562,7 @@ public class PubMatcher {
         Collections.sort(pubNames);
 
         try(
-            BufferedWriter writer = Files.newBufferedWriter(Paths.get("pubsOverTime.csv"))
+            BufferedWriter writer = Files.newBufferedWriter(Paths.get("pubsOverTimes.csv"))
         ) {
             writer.write("year");
             writer.write(",");
@@ -648,12 +681,30 @@ public class PubMatcher {
             }
         }
     }
+
+    public static void outputCleanUniquePubNames() throws Exception {
+        PubMatcher pm = new PubMatcher(false, false);
+
+        try (
+                BufferedWriter writer = Files.newBufferedWriter(Paths.get("cleanUniquePubs.csv"))
+        ) {
+            writer.write("name,");
+            writer.newLine();
+            Set<Pub> pubs = new HashSet<>(pm.getPubs());
+            for(Pub pub : pubs) {
+                writer.write(pub.name);
+                writer.newLine();
+            }
+        }
+    }
+
     public static void main(String[] args ) throws Exception {
 
 //        getUnmatched();
 //        rebuildIndex();
-        getMatchedOverTime();
+//        getMatchedOverTime();
 //        process2Columns();
+        outputCleanUniquePubNames();
     }
 
 }
