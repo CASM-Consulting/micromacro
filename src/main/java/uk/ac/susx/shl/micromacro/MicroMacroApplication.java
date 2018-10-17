@@ -18,6 +18,8 @@ import uk.ac.susx.shl.micromacro.webapp.resources.PlacesResource;
 
 import javax.ws.rs.client.Client;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 public class MicroMacroApplication extends Application<MicroMacroConfiguration> {
 
@@ -38,6 +40,8 @@ public class MicroMacroApplication extends Application<MicroMacroConfiguration> 
     @Override
     public void run(final MicroMacroConfiguration configuration,
                     final Environment environment) throws IOException {
+
+        Files.createDirectories(Paths.get("data"));
 
         JdbiFactory factory = new JdbiFactory();
 
