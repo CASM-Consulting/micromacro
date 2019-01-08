@@ -1,4 +1,4 @@
-package uk.ac.susx.shl.micromacro.client;
+package uk.ac.susx.shl.micromacro.db;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -22,23 +22,22 @@ import java.util.ListIterator;
 /**
  * Created by sw206 on 12/09/2018.
  */
-public class Method52Data {
+public class Method52DAO {
 
     private final Jdbi jdbi;
 
-    public Method52Data(Jdbi jdbi) {
+    public Method52DAO(Jdbi jdbi) {
 
         this.jdbi = jdbi;
     }
 
     public List<String> listTables() throws SQLException {
-
-        try (Handle handle  = jdbi.open()) {
+        return jdbi.withHandle(handle -> {
             Connection con = handle.getConnection();
             //no need to close - hadle does it
             List<String> dbs = PostgresUtils.getTableNames(con);
             return dbs;
-        }
+        });
     }
 
     public KeySet listKeys(String table) throws SQLException {

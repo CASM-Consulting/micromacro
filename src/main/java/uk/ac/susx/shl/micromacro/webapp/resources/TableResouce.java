@@ -2,9 +2,7 @@ package uk.ac.susx.shl.micromacro.webapp.resources;
 
 import com.google.gson.Gson;
 import uk.ac.susx.shl.micromacro.db.Method52DAO;
-import uk.ac.susx.tag.method51.core.data.StoreException;
 import uk.ac.susx.tag.method51.core.gson.GsonBuilderFactory;
-import uk.ac.susx.tag.method51.core.meta.Datum;
 import uk.ac.susx.tag.method51.core.meta.KeySet;
 
 import javax.ws.rs.*;
@@ -16,20 +14,20 @@ import java.util.List;
 /**
  * Created by sw206 on 18/07/2018.
  */
-@Path("m52")
+@Path("tables")
 @Produces(MediaType.APPLICATION_JSON)
-public class Method52Resouce {
+public class TableResouce {
 
     private final Method52DAO data;
 
-    public Method52Resouce(Method52DAO data) {
+    public TableResouce(Method52DAO data) {
 
         this.data = data;
     }
 
 
     @GET
-    @Path("list-tables")
+    @Path("list")
     public Response listTables() throws SQLException {
 
         List<String> tables = data.listTables();
@@ -41,7 +39,7 @@ public class Method52Resouce {
     }
 
     @GET
-    @Path("list-keys")
+    @Path("schema")
     public Response listKeys(@QueryParam("table") String table) throws SQLException {
 
         Gson gson = GsonBuilderFactory.get().create();
@@ -53,23 +51,4 @@ public class Method52Resouce {
         ).build();
 
     }
-
-    @POST
-    @Path("get-annotations")
-    @Consumes(MediaType.APPLICATION_JSON)
-    public Response getScores(@QueryParam("table") String table,
-                              @QueryParam("trialIdKey") String trialIdKey,
-                              @QueryParam("sentenceIdKey") String sentenceIdKey,
-                              @QueryParam("annotationKeys") List<String> annotationKeys,
-                              List<String> ids) throws SQLException, StoreException {
-
-        Gson gson = GsonBuilderFactory.get().create();
-
-        List<Datum> results = data.getScores(table, trialIdKey, sentenceIdKey, annotationKeys, ids);
-
-        return Response.status(Response.Status.OK).entity(
-                gson.toJson(results)
-        ).build();
-    }
-
 }

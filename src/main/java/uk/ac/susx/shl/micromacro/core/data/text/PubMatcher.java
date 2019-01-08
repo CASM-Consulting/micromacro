@@ -3,14 +3,13 @@ package uk.ac.susx.shl.micromacro.core.data.text;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.jdbi.v3.core.Jdbi;
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
 import org.postgresql.ds.PGSimpleDataSource;
-import uk.ac.susx.shl.micromacro.client.Method52Data;
+import uk.ac.susx.shl.micromacro.db.Method52DAO;
 import uk.ac.susx.shl.micromacro.core.data.Match;
 import uk.ac.susx.shl.micromacro.core.data.geo.GeoJsonKnowledgeBase;
 import uk.ac.susx.tag.method51.core.meta.Datum;
@@ -20,7 +19,6 @@ import uk.ac.susx.tag.method51.core.meta.span.Span;
 import uk.ac.susx.tag.method51.core.meta.span.Spans;
 import uk.ac.susx.tag.method51.core.meta.types.RuntimeType;
 
-import javax.sql.DataSource;
 import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.IOException;
@@ -476,7 +474,7 @@ public class PubMatcher {
 
         Jdbi jdbi = Jdbi.create(dataSource);
 
-        Method52Data method52Data = new Method52Data(jdbi);
+        Method52DAO method52Data = new Method52DAO(jdbi);
 
         PubMatcher pm = new PubMatcher(false, false);
 

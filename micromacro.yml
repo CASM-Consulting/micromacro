@@ -54,7 +54,7 @@ database:
 
   # the maximum number of connections to keep open
   ## otherwise every connection makes a pool which doesn't get closed!
-  maxSize: 1
+  maxSize: 10
 
   # whether or not idle connections should be validated
   #checkConnectionWhileIdle: false

@@ -50,19 +50,23 @@ public class MicroMacroConfiguration extends Configuration implements AssetsBund
     }
 
 
-    @Valid
-    @NotNull
-    private JerseyClientConfiguration jerseyClient = new JerseyClientConfiguration();
+//    @Valid
+//    @NotNull
+//    private JerseyClientConfiguration jerseyClient = new JerseyClientConfiguration();
 
-    @JsonProperty("jerseyClient")
-    public JerseyClientConfiguration getJerseyClientConfiguration() {
-        return jerseyClient;
-    }
+//    @JsonProperty("jerseyClient")
+//    public JerseyClientConfiguration getJerseyClientConfiguration() {
+//        return jerseyClient;
+//    }
+//
+//    @JsonProperty("jerseyClient")
+//    public void setJerseyClientConfiguration(JerseyClientConfiguration jerseyClient) {
+//        this.jerseyClient = jerseyClient;
+//    }
 
-    @JsonProperty("jerseyClient")
-    public void setJerseyClientConfiguration(JerseyClientConfiguration jerseyClient) {
-        this.jerseyClient = jerseyClient;
-    }
+
+
+
 
     @Valid
     @NotNull
