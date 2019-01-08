@@ -48,7 +48,7 @@ public class MicroMacroApplication extends Application<MicroMacroConfiguration> 
 //        Jdbi jdbi = null;
 
         PubMatcher pubMatcher = new PubMatcher(false, false);
-        Method52DAO method52Data = new Method52DAO(jdbi);
+        Method52DAO method52DAO = new Method52DAO(jdbi);
 
         final PlacesResource places = new PlacesResource(configuration.geoJsonPath, pubMatcher);
         environment.jersey().register(places);
@@ -65,11 +65,10 @@ public class MicroMacroApplication extends Application<MicroMacroConfiguration> 
 
 //        final Client client = new JerseyClientBuilder(environment).using(configuration.getJerseyClientConfiguration()).build(getName());
 
-        environment.jersey().register(new Method52Resouce(method52Data));
+        environment.jersey().register(new Method52Resouce(method52DAO));
 
-
-        final DatumWrapperDAO dao = new DatumWrapperDAO(jdbi);
-        environment.jersey().register(new DatumResources(dao));
+        final DatumWrapperDAO datumWrapperDAO = new DatumWrapperDAO(jdbi);
+        environment.jersey().register(new DatumResources(datumWrapperDAO, method52DAO));
 
     }
 

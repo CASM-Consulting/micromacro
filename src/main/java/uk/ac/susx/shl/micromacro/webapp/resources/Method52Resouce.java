@@ -46,7 +46,7 @@ public class Method52Resouce {
 
         Gson gson = GsonBuilderFactory.get().create();
 
-        KeySet keys = data.listKeys(table);
+        KeySet keys = data.schema(table);
 
         return Response.status(Response.Status.OK).entity(
                 gson.toJson(keys)
