@@ -6,6 +6,8 @@ import io.dropwizard.hibernate.UnitOfWork;
 import uk.ac.susx.shl.micromacro.db.DatumWrapper;
 import uk.ac.susx.shl.micromacro.db.DatumWrapperDAO;
 import uk.ac.susx.shl.micromacro.db.Method52DAO;
+import uk.ac.susx.tag.method51.core.data.store2.query.OrderBy;
+import uk.ac.susx.tag.method51.core.data.store2.query.Proxy;
 import uk.ac.susx.tag.method51.core.data.store2.query.Select;
 import uk.ac.susx.tag.method51.core.meta.Key;
 import uk.ac.susx.tag.method51.core.meta.KeySet;
@@ -13,6 +15,7 @@ import uk.ac.susx.tag.method51.core.meta.filters.DatumFilter;
 import uk.ac.susx.tag.method51.core.meta.filters.KeyFilter;
 import uk.ac.susx.tag.method51.core.meta.filters.KeyFilters;
 import uk.ac.susx.tag.method51.core.meta.filters.logic.LogicParser;
+import uk.ac.susx.tag.method51.core.meta.types.RuntimeType;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -47,13 +50,13 @@ public class DatumResources {
 
     @POST
     @Path("select")
-    public Response selecta(@QueryParam("table") String table,
+    public Response select(@QueryParam("table") String table,
                           @QueryParam("expression") String expression,
                           Map<String, Map<String, String>> literalSpec
     ) throws SQLException {
 
         Map<String, KeyFilter> literals = processLiterals(literalSpec, method52DAO.schema(table));
- 
+
         LogicParser parser = new LogicParser(literals);
 
         DatumFilter datumFilter = parser.parse(null, expression);
@@ -64,6 +67,40 @@ public class DatumResources {
 
         return Response.status(Response.Status.OK).entity(
                 data
+        ).build();
+    }
+
+
+    @POST
+    @Path("proxy")
+    public Response proxy(@QueryParam("table") String table,
+                            @QueryParam("target") String target,
+                            @QueryParam("proxy") String proxy,
+                            @QueryParam("partition") String partition,
+                            @QueryParam("orderBy") String orderByKey,
+                            @QueryParam("proximity") int proximity,
+                            @QueryParam("limit") int limit,
+                            Map<String, Map<String, String>> literalSpec
+    ) throws SQLException {
+
+        KeySet keys = method52DAO.schema(table);
+
+        Key partitionKey = keys.get(partition);
+
+        Map<String, KeyFilter> literals = processLiterals(literalSpec, keys);
+
+        LogicParser parser = new LogicParser(literals);
+
+        DatumFilter targetFilter = parser.parse(null, target);
+        DatumFilter proxyFilter = parser.parse(null, proxy);
+        OrderBy orderBy = processOrderBy(orderByKey);
+
+        String sql = new Proxy(table, targetFilter, proxyFilter, partitionKey, proximity, orderBy, limit).sql();
+
+        List<DatumWrapper> data = datumWrapperDAO.execute(sql);
+
+        return Response.status(Response.Status.OK).entity(
+            data
         ).build();
     }
 
@@ -88,5 +125,9 @@ public class DatumResources {
         }
 
         return literals;
+    }
+
+    private OrderBy processOrderBy(String key) {
+        return OrderBy.asc(Key.of(key, RuntimeType.ANY));
     }
 }
