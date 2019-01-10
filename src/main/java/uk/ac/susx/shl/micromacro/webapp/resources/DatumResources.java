@@ -9,6 +9,7 @@ import uk.ac.susx.shl.micromacro.db.Method52DAO;
 import uk.ac.susx.tag.method51.core.data.store2.query.OrderBy;
 import uk.ac.susx.tag.method51.core.data.store2.query.Proxy;
 import uk.ac.susx.tag.method51.core.data.store2.query.Select;
+import uk.ac.susx.tag.method51.core.data.store2.query.SelectDistinct;
 import uk.ac.susx.tag.method51.core.meta.Key;
 import uk.ac.susx.tag.method51.core.meta.KeySet;
 import uk.ac.susx.tag.method51.core.meta.filters.DatumFilter;
@@ -41,7 +42,34 @@ public class DatumResources {
     @Path("sql")
     public Response sql(@QueryParam("sql") String sql) throws SQLException {
 
-        List<DatumWrapper> data = datumWrapperDAO.execute(sql);
+        List<DatumWrapper> data = datumWrapperDAO.select(sql);
+
+        return Response.status(Response.Status.OK).entity(
+                data
+        ).build();
+    }
+
+    @POST
+    @Path("select-distinct")
+    public Response selectDistinct(@QueryParam("table") String table,
+                           @QueryParam("expression") String expression,
+                           @QueryParam("distinctKey") String key,
+                           Map<String, Map<String, String>> literalSpec
+    ) throws SQLException {
+
+        KeySet keys = method52DAO.schema(table);
+
+        Key distinctKey = keys.get(key);
+
+        Map<String, KeyFilter> literals = processLiterals(literalSpec, keys);
+
+        LogicParser parser = new LogicParser(literals);
+
+        DatumFilter datumFilter = parser.parse(null, expression);
+
+        String sql = new SelectDistinct(table, distinctKey, datumFilter).sql();
+
+            List<String> data = datumWrapperDAO.selectString(sql);
 
         return Response.status(Response.Status.OK).entity(
                 data
@@ -63,7 +91,7 @@ public class DatumResources {
 
         String sql = new Select(table, datumFilter, ImmutableList.of(), 0).sql();
 
-        List<DatumWrapper> data = datumWrapperDAO.execute(sql);
+        List<DatumWrapper> data = datumWrapperDAO.select(sql);
 
         return Response.status(Response.Status.OK).entity(
                 data
@@ -97,7 +125,7 @@ public class DatumResources {
 
         String sql = new Proxy(table, targetFilter, proxyFilter, partitionKey, proximity, orderBy, limit).sql();
 
-        List<DatumWrapper> data = datumWrapperDAO.execute(sql);
+        List<DatumWrapper> data = datumWrapperDAO.select(sql);
 
         return Response.status(Response.Status.OK).entity(
             data

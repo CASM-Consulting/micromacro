@@ -22,7 +22,7 @@ class DatumWrapperDAOTest {
 //    @Test
 //    public void selectDatumWrapper() {
 //        List<DatumWrapper> data = database.inTransaction(() -> {
-//            return datumWrapperDAO.execute("select * from test");
+//            return datumWrapperDAO.select("select * from test");
 //        });
 //
 //        System.out.println(data.size());
