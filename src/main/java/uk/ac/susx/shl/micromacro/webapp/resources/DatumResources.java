@@ -69,7 +69,7 @@ public class DatumResources {
 
         String sql = new SelectDistinct(table, distinctKey, datumFilter).sql();
 
-            List<String> data = datumWrapperDAO.selectString(sql);
+        List<String> data = datumWrapperDAO.selectString(sql);
 
         return Response.status(Response.Status.OK).entity(
                 data
@@ -122,6 +122,7 @@ public class DatumResources {
         DatumFilter targetFilter = parser.parse(null, target);
         DatumFilter proxyFilter = parser.parse(null, proxy);
         OrderBy orderBy = processOrderBy(orderByKey);
+        orderBy = orderBy.numeric(true);
 
         String sql = new Proxy(table, targetFilter, proxyFilter, partitionKey, proximity, orderBy, limit).sql();
 

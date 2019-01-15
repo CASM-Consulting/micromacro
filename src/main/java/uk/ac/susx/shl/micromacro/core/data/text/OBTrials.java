@@ -571,7 +571,7 @@ public class OBTrials {
                     statementIdKey,
                     sentenceIdKey,
                     textKey,
-//                    placeNameSpansKey,
+                    placeNameSpansKey,
                     placeNamesKey
                 );
 
@@ -606,6 +606,7 @@ public class OBTrials {
                             }
 
                             datum = datum.with(placeNamesKey, placeNames);
+                            datum = datum.with(placeNameSpansKey, placeNameSpans);
                         }
 
 
