@@ -22,7 +22,6 @@ public class WorkspaceResource {
     private final Map<String, Workspace> workspaces;
     private final QueryFactory queryFactory;
 
-
     public WorkspaceResource(Map<String, Workspace> workspaces, QueryFactory queryFactory) {
         this.workspaces = workspaces;
         this.queryFactory = queryFactory;
@@ -44,13 +43,26 @@ public class WorkspaceResource {
     }
 
     @GET
+    @Path("listQueries")
+    public Response list(@QueryParam("name") String name) {
+
+        List<String> queries = new ArrayList<>(workspaces.get(name).queries().keySet());
+
+        Collections.sort(queries);
+
+        return Response.status(Response.Status.OK).entity(
+                queries
+        ).build();
+    }
+
+    @GET
     @Path("load")
     public Response load(@QueryParam("name") String name) {
 
         Workspace workspace = workspaces.get(name);
 
         return Response.status(Response.Status.OK).entity(
-                workspace
+                new WorkspaceRep(workspace)
         ).build();
     }
 

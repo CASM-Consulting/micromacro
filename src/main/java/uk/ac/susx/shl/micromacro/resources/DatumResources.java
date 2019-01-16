@@ -93,31 +93,4 @@ public class DatumResources {
             data
         ).build();
     }
-
-    private final static String KEY_NAME = "key";
-    private final static String ARGS = "args";
-    private final static String FILTER_NAME = "filter";
-
-    private Map<String, KeyFilter> processLiterals(Map<String, Map<String, String>> specs, KeySet keys) {
-
-        Map<String, KeyFilter> literals = new HashMap<>();
-
-        for(Map.Entry<String, Map<String, String>> entry : specs.entrySet()) {
-            Map<String, String> spec = entry.getValue();
-
-            Key key = keys.get(spec.get(KEY_NAME));
-            String name = spec.get(FILTER_NAME);
-            String args = spec.get(ARGS);
-
-            KeyFilter filter = KeyFilters.get(name, args, key);
-
-            literals.put(entry.getKey(), filter);
-        }
-
-        return literals;
-    }
-
-    private OrderBy processOrderBy(String key) {
-        return OrderBy.asc(Key.of(key, RuntimeType.ANY));
-    }
 }

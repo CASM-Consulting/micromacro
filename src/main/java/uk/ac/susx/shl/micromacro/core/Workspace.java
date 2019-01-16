@@ -2,11 +2,12 @@ package uk.ac.susx.shl.micromacro.core;
 
 import uk.ac.susx.tag.method51.core.data.store2.query.DatumQuery;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class Workspace {
+public class Workspace implements Serializable {
 
     private final String id;
     private final String name;
@@ -34,6 +35,11 @@ public class Workspace {
 
         queries.get(name).add(query);
         return this;
+    }
+
+    public Map<String, Query> queries(){
+
+        return queries;
     }
 
 
