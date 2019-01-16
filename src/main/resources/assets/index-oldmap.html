@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="en" ng-app="MicroMacroApp">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
+    <!--<link rel="stylesheet" href="bower_components/leaflet/dist/leaflet.css">-->
+    <link rel="stylesheet" href="node_modules/leaflet/dist/leaflet.css">
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="bower_components/nvd3/build/nv.d3.min.css">
+    <style>
+      @import url(http://fonts.googleapis.com/css?family=Open+Sans);
+      html, body{
+        margin: 0;
+        padding: 0;
+        font-family: "Open Sans", sans-serif;
+      }
+      #info{
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 20vw;
+        padding: 1em;
+      }
+      #map{
+        position: fixed;
+        top: 0;
+        left: 20vw;
+        bottom: 0;
+        right: 0;
+      }
+      .leaflet-bottom.leaflet-left{
+        width: 100%;
+      }
+      .leaflet-control-container .leaflet-timeline-controls{
+        box-sizing: border-box;
+        width: 100%;
+        margin: 0;
+        margin-bottom: 15px;
+      }
+      .unmatchedPub {
+        color: yellow;
+      }
+      .matchedPub {
+        color: purple;
+      }
+      .unmatchedPlace {
+        color: red;
+      }
+      .matchedPlace {
+        color: green;
+      }
+      .unmatchedPub {
+        color: yellow;
+      }
+      .matchedPub {
+        color: blue;
+      }
+      .trial {
+        height:800px
+      }
+      .trials {
+        max-height:800px;
+        overflow-y: scroll;
+      }
+      .trials button {
+        margin : 5px;
+      }
+      .map {
+      }
+
+      .flashing {
+        animation: blinker 1s linear infinite;
+      }
+      @keyframes blinker {
+        50% {
+          opacity: 0;
+        }
+      }
+
+    </style></head>
+<body>
+
+<div ng-controller="OBMapController">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-3">
+                <button ng-click="resetConfig()" class="btn btn-default">Reset Config</button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <span>From</span>
+                <p class="input-group">
+                    <input type="text"
+                           class="form-control"
+                           uib-datepicker-popup
+                           ng-model="config.from"
+                           is-open="fromOpen"
+                           datepicker-options="fromDateOptions"
+                           ng-required="true"
+                           close-text="Close"  />
+                    <span class="input-group-btn">
+                        <button type="button"
+                                class="btn btn-default"
+                                ng-click="fromOpen = true;">
+                            <i class="glyphicon glyphicon-calendar"></i></button>
+                    </span>
+                </p>
+            </div>
+            <div class="col-md-3">
+                <span>To</span>
+                <p class="input-group">
+                    <input type="text"
+                           class="form-control"
+                           uib-datepicker-popup
+                           ng-model="config.to"
+                           is-open="toOpen"
+                           datepicker-options="toDateOptions"
+                           ng-required="true"
+                           close-text="Close" />
+                    <span class="input-group-btn">
+                        <button type="button"
+                                class="btn btn-default"
+                                ng-click="toOpen = true;">
+                            <i class="glyphicon glyphicon-calendar"></i></button>
+                    </span>
+                </p>
+            </div>
+
+        </div>
+
+        <div class="row">
+            <div class="col-md-3">
+                <span>Select table</span>
+                <span>
+                    <select ng-model="config.table">
+                        <option ng-repeat="tbl in tables" ng-value="tbl">{{tbl}}</option>
+                    </select>
+                </span>
+                <div>
+                    <button ng-click="loadData()" class="btn btn-default">Load</button>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div>
+                    <span>Trial Id Key</span>
+                    <span>
+                    <select ng-model="config.trialIdKey">
+                        <option ng-repeat="key in keys | toArray | orderBy:'$key' " ng-value="key.$key">{{key.$key}}</option>
+                    </select>
+                    </span>
+                </div>
+                <div>
+                    <span>Sentence Id Key</span>
+                    <span>
+                        <select ng-model="config.sentenceIdKey" >
+                            <option ng-repeat="key in keys | toArray | orderBy:'$key' " ng-value="key.$key">{{key.$key}}</option>
+                        </select>
+                    </span>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <span>Select Keys</span>
+                <select multiple ng-model="config.annotationKeys">
+                    <option ng-repeat="key in keys | toArray | orderBy:'$key' " ng-value="key.$key">{{key.$key}}</option>
+                </select>
+            </div>
+
+
+        </div>
+
+
+        <div class="row">
+            <div class="col-md-3">
+                <span>New table</span>
+                <span>
+                    <input ng-model="config.newTable">
+                </span>
+            </div>
+
+            <div class="col-md-3">
+                <span>
+                    <button ng-click="saveSents2Table()" class="btn btn-default">Save Sentences to table</button>
+                </span>
+                <span>
+                    <button ng-click="saveStatements2Table()" class="btn btn-default">Save Statements to table</button>
+                </span>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <span class="">Heatmap</span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-2">
+                <span>Intensity</span>
+                <span>
+                    <input ng-model="config.heatmap.intensity" step="1" type="number">
+                </span>
+            </div>
+
+            <div class="col-md-2">
+                <span>Decay</span>
+                <span>
+                    <input ng-model="config.heatmap.decay" step="1" type="number">
+                </span>
+            </div>
+
+            <div class="col-md-2">
+                <span>Radius</span>
+                <span>
+                    <input ng-model="config.heatmap.radius" step="1" type="number">
+                </span>
+            </div>
+
+            <div class="col-md-2">
+                <span>Blur</span>
+                <span>
+                    <input ng-model="config.heatmap.blur" step="1" type="number">
+                </span>
+            </div>
+
+            <!--<div class="col-md-2">-->
+                <!--<span>Timeline Duration</span>-->
+                <!--<span>-->
+                    <!--<input ng-model="timelineDuration" step="100" type="number">-->
+                <!--</span>-->
+            <!--</div>-->
+        </div>
+        <!--<div class="row">-->
+            <!--<div class="col-md-2">-->
+                <!--<span>Threshold</span>-->
+                <!--<span>-->
+                    <!--<input ng-model="config.scoreThresh" step="0.1" min="0" max="1" type="number">-->
+                <!--</span>-->
+            <!--</div>-->
+
+        <!--</div>-->
+
+        <div class="row">
+            <div class="col-md-1">
+                <span>Place Type</span>
+                <span>
+                    <div>
+                        <label><input type="checkbox" ng-model="config.filter.pubs"> pubs</label>
+                    </div>
+                    <div>
+                        <label><input type="checkbox" ng-model="config.filter.places"> places</label>
+                    </div>
+                </span>
+            </div>
+
+            <div class="col-md-2">
+                <span>Crime Type</span>
+                <span>
+                    <div ng-repeat="cat in offences.cats | toArray | orderBy:'$key' ">
+                        <label>
+                            <input type="checkbox"
+                               inverted-checkbox="cat.$key"
+                               inverted-checkbox-model="config.filter.cat"
+                               inverted-checkbox-change="persistConfig"
+                            > {{cat.$key}}
+                        </label>
+                    </div>
+                </span>
+            </div>
+
+            <div class="col-md-3">
+                <span>Annotation</span>
+                <span>
+                    <div ng-repeat="anno in config.annotationKeys">
+                        <label>
+                            <span ng-if="keys[anno].type.class == 'java.lang.String' || keys[anno].type.class == 'uk.ac.susx.tag.method51.twitter.LabelDecision' ">
+                                <input type="checkbox"
+                                       inverted-checkbox="anno"
+                                       inverted-checkbox-model="config.filter.annotations"
+                                       inverted-checkbox-change="persistConfig"
+                                >
+                            </span>
+                            <span ng-if="keys[anno].type.class == 'java.lang.Double'">
+                                <input type="number" ng-model="config.filter.annotations[anno]" min="0" max="1" step="0.01" style="width:50px">
+                            </span>
+
+                            {{anno}}
+                        </label>
+                    </div>
+                </span>
+            </div>
+
+            <!--<div class="col-md-4">-->
+                <!--<span>Crime Sub Type</span>-->
+                <!--<span  >-->
+                    <!--<div style="max-height:400px;overflow:scroll;">-->
+                        <!--<div ng-repeat="subCat in offences.subCats | toArray | orderBy:'cat' ">-->
+                            <!--<input-->
+                                <!--inverted-checkbox="subCat.$key"-->
+                                <!--inverted-checkbox-model="config.filter.subCat"-->
+                                <!--inverted-checkbox-change="persistConfig"-->
+                                <!--type="checkbox"-->
+                            <!--&gt; {{subCat.cat}} - {{subCat.$key}}-->
+                        <!--</div>-->
+                    <!--</div>-->
+                <!--</span>-->
+            <!--</div>-->
+
+        </div>
+
+
+        <div class="row" >
+
+            <div class="map col-md-10">
+                <span ng-show="loadingData" class="flashing">LOADING DATA</span>
+                <span ng-show="loadingAnnotations" class="flashing">LOADING ANNOTATIONS</span>
+                <span ng-show="loadingPubs" class="flashing">LOADING PUBS</span>
+
+
+                <leaflet
+                    width="800px"
+                    height="800px"
+                    center="center"
+                    tiles="tiles"
+                    defaults="defaults"
+                    markers="markers"
+                    geojson="geojson"
+                    layers="layers"
+                ></leaflet>
+
+                <button ng-click="changeTiles('oldlondon')" class="btn btn-default">Old London</button>
+                <button ng-click="changeTiles('openstreetmap')" class="btn btn-default">Open Street Maps</button>
+
+                <input ng-model="query" type="text" />
+                <button ng-click="search(query)" class="btn btn-default">Search</button>
+                <button ng-click="extract(query)" class="btn btn-default">Extract</button>
+                <button ng-click="getAll()" class="btn btn-default">Get All</button>
+
+            </div>
+
+            <div class="col-md-2 trials">
+                <div ng-repeat="trial in trials"><button class="btn btn-primary btn-xs" ng-click="selectTrial(trial.id)" >{{trial.id}}</button></div>
+            </div>
+
+            <!--<div>-->
+            <!--{{selectedMarker}}-->
+            <!--</div>-->
+        </div>
+
+        <div class="row">
+
+            <div class="trial col-md-12">
+                <p ng-repeat="sentence in selectedTrial.data track by $index">
+                <span
+                    ng-repeat="token in sentence.tokens track by $index"
+                    ng-class="{ matchedPlace: selectedTrial.matchedPlaceMap[$parent.$index][$index], unmatchedPlace: selectedTrial.unmatchedPlaceMap[$parent.$index][$index], matchedPub: selectedTrial.matchedPubMap[$parent.$index][$index], unmatchedPub: selectedTrial.unmatchedPubMap[$parent.$index][$index] }"
+                >
+                    {{token}}
+                </span>
+                </p>
+            </div>
+        </div>
+
+            <!--<div class="col-md-4">-->
+                <!--<div ng-repeat="match in matches">-->
+                    <!--{{match}}-->
+                <!--</div>-->
+            <!--</div>-->
+    </div>
+</div>
+
+
+
+<script type="text/ng-template" id="marker">
+    <ul>
+        <li>Match: {{match.text}}</li>
+        <li>Lat: {{match.metadata.lat}}</li>
+        <li>Lng: {{match.metadata.lng}}</li>
+    </ul>
+</script>
+
+<script src="bower_components/jquery/dist/jquery.min.js" charset="utf-8"></script>
+<script src="bower_components/bootstrap/dist/js/bootstrap.min.js" charset="utf-8"></script>
+<script src="bower_components/angular/angular.min.js" charset="utf-8"></script>
+<script src="bower_components/angular-route/angular-route.min.js" charset="utf-8"></script>
+<!--<script src="bower_components/angular-ui/build/angular-ui.min.js" charset="utf-8"></script>-->
+<script src="bower_components/angular-bootstrap/ui-bootstrap.min.js" charset="utf-8"></script>
+<script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js" charset="utf-8"></script>
+
+<script src="bower_components/angular-simple-logger/dist/angular-simple-logger.js"></script>
+<script src="bower_components/d3/d3.min.js" charset="utf-8"></script>
+<script src="bower_components/nvd3/build/nv.d3.min.js" charset="utf-8"></script>
+<!--<script src="bower_components/leaflet/dist/leaflet.js"></script>-->
+
+<!--leaflet-->
+<script src="node_modules/leaflet/dist/leaflet-src.js"></script>
+<script src="bower_components/ui-leaflet/dist/ui-leaflet.js"></script>
+<script src="node_modules/moment/moment.js"></script>
+<script src="node_modules/leaflet.timeline/dist/leaflet.timeline.js"></script>
+<script src="node_modules/leaflet.heat/dist/leaflet-heat.js"></script>
+<script src="node_modules/ui-leaflet-layers/dist/ui-leaflet-layers.js"></script>
+
+<script src="/js/app.js"></script>
+<script src="/js/controllers/OBMapController.js"></script>
+
+<div id="end"></div>
+</body>
+</html>

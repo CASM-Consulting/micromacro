@@ -1,4 +1,4 @@
-package uk.ac.susx.shl.micromacro.db;
+package uk.ac.susx.shl.micromacro.jdbi;
 
 
 import org.jdbi.v3.core.mapper.RowMapper;

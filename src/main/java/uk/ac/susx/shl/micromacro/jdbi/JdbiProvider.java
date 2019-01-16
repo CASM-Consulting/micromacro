@@ -1,12 +1,10 @@
-package uk.ac.susx.shl.micromacro.db;
+package uk.ac.susx.shl.micromacro.jdbi;
 
 import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.db.ManagedDataSource;
 import io.dropwizard.jdbi3.JdbiFactory;
 import io.dropwizard.setup.Environment;
 import org.jdbi.v3.core.Jdbi;
-import uk.ac.susx.shl.micromacro.MicroMacroConfiguration;
-import uk.ac.susx.shl.micromacro.webapp.resources.Method52Resouce;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;

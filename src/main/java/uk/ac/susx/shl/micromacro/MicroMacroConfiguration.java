@@ -13,6 +13,10 @@ import java.util.Map;
 
 public class MicroMacroConfiguration extends Configuration implements AssetsBundleConfiguration {
 
+    
+    @NotNull
+    @JsonProperty
+    String workspaceMapPath;
 
     @NotNull
     @JsonProperty

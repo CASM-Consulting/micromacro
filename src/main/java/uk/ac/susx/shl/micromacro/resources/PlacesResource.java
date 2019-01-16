@@ -1,4 +1,4 @@
-package uk.ac.susx.shl.micromacro.webapp.resources;
+package uk.ac.susx.shl.micromacro.resources;
 
 
 import uk.ac.susx.shl.micromacro.core.data.Match;

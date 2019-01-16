@@ -1,4 +1,4 @@
-package uk.ac.susx.shl.micromacro.db;
+package uk.ac.susx.shl.micromacro.jdbi;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;

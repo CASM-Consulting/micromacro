@@ -1,7 +1,7 @@
-package uk.ac.susx.shl.micromacro.webapp.resources;
+package uk.ac.susx.shl.micromacro.resources;
 
 import com.google.gson.Gson;
-import uk.ac.susx.shl.micromacro.db.Method52DAO;
+import uk.ac.susx.shl.micromacro.jdbi.Method52DAO;
 import uk.ac.susx.tag.method51.core.data.StoreException;
 import uk.ac.susx.tag.method51.core.gson.GsonBuilderFactory;
 import uk.ac.susx.tag.method51.core.meta.Datum;

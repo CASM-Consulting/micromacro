@@ -1,11 +1,4 @@
-package uk.ac.susx.shl.micromacro.db;
-
-import io.dropwizard.testing.junit.DAOTestRule;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-
-import java.util.List;
+package uk.ac.susx.shl.micromacro.jdbi;
 
 class DatumWrapperDAOTest {
 

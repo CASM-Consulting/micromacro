@@ -6,19 +6,25 @@ import io.dropwizard.jdbi3.JdbiFactory;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 
+import org.eclipse.jetty.server.session.SessionHandler;
 import org.jdbi.v3.core.Jdbi;
-import uk.ac.susx.shl.micromacro.db.DatumWrapperDAO;
-import uk.ac.susx.shl.micromacro.db.Method52DAO;
+import org.mapdb.DB;
+import org.mapdb.DBMaker;
+import uk.ac.susx.shl.micromacro.core.QueryFactory;
+import uk.ac.susx.shl.micromacro.core.Workspace;
+import uk.ac.susx.shl.micromacro.core.data.text.SimpleDocument;
+import uk.ac.susx.shl.micromacro.jdbi.DatumWrapperDAO;
+import uk.ac.susx.shl.micromacro.jdbi.Method52DAO;
 import uk.ac.susx.shl.micromacro.core.data.text.PubMatcher;
-import uk.ac.susx.shl.micromacro.webapp.health.DefaultHealthCheck;
-import uk.ac.susx.shl.micromacro.webapp.resources.DatumResources;
-import uk.ac.susx.shl.micromacro.webapp.resources.Method52Resouce;
-import uk.ac.susx.shl.micromacro.webapp.resources.OBResource;
-import uk.ac.susx.shl.micromacro.webapp.resources.PlacesResource;
+import uk.ac.susx.shl.micromacro.health.DefaultHealthCheck;
+import uk.ac.susx.shl.micromacro.resources.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
 
 public class MicroMacroApplication extends Application<MicroMacroConfiguration> {
 
@@ -40,12 +46,13 @@ public class MicroMacroApplication extends Application<MicroMacroConfiguration> 
     public void run(final MicroMacroConfiguration configuration,
                     final Environment environment) throws IOException {
 
+        environment.servlets().setSessionHandler(new SessionHandler());
+
         Files.createDirectories(Paths.get("data"));
 
         JdbiFactory factory = new JdbiFactory();
 
         Jdbi jdbi = factory.build(environment, configuration.getDataSourceFactory(), "postgresql");
-//        Jdbi jdbi = null;
 
         PubMatcher pubMatcher = new PubMatcher(false, false);
         Method52DAO method52DAO = new Method52DAO(jdbi);
@@ -68,7 +75,25 @@ public class MicroMacroApplication extends Application<MicroMacroConfiguration> 
         environment.jersey().register(new Method52Resouce(method52DAO));
 
         final DatumWrapperDAO datumWrapperDAO = new DatumWrapperDAO(jdbi);
-        environment.jersey().register(new DatumResources(datumWrapperDAO, method52DAO));
+
+        QueryFactory queryFactory = new QueryFactory(method52DAO);
+
+        environment.jersey().register(new DatumResources(queryFactory, datumWrapperDAO));
+
+        environment.jersey().register(new TableResource(method52DAO));
+
+        DB workspaceDb = DBMaker
+                .fileDB(configuration.workspaceMapPath)
+                .fileMmapEnable()
+                .closeOnJvmShutdown()
+//                .readOnly()
+                .make();
+
+        Map<String, Workspace> workspaces = (Map<String, Workspace>) workspaceDb.hashMap("workspaces").createOrOpen();
+
+        environment.jersey().register(new WorkspaceResource(workspaces, queryFactory));
+
+
 
     }
 

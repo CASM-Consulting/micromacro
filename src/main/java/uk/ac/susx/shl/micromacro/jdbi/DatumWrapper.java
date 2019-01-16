@@ -1,4 +1,4 @@
-package uk.ac.susx.shl.micromacro.db;
+package uk.ac.susx.shl.micromacro.jdbi;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

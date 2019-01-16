@@ -9,7 +9,7 @@ import org.jdbi.v3.core.Jdbi;
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
 import org.postgresql.ds.PGSimpleDataSource;
-import uk.ac.susx.shl.micromacro.db.Method52DAO;
+import uk.ac.susx.shl.micromacro.jdbi.Method52DAO;
 import uk.ac.susx.shl.micromacro.core.data.Match;
 import uk.ac.susx.shl.micromacro.core.data.geo.GeoJsonKnowledgeBase;
 import uk.ac.susx.tag.method51.core.meta.Datum;

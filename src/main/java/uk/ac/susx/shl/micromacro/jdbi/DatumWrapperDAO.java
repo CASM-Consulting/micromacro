@@ -1,7 +1,5 @@
-package uk.ac.susx.shl.micromacro.db;
+package uk.ac.susx.shl.micromacro.jdbi;
 
-import io.dropwizard.hibernate.AbstractDAO;
-import org.hibernate.SessionFactory;
 import org.jdbi.v3.core.Jdbi;
 
 import java.util.List;
