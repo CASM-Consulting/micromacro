@@ -3,6 +3,7 @@ package uk.ac.susx.shl.micromacro.resources;
 
 import uk.ac.susx.shl.micromacro.api.ProxyRep;
 import uk.ac.susx.shl.micromacro.api.WorkspaceRep;
+import uk.ac.susx.shl.micromacro.core.Query;
 import uk.ac.susx.shl.micromacro.core.QueryFactory;
 import uk.ac.susx.shl.micromacro.core.Workspace;
 
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 @Path("workspaces")
+@Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class WorkspaceResource {
 
@@ -39,6 +41,18 @@ public class WorkspaceResource {
 
         return Response.status(Response.Status.OK).entity(
                 workspace
+        ).build();
+    }
+
+    @GET
+    @Path("loadQuery")
+    public Response loadQuery(@QueryParam("workspace") String workspaceName,
+                              @QueryParam("queryName") String queryName) {
+
+        Query query = workspaces.get(workspaceName).queries().get(queryName);
+
+        return Response.status(Response.Status.OK).entity(
+            queryFactory.rep(query.get())
         ).build();
     }
 
