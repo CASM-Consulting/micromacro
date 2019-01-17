@@ -2,6 +2,7 @@ package uk.ac.susx.shl.micromacro.core;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import uk.ac.susx.shl.micromacro.api.AbstractQueryRep;
 import uk.ac.susx.shl.micromacro.api.ProxyRep;
 import uk.ac.susx.shl.micromacro.api.SelectDistinctRep;
 import uk.ac.susx.shl.micromacro.api.SelectRep;
@@ -192,9 +193,8 @@ public class QueryFactory {
     }
 
 
-    public <T extends DatumQuery> Object rep(T query) {
+    public <T extends DatumQuery> AbstractQueryRep rep(T query) {
         if(query instanceof Proxy) {
-
             return proxy((Proxy)query);
         } else if(query instanceof Select) {
             return select((Select)query);

@@ -1,19 +1,8 @@
 <div>
-
-    <select
-            ng-model="table"
-            ng-options="table for table in tables"
-            class="form-control"
-    >
-    </select>
-
-
-
     <div ng-repeat="literal in literals">
         <span>key:{{literal.key}}</span>
         <span>type:{{literal.type}}</span>
         <span>args:{{literal.args}}</span>
     </div>
     <button ng-click="addLiteral">Add Literal</button>
-
 </div>

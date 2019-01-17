@@ -1,6 +1,4 @@
-'use strict';
-
-app.controller('OBMapController', function($scope, $rootScope, $http, $compile, leafletData, debounce, $window) {
+MicroMacroApp.controller('OBMapController', function($scope, $rootScope, $http, $compile, leafletData, debounce, $window) {
 
     var DATE_FORMAT = 'YYYY-MM-DD';
     var TRIAL_ID_KEY = 'trial_id';

@@ -8,11 +8,9 @@ import io.dropwizard.setup.Environment;
 
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.jdbi.v3.core.Jdbi;
-import org.mapdb.DB;
-import org.mapdb.DBMaker;
 import uk.ac.susx.shl.micromacro.core.QueryFactory;
-import uk.ac.susx.shl.micromacro.core.Workspace;
-import uk.ac.susx.shl.micromacro.core.data.text.SimpleDocument;
+import uk.ac.susx.shl.micromacro.core.WorkspaceFactory;
+import uk.ac.susx.shl.micromacro.core.Workspaces;
 import uk.ac.susx.shl.micromacro.jdbi.DatumWrapperDAO;
 import uk.ac.susx.shl.micromacro.jdbi.Method52DAO;
 import uk.ac.susx.shl.micromacro.core.data.text.PubMatcher;
@@ -22,9 +20,6 @@ import uk.ac.susx.shl.micromacro.resources.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
 
 public class MicroMacroApplication extends Application<MicroMacroConfiguration> {
 
@@ -78,23 +73,17 @@ public class MicroMacroApplication extends Application<MicroMacroConfiguration> 
 
         QueryFactory queryFactory = new QueryFactory(method52DAO);
 
-        environment.jersey().register(new DatumResources(queryFactory, datumWrapperDAO));
+        environment.jersey().register(new QueryResources(queryFactory, datumWrapperDAO));
 
         environment.jersey().register(new TableResource(method52DAO));
 
-        DB workspaceDb = DBMaker
-                .fileDB(configuration.workspaceMapPath)
-                .fileMmapEnable()
-                .closeOnJvmShutdown()
-//                .readOnly()
-                .make();
+        Workspaces workspaces = new Workspaces(configuration.workspaceMapPath);
 
-        Map<String, Workspace> workspaces = (Map<String, Workspace>) workspaceDb.hashMap("workspaces").createOrOpen();
+        WorkspaceFactory workspaceFactory = new WorkspaceFactory(workspaces, queryFactory);
 
-        environment.jersey().register(new WorkspaceResource(workspaces, queryFactory));
+        environment.jersey().register(new WorkspacesResource(workspaces, workspaceFactory));
 
-
-
+        environment.jersey().register(new WorkspaceResource(workspaces, workspaceFactory, queryFactory));
     }
 
 }

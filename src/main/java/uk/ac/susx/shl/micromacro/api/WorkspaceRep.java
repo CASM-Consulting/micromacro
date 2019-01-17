@@ -11,12 +11,5 @@ public class WorkspaceRep {
 
     public String id;
     public String name;
-
-    public WorkspaceRep(){}
-
-    public WorkspaceRep(Workspace workspace){
-        id = workspace.id();
-        name = workspace.name();
-    }
-
+    public Map<String, AbstractQueryRep> queries;
 }

@@ -28,14 +28,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Path("datum")
+@Path("query")
 @Produces(MediaType.APPLICATION_JSON)
-public class DatumResources {
+public class QueryResources {
 
     private final QueryFactory queryFactory;
     private final DatumWrapperDAO datumWrapperDAO;
 
-    public DatumResources(QueryFactory queryFactory, DatumWrapperDAO datumWrapperDAO) {
+    public QueryResources(QueryFactory queryFactory, DatumWrapperDAO datumWrapperDAO) {
         this.queryFactory = queryFactory;
         this.datumWrapperDAO = datumWrapperDAO;
     }

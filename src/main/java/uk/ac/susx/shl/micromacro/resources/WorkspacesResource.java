@@ -13,48 +13,47 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-@Path("workspace")
+@Path("workspaces")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public class WorkspaceResource {
+public class WorkspacesResource {
 
     private final Workspaces workspaces;
-    private final QueryFactory queryFactory;
     private final WorkspaceFactory workspaceFactory;
 
-    public WorkspaceResource(Workspaces workspaces, WorkspaceFactory workspaceFactory, QueryFactory queryFactory) {
+    public WorkspacesResource(Workspaces workspaces, WorkspaceFactory workspaceFactory) {
         this.workspaces = workspaces;
         this.workspaceFactory = workspaceFactory;
-        this.queryFactory = queryFactory;
     }
-
-    @POST
-    @Path("addQuery")
-    public Response addQuery(@QueryParam("workspace") String workspaceName,
-                             @QueryParam("queryName") String queryName,
-                             ProxyRep query) throws SQLException {
-
-        Workspace workspace = workspaces.get(workspaceName);
-
-        workspace.add(queryName, queryFactory.proxy(query));
-
-        return Response.status(Response.Status.OK).entity(
-                workspace
-        ).build();
-    }
-
 
 
     @GET
-    @Path("load")
-    public Response load(@QueryParam("name") String name) {
+    @Path("create")
+    public Response create(@QueryParam("name") String name)  {
+
+        Workspace workspace = workspaces.create(name);
 
         return Response.status(Response.Status.OK).entity(
-                workspaceFactory.rep(name)
+                workspaceFactory.rep(workspace)
         ).build();
     }
 
+    @GET
+    @Path("list")
+    public Response list() throws SQLException {
 
+        List<WorkspaceRep> workspacesNames = workspaces.get().values()
+                .stream()
+                .map(w->workspaceFactory.rep(w))
+                .collect(Collectors.toList());
+
+        Collections.sort(workspacesNames, (o1, o2) -> o1.name.compareToIgnoreCase(o2.name));
+
+        return Response.status(Response.Status.OK).entity(
+                workspacesNames
+        ).build();
+    }
 
 }

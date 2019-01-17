@@ -1,7 +1,4 @@
-'use strict';
-
-
-app.controller('QueryViewer', function($scope, Tables, ) {
+MicroMacroApp.controller('QueryViewer', function($scope, Tables) {
 
     var tables = Tables(function(tables){
         $scope.tables = tables;
@@ -14,7 +11,7 @@ app.controller('QueryViewer', function($scope, Tables, ) {
 
 });
 
-app.service("Tables", function($http) {
+MicroMacroApp.service("Tables", function($http) {
 
     return function(success, error) {
         error = error || function(){};
@@ -28,7 +25,7 @@ app.service("Tables", function($http) {
 });
 
 
-app.service("Configs", function($http) {
+MicroMacroApp.service("Configs", function($http) {
 
     return function(success, error) {
         error = error || function(){};
@@ -42,7 +39,7 @@ app.service("Configs", function($http) {
 });
 
 
-app.factory("Workspace", function() {
+MicroMacroApp.factory("Workspace", function() {
 
 
 

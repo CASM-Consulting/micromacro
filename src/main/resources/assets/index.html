@@ -4,18 +4,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="utf-8">
     <!--<link rel="stylesheet" href="bower_components/leaflet/dist/leaflet.css">-->
-    <link rel="stylesheet" href="node_modules/leaflet/dist/leaflet.css">
     <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="node_modules/leaflet/dist/leaflet.css">
     <link rel="stylesheet" href="bower_components/nvd3/build/nv.d3.min.css">
     <style>
     </style>
 </head>
-<body>
+<body ng-app="MicroMacroApp">
 
-<div ng-controller="MicroMacro">
-    <div ng-include="'js/controllers/QueryViewer.html'">
-
-    </div>
+<div class="container-fluid">
+    <workspaces></workspaces>
 </div>
 
 
@@ -23,7 +21,8 @@
 <script src="bower_components/jquery/dist/jquery.min.js" charset="utf-8"></script>
 <script src="bower_components/bootstrap/dist/js/bootstrap.min.js" charset="utf-8"></script>
 <script src="bower_components/angular/angular.min.js" charset="utf-8"></script>
-<script src="bower_components/angular-route/angular-route.min.js" charset="utf-8"></script>
+<script src="node_modules/@uirouter/angularjs/release/angular-ui-router.min.js" charset="utf-8"></script>
+<!--<script src="bower_components/angular-route/angular-route.min.js" charset="utf-8"></script>-->
 <!--<script src="bower_components/angular-ui/build/angular-ui.min.js" charset="utf-8"></script>-->
 <script src="bower_components/angular-bootstrap/ui-bootstrap.min.js" charset="utf-8"></script>
 <script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js" charset="utf-8"></script>
@@ -41,10 +40,13 @@
 <script src="node_modules/leaflet.heat/dist/leaflet-heat.js"></script>
 <script src="node_modules/ui-leaflet-layers/dist/ui-leaflet-layers.js"></script>
 
-<script src="/js/app.js"></script>
-<script src="/js/controllers/MicroMacro.js"></script>
-<script src="/js/controllers/QueryViewer.js"></script>
-<script src="/js/directives/ProxyConfig.js"></script>
+<script src="/js/MicroMacroApp.js"></script>
+<script src="/js/services/WorkspaceService.js"></script>
+<script src="/js/services/Util.js"></script>
+<script src="/js/components/workspaces.js"></script>
+<script src="/js/components/workspace.js"></script>
+<script src="/js/components/queryViewer.js"></script>
+<script src="/js/components/proxyConfig.js"></script>
 
 <div id="end"></div>
 </body>

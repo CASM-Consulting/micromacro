@@ -1,8 +1,6 @@
 'use strict';
 
 
-var MicroMacroApp = {};
-
 angular.module('angular-toArrayFilter', []) .filter('toArray', function () {
   return function (obj, addKey) {
     if (!angular.isObject(obj)) return obj;
@@ -21,9 +19,28 @@ angular.module('angular-toArrayFilter', []) .filter('toArray', function () {
   };
 });
 
-var app = angular.module('MicroMacroApp', ['ui.bootstrap', 'ngRoute', 'ui-leaflet', 'angular-toArrayFilter']);
+var MicroMacroApp = angular.module('MicroMacroApp', ['ui.bootstrap', 'ui.router', 'ui-leaflet', 'angular-toArrayFilter']);
 
-app.factory("OBTrials", function($scope, $http){
+
+MicroMacroApp.config(function($stateProvider){
+
+    var workspaceState = {
+        name: 'workspace',
+        url: '/workspace/{workspaceId}',
+        component:'workspace',
+        resolve: {
+            workspace: function(Workspaces, $transition$) {
+                return Workspaces.load($transition$.params().workspaceId);
+            }
+        }
+    };
+
+    $stateProvider.state(workspaceState);
+
+});
+
+
+MicroMacroApp.factory("OBTrials", function($scope, $http){
 
 
     $http.get("/api/places/ob", {
@@ -39,7 +56,7 @@ app.factory("OBTrials", function($scope, $http){
     return trials;
 });
 
-app.factory('debounce', function($timeout) {
+MicroMacroApp.factory('debounce', function($timeout) {
     return function(callback, interval) {
         var timeout = null;
         return function() {
@@ -52,7 +69,7 @@ app.factory('debounce', function($timeout) {
     };
 });
 
-app.directive('loading', ['$http' ,function ($http)
+MicroMacroApp.directive('loading', ['$http' ,function ($http)
 {
     return {
         restrict: 'A',
@@ -74,7 +91,7 @@ app.directive('loading', ['$http' ,function ($http)
     };
 }]);
 
-app.directive('invertedCheckbox', function ()
+MicroMacroApp.directive('invertedCheckbox', function ()
 {
     return {
         restrict: 'A',
@@ -97,3 +114,4 @@ app.directive('invertedCheckbox', function ()
         }
     };
 });
+

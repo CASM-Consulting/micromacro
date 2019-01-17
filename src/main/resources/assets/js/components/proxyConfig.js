@@ -1,15 +1,13 @@
-app.directive("proxyConfig", function() {
-
+MicroMacroApp.component("proxyConfig", function() {
     return {
-        restrict: 'E',
-        scope: {
+        bindings: {
             tables : "=",
             config : "="
         },
-        templateUrl: 'js/directives/ProxyConfig.html',
-        link: function(scope) {
+        templateUrl: 'html/proxy-config.html',
+        controller: function($scope) {
 
-            scope.config = scope.config || {
+            $scope.config = $scope.config || {
                 target:"",
                 proxy:"",
                 table:"",
@@ -29,6 +27,5 @@ app.directive("proxyConfig", function() {
             };
 
         }
-      };
-
+    }
 });

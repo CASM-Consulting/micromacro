@@ -2,9 +2,8 @@ package uk.ac.susx.shl.micromacro.api;
 
 import java.util.Map;
 
-public class ProxyRep {
+public class ProxyRep extends AbstractQueryRep {
 
-    public String table;
     public String target;
     public String proxy;
     public String partitionKey;

@@ -1,0 +1,45 @@
+<style>.active { color: red; font-weight: bolder; }</style>
+<div>
+
+    <nav class="navbar navbar-default" role="navigation">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" ng-click="isNavCollapsed = !isNavCollapsed">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">MicroMacro</a>
+        </div>
+        <div class="collapse navbar-collapse" uib-collapse="isNavCollapsed">
+            <ul class="nav navbar-nav">
+                <li uib-dropdown>
+                    <a href="#" uib-dropdown-toggle>Workspaces <span class="caret"></span></a>
+                    <ul class="dropdown-menu" uib-dropdown-menu>
+                        <li ng-repeat="workspace in workspaces"><a ui-sref="workspace({workspaceId: workspace.name})" ui-sref-active="active">{{workspace.name}}</a></li>
+                    </ul>
+                </li>
+
+                <li>
+                    <form class="navbar-form navbar-left" >
+                        <div class="form-group">
+                            <input type="text" class="form-control" placeholder="New Workspace" ng-model="newWorkspace" >
+                        </div>
+                        <button type="submit" ng-click="createWorkspace(newWorkspace)" class="btn btn-default">Create</button>
+                    </form>
+                </li>
+
+            </ul>
+
+        </div>
+
+
+    </nav>
+
+    <ui-view></ui-view>
+
+
+</div>
+
+
+

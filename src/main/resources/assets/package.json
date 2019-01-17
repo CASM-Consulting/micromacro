@@ -2,13 +2,7 @@
   "name": "micro-macro",
   "version": "1.0.0",
   "dependencies": {
-    "leaflet": "^1.3.3",
-    "leaflet.heat": "^0.2.0",
-    "leaflet.timeline": "^1.2.1",
-    "less": "^3.8.1",
-    "moment": "^2.22.2",
-    "ui-leaflet-layers": "^0.1.3",
-    "@bower_components/angular": "angular/bower-angular#1.6.10",
+    "@bower_components/angular": "angular/bower-angular#1.7.5",
     "@bower_components/angular-bootstrap": "angular-ui/bootstrap-bower#2.5.0",
     "@bower_components/angular-nvd3": "krispo/angular-nvd3#1.0.9",
     "@bower_components/angular-route": "angular/bower-angular-route#1.6.10",
@@ -19,7 +13,14 @@
     "@bower_components/jquery": "jquery/jquery-dist#>= 1.2.6",
     "@bower_components/leaflet": "Leaflet/Leaflet#~0.7.x",
     "@bower_components/nvd3": "novus/nvd3#^1.7.1",
-    "@bower_components/ui-leaflet": "angular-ui/ui-leaflet#2.0.0"
+    "@bower_components/ui-leaflet": "angular-ui/ui-leaflet#2.0.0",
+    "@uirouter/angularjs": "^1.0.21",
+    "leaflet": "^1.3.3",
+    "leaflet.heat": "^0.2.0",
+    "leaflet.timeline": "^1.2.1",
+    "less": "^3.8.1",
+    "moment": "^2.22.2",
+    "ui-leaflet-layers": "^0.1.3"
   },
   "engines": {
     "yarn": ">= 1.0.0"
