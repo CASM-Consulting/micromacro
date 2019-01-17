@@ -15,7 +15,15 @@ MicroMacroApp.factory("Server", function($http){
 
         },
         post : function(url, data, options) {
+            var error = options.error || function(){};
+            var success = options.success || function(){};
+            options.params = options.params || {};
 
+            $http.post(url, data, options).then(function (data, status) {
+                success(data.data);
+            }, function (data, status) {
+                error(data, status);
+            });
         }
 
     }

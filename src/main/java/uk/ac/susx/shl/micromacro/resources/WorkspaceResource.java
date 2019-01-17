@@ -2,6 +2,7 @@ package uk.ac.susx.shl.micromacro.resources;
 
 
 import uk.ac.susx.shl.micromacro.api.ProxyRep;
+import uk.ac.susx.shl.micromacro.api.SelectRep;
 import uk.ac.susx.shl.micromacro.api.WorkspaceRep;
 import uk.ac.susx.shl.micromacro.core.*;
 
@@ -21,17 +22,30 @@ public class WorkspaceResource {
 
     private final Workspaces workspaces;
     private final QueryFactory queryFactory;
-    private final WorkspaceFactory workspaceFactory;
 
-    public WorkspaceResource(Workspaces workspaces, WorkspaceFactory workspaceFactory, QueryFactory queryFactory) {
+    public WorkspaceResource(Workspaces workspaces, QueryFactory queryFactory) {
         this.workspaces = workspaces;
-        this.workspaceFactory = workspaceFactory;
         this.queryFactory = queryFactory;
     }
 
+
+    @GET
+    @Path("loadQuery")
+    public Response loadQuery(@QueryParam("workspace") String workspaceName,
+                             @QueryParam("queryName") String queryName) throws SQLException {
+
+        Workspace workspace = workspaces.get(workspaceName);
+
+        Query query = workspace.queries().get(queryName);
+
+        return Response.status(Response.Status.OK).entity(
+                queryFactory.rep(query.get())
+        ).build();
+    }
+
     @POST
-    @Path("addQuery")
-    public Response addQuery(@QueryParam("workspace") String workspaceName,
+    @Path("addProxy")
+    public Response addProxy(@QueryParam("workspace") String workspaceName,
                              @QueryParam("queryName") String queryName,
                              ProxyRep query) throws SQLException {
 
@@ -39,22 +53,28 @@ public class WorkspaceResource {
 
         workspace.add(queryName, queryFactory.proxy(query));
 
+        workspaces.save(workspace);
+
         return Response.status(Response.Status.OK).entity(
-                workspace
+                queryFactory.rep(workspaces.get(workspaceName).queries().get(queryName).get())
         ).build();
     }
 
+    @POST
+    @Path("addSelect")
+    public Response addSelect(@QueryParam("workspace") String workspaceName,
+                             @QueryParam("queryName") String queryName,
+                             SelectRep query) throws SQLException {
 
+        Workspace workspace = workspaces.get(workspaceName);
 
-    @GET
-    @Path("load")
-    public Response load(@QueryParam("name") String name) {
+        workspace.add(queryName, queryFactory.select(query));
+
+        workspaces.save(workspace);
 
         return Response.status(Response.Status.OK).entity(
-                workspaceFactory.rep(name)
+                queryFactory.rep(workspaces.get(workspaceName).queries().get(queryName).get())
         ).build();
     }
-
-
 
 }

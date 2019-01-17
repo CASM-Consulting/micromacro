@@ -16,7 +16,7 @@
                 <li uib-dropdown>
                     <a href="#" uib-dropdown-toggle>Workspaces <span class="caret"></span></a>
                     <ul class="dropdown-menu" uib-dropdown-menu>
-                        <li ng-repeat="workspace in workspaces"><a ui-sref="workspace({workspaceId: workspace.name})" ui-sref-active="active">{{workspace.name}}</a></li>
+                        <li ng-repeat="workspace in workspaces"><a ui-sref="workspace({workspaceId: workspace})" ui-sref-active="active">{{workspace}}</a></li>
                     </ul>
                 </li>
 

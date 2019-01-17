@@ -1,5 +1,6 @@
 package uk.ac.susx.shl.micromacro.core;
 
+import uk.ac.susx.shl.micromacro.api.AbstractQueryRep;
 import uk.ac.susx.tag.method51.core.data.store2.query.DatumQuery;
 
 import java.io.Serializable;
@@ -15,6 +16,12 @@ public class Workspace implements Serializable {
 
     public Workspace(String name) {
         id = UUID.randomUUID().toString();
+        this.name = name;
+        queries = new HashMap<>();
+    }
+
+    public Workspace(String name,String id) {
+        this.id = id;
         this.name = name;
         queries = new HashMap<>();
     }

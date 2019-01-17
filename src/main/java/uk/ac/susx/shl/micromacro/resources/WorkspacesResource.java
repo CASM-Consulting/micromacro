@@ -44,16 +44,26 @@ public class WorkspacesResource {
     @Path("list")
     public Response list() throws SQLException {
 
-        List<WorkspaceRep> workspacesNames = workspaces.get().values()
-                .stream()
-                .map(w->workspaceFactory.rep(w))
-                .collect(Collectors.toList());
+        List<String> workspacesNames = workspaces.list();
 
-        Collections.sort(workspacesNames, (o1, o2) -> o1.name.compareToIgnoreCase(o2.name));
+        Collections.sort(workspacesNames);
 
         return Response.status(Response.Status.OK).entity(
                 workspacesNames
         ).build();
     }
+
+
+    @GET
+    @Path("load")
+    public Response load(@QueryParam("name") String name) {
+
+        WorkspaceRep rep =  workspaceFactory.rep(workspaces.get(name));
+
+        return Response.status(Response.Status.OK).entity(
+               rep
+        ).build();
+    }
+
 
 }

@@ -92,6 +92,7 @@ public class QueryFactory {
         rep.limit = proxy.limit();
         rep.orderBy = proxy.orderBy().key().toString();
         rep.proximity = proxy.proximity();
+        rep.partitionKey = proxy.partitionKey().toString();
 
         Map<KeyFilter, String> slaretil = new HashMap<>();
 
@@ -176,9 +177,9 @@ public class QueryFactory {
         for(Map.Entry<String, Map<String, String>> entry : specs.entrySet()) {
             Map<String, String> spec = entry.getValue();
 
-            Key key = keys.get(spec.get(KEY_NAME));
-            String name = spec.get(FILTER_NAME);
-            String args = spec.get(ARGS);
+            Key key = keys.get(spec.get("key"));
+            String args = spec.get("args");
+            String name = spec.get("type");
 
             KeyFilter filter = KeyFilters.get(name, args, key);
 
@@ -192,6 +193,17 @@ public class QueryFactory {
         return OrderBy.asc(Key.of(key, RuntimeType.ANY));
     }
 
+    public <T extends AbstractQueryRep> DatumQuery query(T rep) throws SQLException {
+        if(rep instanceof ProxyRep) {
+            return proxy((ProxyRep)rep);
+        } else if(rep instanceof SelectRep) {
+            return select((SelectRep)rep);
+        } else if(rep instanceof SelectDistinctRep) {
+            return selectDistinct((SelectDistinctRep)rep);
+        } else {
+            throw new UnrecognisedQueryException();
+        }
+    }
 
     public <T extends DatumQuery> AbstractQueryRep rep(T query) {
         if(query instanceof Proxy) {
@@ -201,7 +213,7 @@ public class QueryFactory {
         } else if(query instanceof SelectDistinct) {
             return selectDistinct((SelectDistinct)query);
         } else {
-            throw new UnrecognisedQueryException(query);
+            throw new UnrecognisedQueryException();
         }
 
     }

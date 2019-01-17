@@ -77,13 +77,13 @@ public class MicroMacroApplication extends Application<MicroMacroConfiguration> 
 
         environment.jersey().register(new TableResource(method52DAO));
 
-        Workspaces workspaces = new Workspaces(configuration.workspaceMapPath);
+        WorkspaceFactory workspaceFactory = new WorkspaceFactory(queryFactory);
 
-        WorkspaceFactory workspaceFactory = new WorkspaceFactory(workspaces, queryFactory);
+        Workspaces workspaces = new Workspaces(configuration.workspaceMapPath, workspaceFactory);
 
         environment.jersey().register(new WorkspacesResource(workspaces, workspaceFactory));
 
-        environment.jersey().register(new WorkspaceResource(workspaces, workspaceFactory, queryFactory));
+        environment.jersey().register(new WorkspaceResource(workspaces, queryFactory));
     }
 
 }

@@ -17,7 +17,7 @@ MicroMacroApp.factory("Workspaces", function($q, Server) {
         },
         load : function(id) {
             return $q(function(resolve) {
-                Server.get("api/workspace/load", {
+                Server.get("api/workspaces/load", {
                     params : {name : id},
                     success : resolve
                 });
