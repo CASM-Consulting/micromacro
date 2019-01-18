@@ -11,7 +11,7 @@ import org.jdbi.v3.core.Jdbi;
 import uk.ac.susx.shl.micromacro.core.QueryFactory;
 import uk.ac.susx.shl.micromacro.core.WorkspaceFactory;
 import uk.ac.susx.shl.micromacro.core.Workspaces;
-import uk.ac.susx.shl.micromacro.jdbi.DatumWrapperDAO;
+import uk.ac.susx.shl.micromacro.jdbi.DatumDAO;
 import uk.ac.susx.shl.micromacro.jdbi.Method52DAO;
 import uk.ac.susx.shl.micromacro.core.data.text.PubMatcher;
 import uk.ac.susx.shl.micromacro.health.DefaultHealthCheck;
@@ -69,11 +69,11 @@ public class MicroMacroApplication extends Application<MicroMacroConfiguration> 
 
         environment.jersey().register(new Method52Resouce(method52DAO));
 
-        final DatumWrapperDAO datumWrapperDAO = new DatumWrapperDAO(jdbi);
+        final DatumDAO datumDAO = new DatumDAO(jdbi, method52DAO);
 
         QueryFactory queryFactory = new QueryFactory(method52DAO);
 
-        environment.jersey().register(new QueryResources(queryFactory, datumWrapperDAO));
+        environment.jersey().register(new QueryResources(queryFactory, datumDAO));
 
         environment.jersey().register(new TableResource(method52DAO));
 
