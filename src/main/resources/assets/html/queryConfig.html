@@ -1,0 +1,41 @@
+<div>
+
+    <select class="form-control"
+            ng-model="$ctrl.query.table"
+            ng-options="table for table in $ctrl.tables"
+            ng-change="reload()"
+    >
+    </select>
+
+    <literals literals="$ctrl.query.literals" keys="$ctrl.keys"></literals>
+
+
+    <div ng-if="$ctrl.query.type='proxy'">
+        <div>target</div>
+        <div><input class="form-control" ng-model="$ctrl.query.target"></div>
+        <div>proxy</div>
+        <div><input class="form-control" ng-model="$ctrl.query.proxy"></div>
+        <div>partition key</div>
+        <div><select class="form-control" ng-model="$ctrl.query.partitionKey"
+                     ng-options="id as id for (id, key) in $ctrl.keys"></select>
+        </div>
+        <div>order by</div>
+        <div><select class="form-control" ng-model="$ctrl.query.orderBy"
+                     ng-options="id as id for (id, key) in $ctrl.keys"></select>
+        </div>
+        <div>proximity</div>
+        <div><input class="form-control" ng-model="$ctrl.query.proximity"></div>
+
+    </div>
+
+
+    <div ng-if="$ctrl.query.type='select'">
+
+    </div>
+
+    <!--<button type="button" class='btn btn-default' ng-click="execute()">Execute</button>-->
+
+
+
+
+</div>

@@ -8,10 +8,12 @@
             <li>New Select</li>
             <li ng-repeat="(name, query) in $ctrl.workspace.queries"><a ui-sref="workspace.query({queryId: name})">{{name}}</a></li>
         </ul>
+
+        <div ui-view="config"></div>
     </div>
 
     <div class="col-md-10">
-        <ui-view></ui-view>
+        <div ui-view="results"></div>
     </div>
 
 </div>

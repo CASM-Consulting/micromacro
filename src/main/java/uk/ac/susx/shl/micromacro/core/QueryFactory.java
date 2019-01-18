@@ -6,7 +6,6 @@ import uk.ac.susx.shl.micromacro.api.AbstractQueryRep;
 import uk.ac.susx.shl.micromacro.api.ProxyRep;
 import uk.ac.susx.shl.micromacro.api.SelectDistinctRep;
 import uk.ac.susx.shl.micromacro.api.SelectRep;
-import uk.ac.susx.shl.micromacro.jdbi.DatumWrapperDAO;
 import uk.ac.susx.shl.micromacro.jdbi.Method52DAO;
 import uk.ac.susx.tag.method51.core.data.store2.query.*;
 import uk.ac.susx.tag.method51.core.meta.Key;
@@ -88,6 +87,7 @@ public class QueryFactory {
 
     public ProxyRep proxy(Proxy proxy) {
         ProxyRep rep = new ProxyRep();
+        rep.type = "proxy";
         rep.table = proxy.table();
         rep.limit = proxy.limit();
         rep.orderBy = proxy.orderBy().key().toString();
@@ -113,6 +113,7 @@ public class QueryFactory {
 
     public SelectRep select(Select select) {
         SelectRep rep = new SelectRep();
+        rep.type = "select";
         rep.table = select.table();
         rep.limit = select.limit();
 //        rep.orderBy = select.orderBy().key().toString();
@@ -135,6 +136,7 @@ public class QueryFactory {
 
     public SelectDistinctRep selectDistinct(SelectDistinct selectDistinct) {
         SelectDistinctRep rep = new SelectDistinctRep();
+        rep.type = "selectDistinct";
         rep.table = selectDistinct.table();
 //        rep.orderBy = select.orderBy().key().toString();
 

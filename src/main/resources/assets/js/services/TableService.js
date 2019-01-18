@@ -7,6 +7,16 @@ MicroMacroApp.factory("Tables", function($q, Server) {
                     success : resolve
                 });
             });
+        },
+        schema : function(table) {
+            return $q(function(resolve) {
+                Server.get("api/tables/schema", {
+                    params : {
+                        table : table
+                    },
+                    success : resolve
+                });
+            });
         }
     }
 });

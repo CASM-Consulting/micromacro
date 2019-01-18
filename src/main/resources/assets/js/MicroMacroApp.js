@@ -22,35 +22,6 @@ angular.module('angular-toArrayFilter', []) .filter('toArray', function () {
 var MicroMacroApp = angular.module('MicroMacroApp', ['ui.bootstrap', 'ui.router', 'ui-leaflet', 'angular-toArrayFilter']);
 
 
-MicroMacroApp.config(function($stateProvider){
-
-    var workspaceState = {
-        name: 'workspace',
-        url: '/workspace/{workspaceId}',
-        component:'workspace',
-        resolve: {
-            workspace: function(Workspaces, $stateParams) {
-                return Workspaces.load($stateParams.workspaceId);
-            }
-        }
-    };
-
-    var queryState = {
-        name: 'workspace.query',
-        url: '/{queryId}',
-        component:'query',
-        resolve: {
-            query: function(Queries, $stateParams) {
-                return Queries.load($stateParams.workspaceId, $stateParams.queryId);
-            }
-        }
-    };
-
-    $stateProvider.state(workspaceState);
-    $stateProvider.state(queryState);
-
-});
-
 
 MicroMacroApp.factory("OBTrials", function($scope, $http){
 

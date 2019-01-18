@@ -1,8 +1,28 @@
 <div>
-    <div ng-repeat="literal in literals">
-        <span>key:{{literal.key}}</span>
-        <span>type:{{literal.type}}</span>
-        <span>args:{{literal.args}}</span>
+    <div ng-repeat="(letter, literal) in $ctrl.literals">
+        <span>{{letter}}</span>->
+        <literal ng-click="setLiteral(letter, literal)" literal="literal" keys="$ctrl.keys"></literal>
     </div>
-    <button ng-click="addLiteral">Add Literal</button>
+
+    <div>
+        <input class="form-control" type="text" ng-model="letter">
+
+        <select class="form-control"
+                ng-options="id as id for (id, key) in $ctrl.keys"
+                ng-model="key"
+        ></select>
+
+        <select class="form-control"
+                ng-model="type"
+        >
+            <option>equals</option>
+            <option>present</option>
+        </select>
+
+        <input class="form-control" type="text" ng-model="args">
+
+    </div>
+
+    <button class="btn btn-default" ng-click="addLiteral()">Set Literal</button>
+
 </div>

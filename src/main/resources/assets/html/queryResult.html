@@ -1,0 +1,12 @@
+<div>
+
+    {{$ctrl.query | json}}
+    <button type="button" class='btn btn-default' ng-click="execute()">Execute</button>
+
+    <div ng-repeat="result in results" class="row">
+
+        <div class="col-md-1">{{result.id}}</div>
+        <div class="col-md-11">{{result.data.text}}</div>
+
+    </div>
+</div>

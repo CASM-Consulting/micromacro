@@ -4,6 +4,6 @@ import java.io.Serializable;
 
 public class AbstractQueryRep implements Serializable {
 
-//    public String type;
+    public String type;
     public String table;
 }
