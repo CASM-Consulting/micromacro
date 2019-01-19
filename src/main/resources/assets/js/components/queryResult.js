@@ -1,17 +1,31 @@
 MicroMacroApp.component('queryResult', {
     templateUrl : 'html/queryResult.html',
     bindings : {
-        query: '<'
+        query: '<',
+        keys: '<',
+        result: '<'
     },
-    controller : function($scope, Tables, Queries) {
-        Tables.list().then(function(tables) {
-            $scope.tables = tables;
-        });
+    controller : function($scope, $state) {
 
-        $scope.execute = function () {
-            Queries.execute($scope.$ctrl.query).then(function(data){
-                $scope.results = data;
-            });
+        var TOKEN_HACK = $scope.TOKEN_HACK = false;
+
+        var $ctrl = this;
+
+        $ctrl.$onInit = function() {
+            $scope.selectedKeys = {};
+            $scope.keyList = [];
+
+            for(var key in $ctrl.keys) {
+
+                $scope.selectedKeys[key] = false;
+                $scope.keyList.push(key);
+            }
+
+            $scope.keyList.sort();
+        };
+
+        $scope.cols = function(max, num) {
+            return Math.floor(max/num);
         }
     }
 });

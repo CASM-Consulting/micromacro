@@ -1,12 +1,24 @@
 <div>
 
-    {{$ctrl.query | json}}
-    <button type="button" class='btn btn-default' ng-click="execute()">Execute</button>
+    <div class="btn-group">
+        <label class="btn btn-primary"
+               ng-repeat="key in keyList"
+               ng-model="selectedKeys[key]"
+               uib-btn-checkbox>{{key}}
+        </label>
+    </div>
 
-    <div ng-repeat="result in results" class="row">
+    <div ng-repeat="result in $ctrl.result" class="row">
 
         <div class="col-md-1">{{result.id}}</div>
-        <div class="col-md-11">{{result.data.text}}</div>
+
+        <row data="result.data"
+             selected-keys="selectedKeys"
+             widths="widths"
+             key-list="keyList"
+             keys="$ctrl.keys"
+        ></row>
 
     </div>
+
 </div>

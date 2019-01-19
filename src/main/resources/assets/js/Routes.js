@@ -1,6 +1,6 @@
 MicroMacroApp.config(function($stateProvider){
 
-    var workspace = {
+    $stateProvider.state('workspace',{
         name: 'workspace',
         url: '/workspace/{workspaceId}',
         component:'workspace',
@@ -9,13 +9,7 @@ MicroMacroApp.config(function($stateProvider){
                 return Workspaces.load($stateParams.workspaceId);
             }
         }
-    };
-    $stateProvider.state(workspace);
-
-
-    var queryResults = {
-
-    };
+    });
 
     $stateProvider.state('workspace.query', {
         url: '/{queryId}',
@@ -31,13 +25,25 @@ MicroMacroApp.config(function($stateProvider){
             }
         },
         views : {
-            results : {
-                component:'queryResult'
-            },
             config : {
                 component:'queryConfig'
             }
         }
     });
+
+    $stateProvider.state('workspace.query.execute', {
+        url: '/execute',
+        views: {
+            'result@workspace' :  {
+                component:'queryResult'
+            }
+        },
+        resolve: {
+            result: function(query, Queries) {
+                return Queries.execute(query);
+            }
+        }
+    });
+
 
 });

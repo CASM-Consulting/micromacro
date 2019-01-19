@@ -571,6 +571,7 @@ public class OBTrials {
                     statementIdKey,
                     sentenceIdKey,
                     textKey,
+                    tokenKey,
                     placeNameSpansKey,
                     placeNamesKey
                 );
@@ -594,7 +595,10 @@ public class OBTrials {
                                 .with(trialIdKey, trialId)
                                 .with(statementIdKey, sentence.get(statementIdKey))
                                 .with(sentenceIdKey, sentence.get(sentenceIdKey))
-                                .with(textKey, sentence.get(textKey));
+                                .with(textKey, sentence.get(textKey))
+                                .with(tokenKey, sentence.get(tokenKey))
+                        ;
+
                         Spans<List<String>, String> placeNameSpans = sentence.get(placeNameSpansKey);
                         if(!placeNameSpans.get().isEmpty()){
 

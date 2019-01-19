@@ -1,0 +1,29 @@
+<div>
+
+    <div ng-repeat="key in $ctrl.keyList">
+
+        <div ng-if="display[key]">
+
+            <div ng-if="type(key)==LIST">
+
+                <div ng-if="targets[key]" class="col-md-10">
+                    <span-text spanss="targets[key]"
+                               text="$ctrl.data[key]">
+                    </span-text>
+                </div>
+
+                <div ng-if="!targets[key]" class="col-md-10">
+                    <span ng-repeat="token in $ctrl.data[key] track by $index">{{token}} </span>
+                </div>
+
+            </div>
+
+            <div ng-if="type(key)==STRING" class="col-md-10">
+                {{$ctrl.data[key]}}
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
