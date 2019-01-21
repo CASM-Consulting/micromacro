@@ -29,7 +29,8 @@ MicroMacroApp.factory("Queries", function($q, Server) {
 
         execute : function(query) {
             return $q(function(resolve) {
-                Server.post("api/query/proxy", query, {
+                var type = query.type;
+                Server.post("api/query/"+type, query, {
                     success : resolve
                 });
             });

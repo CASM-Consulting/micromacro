@@ -1,56 +1,83 @@
-<div>
+<div class="row">
 
-    <select class="form-control"
-            ng-model="$ctrl.query.table"
-            ng-options="table for table in $ctrl.tables"
-            ng-change="reload()"
-    >
-    </select>
+    <form class="form-horizontal col-sm-12">
 
-    <literals literals="$ctrl.query.literals" keys="$ctrl.keys"></literals>
+        <div class="form-group form-group-sm">
+            <label class="col-sm-12 control-label" for="queryName">Query Name</label>
+            <div class="col-sm-12">
+                <input class="form-control input-sm" type="text" id="queryName"
+                       ng-model="$ctrl.queryId">
+            </div>
+
+            <label class="col-sm-12 control-label" for="table">Table</label>
+            <div class="col-sm-12">
+                <select class="form-control input-sm" id="table"
+                        ng-model="$ctrl.query.table"
+                        ng-options="table for table in $ctrl.tables"
+                        ng-change="reload()"
+                >
+                </select>
+            </div>
 
 
-    <div ng-if="$ctrl.query.type=='proxy'">
-        <div>target</div>
-        <div>
-            <input class="form-control" type="text"
-                   ng-model="$ctrl.query.target">
+            <label class="col-sm-12 control-label" >Literals</label>
+
+            <div class="col-sm-12">
+                <literals literals="$ctrl.query.literals" keys="$ctrl.keys"></literals>
+            </div>
+
+
+            <div ng-if="$ctrl.query.type=='proxy'">
+                <label class="col-sm-12 control-label" >Target</label>
+                <div class="col-sm-12">
+                    <input class="form-control" type="text"
+                           ng-model="$ctrl.query.target">
+                </div>
+
+                <label class="col-sm-12 control-label">Proxy</label>
+                <div class="col-sm-12">
+                    <input class="form-control" type="text"
+                           ng-model="$ctrl.query.proxy">
+                </div>
+
+                <label class="col-sm-12 control-label">Partition Key</label>
+                <div class="col-sm-12">
+                    <select class="form-control"
+                            ng-model="$ctrl.query.partitionKey"
+                            ng-options="id as id for (id, key) in $ctrl.keys"></select>
+                </div>
+
+                <label class="col-sm-12 control-label">Order By</label>
+                <div class="col-sm-12">
+                    <select class="form-control"
+                            ng-model="$ctrl.query.orderBy"
+                            ng-options="id as id for (id, key) in $ctrl.keys"></select>
+                </div>
+
+                <label class="col-sm-12 control-label">Proximity</label>
+                <div class="col-sm-12">
+                    <input type="number" step="1" min="1" class="form-control"
+                           ng-model="$ctrl.query.proximity">
+                </div>
+
+                <button type="button" class='btn btn-default col-sm-12' ng-click="addProxy()">Save</button>
+            </div>
+
+
+            <div ng-if="$ctrl.query.type=='select'">
+                <label class="col-sm-12 control-label">Filter</label>
+                <div class="col-sm-12">
+                    <input class="form-control"
+                           ng-model="$ctrl.query.filter">
+                </div>
+                <button type="button" class='btn btn-default col-sm-12' ng-click="addSelect()">Save</button>
+            </div>
+
+            <button type="button" class='btn btn-default col-sm-12' ui-sref=".execute">Execute</button>
+
         </div>
-        <div>proxy</div>
-        <div>
-            <input class="form-control" type="text"
-                   ng-model="$ctrl.query.proxy">
-        </div>
-        <div>partition key</div>
-        <div>
-            <select class="form-control"
-                    ng-model="$ctrl.query.partitionKey"
-                    ng-options="id as id for (id, key) in $ctrl.keys"></select>
-        </div>
-        <div>order by</div>
-        <div>
-            <select class="form-control"
-                    ng-model="$ctrl.query.orderBy"
-                    ng-options="id as id for (id, key) in $ctrl.keys"></select>
-        </div>
-        <div>proximity</div>
-        <div>
-            <input type="number" step="1" min="1" class="form-control"
-                   ng-model="$ctrl.query.proximity">
-        </div>
-        <button type="button" class='btn btn-default' ng-click="addProxy()">Save</button>
-    </div>
+    </form>
 
 
-    <div ng-if="$ctrl.query.type=='select'">
-        <div>filter</div>
-        <div>
-            <input class="form-control"
-            ng-model="$ctrl.query.filter">
-        </div>
-        <button type="button" class='btn btn-default' ng-click="addSelect()">Save</button>
-    </div>
-
-    <button type="button" class='btn btn-default' ui-sref=".execute">Execute</button>
 
 </div>

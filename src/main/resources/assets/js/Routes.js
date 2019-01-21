@@ -2,7 +2,7 @@ MicroMacroApp.config(function($stateProvider){
 
     $stateProvider.state('workspace',{
         name: 'workspace',
-        url: '/workspace/{workspaceId}',
+        url: '/workspace/:workspaceId',
         component:'workspace',
         resolve: {
             workspace: function(Workspaces, $stateParams) {
@@ -11,8 +11,25 @@ MicroMacroApp.config(function($stateProvider){
         }
     });
 
+    $stateProvider.state('workspace.newQuery', {
+        url: '/new-query/:type',
+        resolve: {
+            query: function($stateParams) {
+                return {type:$stateParams.type};
+            },
+            tables: function(Tables) {
+                return Tables.list();
+            }
+        },
+        views : {
+            config : {
+                component:'queryConfig'
+            }
+        }
+    });
+
     $stateProvider.state('workspace.query', {
-        url: '/{queryId}',
+        url: '/query/:queryId',
         resolve: {
             query: function(Queries, $stateParams) {
                 return Queries.load($stateParams.workspaceId, $stateParams.queryId);

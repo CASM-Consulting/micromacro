@@ -3,9 +3,9 @@
     <div class="col-md-2">
         <h2>{{$ctrl.workspace.name}}</h2>
         <h3>Queries</h3>
+        <button class='btn btn-default' ui-sref=".newQuery({type:'proxy'})">New Proxy</button>
+        <button class='btn btn-default' ui-sref=".newQuery({type:'select'})">New Select</button>
         <ul>
-            <li>New Proxy</li>
-            <li>New Select</li>
             <li ng-repeat="(name, query) in $ctrl.workspace.queries"><a ui-sref=".query({queryId: name})">{{name}}</a></li>
         </ul>
 

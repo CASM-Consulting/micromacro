@@ -3,11 +3,13 @@ MicroMacroApp.component('queryConfig', {
     bindings : {
         query: '<',
         tables: '<',
-        keys: '<'
+        keys: '<?'
     },
     controller : function($scope, $state, Tables, Queries, $stateParams) {
 
         var $ctrl = this;
+
+        $ctrl.queryId = $stateParams.queryId;
 
         $scope.reload = function() {
 //            $state.reload("workspace.query");
@@ -17,9 +19,12 @@ MicroMacroApp.component('queryConfig', {
         };
 
         $ctrl.$onInit = function(){
-            Tables.schema($scope.$ctrl.query.table).then(function(keys) {
-                $scope.keys = keys;
-            });
+            if($ctrl.query.table) {
+                Tables.schema($ctrl.query.table).then(function(keys) {
+                    $scope.keys = keys;
+                });
+            }
+            $ctrl.query.literals = $ctrl.query.literals || {};
         };
 
         $scope.execute = function () {
@@ -29,13 +34,13 @@ MicroMacroApp.component('queryConfig', {
         }
 
         $scope.addProxy = function() {
-            Queries.addProxy($stateParams.workspaceId, $stateParams.queryId, $ctrl.query).then(function(query){
+            Queries.addProxy($stateParams.workspaceId, $ctrl.queryId, $ctrl.query).then(function(query){
                 alert("saved");
             });
         }
 
         $scope.addSelect = function() {
-            Queries.addSelect($stateParams.workspaceId, $stateParams.queryId, $ctrl.query).then(function(query){
+            Queries.addSelect($stateParams.workspaceId, $ctrl.queryId, $ctrl.query).then(function(query){
                 alert("saved");
             });
         }

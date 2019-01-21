@@ -12,7 +12,7 @@ MicroMacroApp.component('queryResult', {
         var $ctrl = this;
 
         $ctrl.$onInit = function() {
-            $scope.selectedKeys = $stateParams.displayKeys;
+            $scope.selectedKeys = $stateParams.displayKeys || {};
             $scope.keyList = [];
 
             for(var key in $ctrl.keys) {
