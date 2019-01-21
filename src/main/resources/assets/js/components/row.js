@@ -7,7 +7,7 @@ MicroMacroApp.component('row', {
         keys : '<'
     },
     templateUrl : 'html/row.html',
-    controller : function($scope) {
+    controller : function($scope, $state) {
         var $ctrl = this;
 
         var STRING = $scope.STRING = 'java.lang.String';
@@ -15,9 +15,10 @@ MicroMacroApp.component('row', {
         var SPAN = $scope.SPAN = 'uk.ac.susx.tag.method51.core.meta.span.Spans';
 
         $ctrl.$onInit = function() {
-            $scope.targets = {};
-            $scope.display = {};
+
             $scope.$watchCollection("$ctrl.selectedKeys", function() {
+                $scope.targets = {};
+                $scope.display = {};
                 angular.forEach($ctrl.selectedKeys, function(selected, keyName) {
                     if(selected && $ctrl.data[keyName]) {
 

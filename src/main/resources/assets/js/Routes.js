@@ -32,7 +32,7 @@ MicroMacroApp.config(function($stateProvider){
     });
 
     $stateProvider.state('workspace.query.execute', {
-        url: '/execute',
+        url: '/execute?{displayKeys:json}',
         views: {
             'result@workspace' :  {
                 component:'queryResult'
