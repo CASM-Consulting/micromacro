@@ -6,8 +6,12 @@ import uk.ac.susx.tag.method51.core.data.store2.query.DatumQuery;
 
 import java.sql.SQLException;
 import java.util.*;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class WorkspaceFactory {
+
+    private static final Logger LOG = Logger.getLogger(WorkspaceFactory.class.getName());
 
     private final QueryFactory queryFactory;
 
@@ -21,13 +25,20 @@ public class WorkspaceFactory {
 
         Workspace workspace = new Workspace(rep.name, rep.id);
 
-        for(Map.Entry<String, Queue<AbstractQueryRep>> entry : rep.queries.entrySet()) {
+        for(Map.Entry<String, List<AbstractQueryRep>> entry : rep.queries.entrySet()) {
 
-            try {
-                DatumQuery currentQuery = queryFactory.query(entry.getValue().peek());
-                workspace.add(entry.getKey(),currentQuery);
-            } catch (SQLException e) {
-            }
+            LinkedList<? extends DatumQuery> history = entry.getValue()
+                    .stream()
+                    .map(queryRep -> {
+                        try {
+                            return queryFactory.query(queryRep);
+                        } catch (SQLException e) {
+                            throw new RuntimeException(e);
+                        }
+                    })
+                    .collect(Collectors.toCollection(LinkedList::new));
+
+            workspace.setQuery(entry.getKey(), new Query<>(history));
         }
 
         return workspace;
@@ -44,7 +55,7 @@ public class WorkspaceFactory {
 
         for(Map.Entry<String, Query> entry : workspace.queries().entrySet()) {
 
-            Queue<AbstractQueryRep> queries = new LinkedList<>();
+            LinkedList<AbstractQueryRep> queries = new LinkedList<>();
 
             for(Object query : entry.getValue().history()) {
                 queries.add(queryFactory.rep((DatumQuery)query));

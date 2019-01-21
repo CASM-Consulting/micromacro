@@ -5,10 +5,11 @@ import uk.ac.susx.tag.method51.core.data.store2.query.DatumQuery;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.UUID;
 
-public class Workspace implements Serializable {
+public class Workspace {
 
     private final String id;
     private final String name;
@@ -41,6 +42,11 @@ public class Workspace implements Serializable {
         }
 
         queries.get(name).add(query);
+        return this;
+    }
+
+    public Workspace setQuery(String name, Query query) {
+        queries.put(name, query);
         return this;
     }
 

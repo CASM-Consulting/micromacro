@@ -10,15 +10,15 @@
     <literals literals="$ctrl.query.literals" keys="$ctrl.keys"></literals>
 
 
-    <div ng-if="$ctrl.query.type='proxy'">
+    <div ng-if="$ctrl.query.type=='proxy'">
         <div>target</div>
         <div>
-            <input class="form-control"
+            <input class="form-control" type="text"
                    ng-model="$ctrl.query.target">
         </div>
         <div>proxy</div>
         <div>
-            <input class="form-control"
+            <input class="form-control" type="text"
                    ng-model="$ctrl.query.proxy">
         </div>
         <div>partition key</div>
@@ -35,18 +35,20 @@
         </div>
         <div>proximity</div>
         <div>
-            <input class="form-control"
+            <input type="number" step="1" min="1" class="form-control"
                    ng-model="$ctrl.query.proximity">
         </div>
+        <button type="button" class='btn btn-default' ng-click="addProxy()">Save</button>
     </div>
 
 
-    <div ng-if="$ctrl.query.type='select'">
+    <div ng-if="$ctrl.query.type=='select'">
         <div>filter</div>
         <div>
             <input class="form-control"
-                   ng-model="$ctrl.query.filter">
+            ng-model="$ctrl.query.filter">
         </div>
+        <button type="button" class='btn btn-default' ng-click="addSelect()">Save</button>
     </div>
 
     <button type="button" class='btn btn-default' ui-sref=".execute">Execute</button>

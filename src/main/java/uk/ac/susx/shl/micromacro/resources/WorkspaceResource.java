@@ -1,6 +1,7 @@
 package uk.ac.susx.shl.micromacro.resources;
 
 
+import uk.ac.susx.shl.micromacro.api.AbstractQueryRep;
 import uk.ac.susx.shl.micromacro.api.ProxyRep;
 import uk.ac.susx.shl.micromacro.api.SelectRep;
 import uk.ac.susx.shl.micromacro.api.WorkspaceRep;
@@ -45,7 +46,7 @@ public class WorkspaceResource {
 
     @POST
     @Path("addProxy")
-    public Response addProxy(@QueryParam("workspace") String workspaceName,
+    public Response addProxy(@QueryParam("workspaceName") String workspaceName,
                              @QueryParam("queryName") String queryName,
                              ProxyRep query) throws SQLException {
 
@@ -62,7 +63,7 @@ public class WorkspaceResource {
 
     @POST
     @Path("addSelect")
-    public Response addSelect(@QueryParam("workspace") String workspaceName,
+    public Response addSelect(@QueryParam("workspaceName") String workspaceName,
                              @QueryParam("queryName") String queryName,
                              SelectRep query) throws SQLException {
 

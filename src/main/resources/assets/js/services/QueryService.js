@@ -33,8 +33,31 @@ MicroMacroApp.factory("Queries", function($q, Server) {
                     success : resolve
                 });
             });
-        }
+        },
 
+        addProxy : function(workspaceId, queryId, query) {
+            return $q(function(resolve) {
+                Server.post("api/workspace/addProxy", query,  {
+                    params : {
+                        workspaceName : workspaceId,
+                        queryName : queryId
+                    },
+                    success : resolve
+                });
+            });
+        },
+
+        addSelect : function(workspaceId, queryId, query) {
+            return $q(function(resolve) {
+                Server.post("api/workspace/addSelect", query,  {
+                    params : {
+                        workspaceName : workspaceId,
+                        queryName : queryId
+                    },
+                    success : resolve
+                });
+            });
+        }
     }
 
 });

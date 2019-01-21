@@ -11,10 +11,14 @@ import java.util.Queue;
 
 public class Query<T extends DatumQuery> implements Serializable {
 
-    private final Queue<T> history;
+    private final LinkedList<T> history;
 
     public Query() {
         history = new LinkedList<>();
+    }
+
+    public Query(LinkedList<T> history) {
+        this.history = history;
     }
 
     public Query add(T query) {
@@ -23,7 +27,7 @@ public class Query<T extends DatumQuery> implements Serializable {
     }
 
     public T get() {
-        return history.peek();
+        return history.peekLast();
     }
 
     public Queue<T> history() {

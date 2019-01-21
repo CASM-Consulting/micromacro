@@ -14,18 +14,18 @@ public class Workspaces {
 
     private final Map<String, WorkspaceRep> workspaces;
     private final WorkspaceFactory workspaceFactory;
-
+    private final DB db;
 
     public Workspaces(String workspaceMapPath, WorkspaceFactory workspaceFactory) {
         this.workspaceFactory = workspaceFactory;
-        DB workspaceDb = DBMaker
+        db = DBMaker
                 .fileDB(workspaceMapPath)
                 .fileMmapEnable()
                 .closeOnJvmShutdown()
 //                .readOnly()
                 .make();
 
-        workspaces = (Map<String, WorkspaceRep>) workspaceDb.hashMap("workspaces").createOrOpen();
+        workspaces = (Map<String, WorkspaceRep>) db.hashMap("workspaces").createOrOpen();
     }
 
 
@@ -47,6 +47,7 @@ public class Workspaces {
 
     public Workspaces save(Workspace workspace) {
         workspaces.put(workspace.name(), workspaceFactory.rep(workspace));
+        db.commit();
         return this;
     }
 
