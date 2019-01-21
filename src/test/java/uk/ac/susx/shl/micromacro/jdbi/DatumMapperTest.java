@@ -38,11 +38,11 @@ class DatumMapperTest {
         Datum datum2 = new Datum()
                 .with(label2Key, ld2);
 
-        datum1 = DatumMapper.labelDecision2Label(datum1);
-        datum2 = DatumMapper.labelDecision2Label(datum2);
+        datum1 = DatumMapper.processLabelDecisions(datum1);
+        datum2 = DatumMapper.processLabelDecisions(datum2);
 
-        assertEquals(datum1.get(Key.of(ns, model, RuntimeType.STRING)), "label1");
-        assertEquals(datum2.get(Key.of(ns, model, RuntimeType.STRING)), "label2");
+        assertEquals(datum1.get(Key.of(ns, model, RuntimeType.of(LabelDecision.class))), ld1);
+        assertEquals(datum2.get(Key.of(ns, model, RuntimeType.of(LabelDecision.class))), ld2);
 
     }
 }

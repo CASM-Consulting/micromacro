@@ -10,38 +10,56 @@ MicroMacroApp.component('row', {
     controller : function($scope, $state) {
         var $ctrl = this;
 
+        var LABEL = $scope.LABEL = 'uk.ac.susx.tag.method51.twitter.LabelDecision';
         var STRING = $scope.STRING = 'java.lang.String';
         var LIST = $scope.LIST = 'java.util.List';
         var SPAN = $scope.SPAN = 'uk.ac.susx.tag.method51.core.meta.span.Spans';
 
         $ctrl.$onInit = function() {
+            $scope.targets = {};
 
-            $scope.$watchCollection("$ctrl.selectedKeys", function() {
-                $scope.targets = {};
-                $scope.display = {};
-                angular.forEach($ctrl.selectedKeys, function(selected, keyName) {
-                    if(selected && $ctrl.data[keyName]) {
+            angular.forEach($ctrl.keys, function(key, keyName) {
 
-                        var key = $ctrl.keys[keyName];
+                if(type(key) == SPAN && $ctrl.data[keyName]) {
 
-                        if(type(key) == STRING || type(key) == LIST) {
+                    var target = getTarget($ctrl.data[keyName]);
+                    if( !(target in $scope.targets) ) {
 
-                            if(keyName in $ctrl.selectedKeys) {
-
-                                $scope.display[keyName]=key;
-                            }
-                        } else if(type(key) == SPAN) {
-
-                            var target = getTarget($ctrl.data[keyName]);
-                            if( !(target in $scope.targets) ) {
-
-                                $scope.targets[target] = {};
-                            }
-                            $scope.targets[target][keyName] = $ctrl.data[keyName].spans;
-                        }
+                        $scope.targets[target] = {};
                     }
-                });
+                    $scope.targets[target][keyName] = $ctrl.data[keyName].spans;
+                }
+
             });
+
+//
+//
+//            $scope.$watchCollection("$ctrl.selectedKeys", function() {
+//                $scope.targets = {};
+//                $scope.display = {};
+//                angular.forEach($ctrl.selectedKeys, function(selected, keyName) {
+//                    if(selected && $ctrl.data[keyName]) {
+//
+//                        var key = $ctrl.keys[keyName];
+//
+//                        if(type(key) == STRING || type(key) == LIST) {
+//
+//                            if(keyName in $ctrl.selectedKeys) {
+//
+//                                $scope.display[keyName]=key;
+//                            }
+//                        } else if(type(key) == SPAN) {
+//
+//                            var target = getTarget($ctrl.data[keyName]);
+//                            if( !(target in $scope.targets) ) {
+//
+//                                $scope.targets[target] = {};
+//                            }
+//                            $scope.targets[target][keyName] = $ctrl.data[keyName].spans;
+//                        }
+//                    }
+//                });
+//            });
         };
 
         var getTarget = $scope.target = function(key) {

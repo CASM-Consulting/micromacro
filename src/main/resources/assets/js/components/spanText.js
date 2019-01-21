@@ -4,7 +4,7 @@ MicroMacroApp.component('spanText', {
         text : '<',
         tokenHack : '<'
     },
-    template: '<span ng-repeat="token in $ctrl.tokens" style="color:{{token.color}}">{{token.text}} </span>',
+    templateUrl: 'html/spanText.html',
     controller : function() {
 
         var $ctrl = this;

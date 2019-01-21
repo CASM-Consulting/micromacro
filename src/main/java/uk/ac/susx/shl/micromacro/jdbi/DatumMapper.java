@@ -13,15 +13,12 @@ import uk.ac.susx.tag.method51.twitter.LabelDecision;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
 public class DatumMapper implements RowMapper<Datum> {
 
-    private static final Logger LOG = Logger.getLogger(DatumMapper.class.getName());
 
     public final Gson gson;
 
@@ -38,35 +35,11 @@ public class DatumMapper implements RowMapper<Datum> {
 
         Datum datum = gson.fromJson(json, Datum.class);
 
-        datum = labelDecision2Label(datum);
+//        datum = Util.processLabelDecisions(datum);
 
         return datum;
     }
 
 
-    public static Datum labelDecision2Label(Datum datum) {
 
-        Set<String> models = new HashSet<>();
-
-        for(Key key : datum.getKeys().keys.keys()) {
-
-            if(key.type.isAssignableFrom(RuntimeType.of(LabelDecision.class))) {
-
-                LabelDecision l = (LabelDecision)datum.get(key);
-
-                int idx = key.name.lastIndexOf(l.label);
-
-                String model = key.name.substring(0,idx-1);
-
-                if(!models.add(model)) {
-                    LOG.warning("multiple label decisions for " + model);
-                }
-
-                datum = datum.without(key)
-                    .with(Key.of(key.namespace, model, RuntimeType.STRING), l.label);
-            }
-        }
-
-        return datum;
-    }
 }
