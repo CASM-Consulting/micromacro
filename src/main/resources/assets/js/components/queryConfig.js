@@ -36,19 +36,17 @@ MicroMacroApp.component('queryConfig', {
         $scope.addProxy = function() {
             Queries.addProxy($stateParams.workspaceId, $ctrl.queryId, $ctrl.query).then(function(query){
                 alert("saved");
+                $state.go("workspace.query", {workspaceId:$stateParams.workspaceId, queryId:$ctrl.queryId});
             });
         }
 
         $scope.addSelect = function() {
             Queries.addSelect($stateParams.workspaceId, $ctrl.queryId, $ctrl.query).then(function(query){
                 alert("saved");
+                $state.go("workspace.query", {workspaceId:$stateParams.workspaceId, queryId:$ctrl.queryId});
             });
         }
 
-//        $scope.$watch("$ctrl.query", function(newVal, oldVal){
-//            if(newVal) {
-//            }
-//        });
     }
 });
 

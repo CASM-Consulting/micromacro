@@ -9,6 +9,7 @@
     </div>
 
     <div uib-pagination
+            ng-change="pageChange()"
             ng-model="currentPage"
             total-items="$ctrl.result.length"
             max-size="maxSize"

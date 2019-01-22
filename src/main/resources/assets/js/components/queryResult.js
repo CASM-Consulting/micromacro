@@ -5,9 +5,15 @@ MicroMacroApp.component('queryResult', {
         keys: '<',
         result: '<'
     },
-    controller : function($scope, $stateParams) {
+    controller : function($scope, $state, $stateParams) {
 
         var $ctrl = this;
+
+        $scope.pageChange = function() {
+            var params = $stateParams;
+            params.page = $scope.currentPage;
+            $state.go(".", {page:$scope.currentPage});
+        };
 
         $scope.page = [];
         $scope.currentPage = 1;
@@ -17,6 +23,17 @@ MicroMacroApp.component('queryResult', {
         $ctrl.$onInit = function() {
             $scope.selectedKeys = $stateParams.displayKeys || {};
             $scope.keyList = [];
+
+            $scope.$watch(angular.bind(this, function() {
+                return $state.params.page;
+            }), function(page){
+                if($scope.currentPage != page) {
+                    $scope.currentPage = page;
+                }
+            });
+
+            $scope.currentPage = $stateParams.page;
+
 
             for(var key in $ctrl.keys) {
 
