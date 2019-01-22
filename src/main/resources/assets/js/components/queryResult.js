@@ -10,8 +10,6 @@ MicroMacroApp.component('queryResult', {
         var $ctrl = this;
 
         $scope.pageChange = function() {
-            var params = $stateParams;
-            params.page = $scope.currentPage;
             $state.go(".", {page:$scope.currentPage});
         };
 
@@ -21,8 +19,24 @@ MicroMacroApp.component('queryResult', {
         $scope.maxSize = 10;
 
         $ctrl.$onInit = function() {
+
             $scope.selectedKeys = $stateParams.displayKeys || {};
+
+            $scope.$watchCollection(angular.bind(this, function() {
+                return $state.params.displayKeys;
+            }), function(displayKeys){
+                if($scope.selectedKeys != displayKeys && displayKeys) {
+                    $scope.selectedKeys = displayKeys;
+                }
+            });
+
+            $scope.$watchCollection("selectedKeys", function(displayKeys){
+                $state.go(".", {displayKeys:$scope.selectedKeys});
+            });
+
             $scope.keyList = [];
+
+            $scope.currentPage = $stateParams.page;
 
             $scope.$watch(angular.bind(this, function() {
                 return $state.params.page;
@@ -32,7 +46,6 @@ MicroMacroApp.component('queryResult', {
                 }
             });
 
-            $scope.currentPage = $stateParams.page;
 
 
             for(var key in $ctrl.keys) {

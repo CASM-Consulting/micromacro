@@ -51,7 +51,8 @@ MicroMacroApp.config(function($stateProvider){
     $stateProvider.state('workspace.query.execute', {
         url: '/execute/{page:int}?{displayKeys:json}',
         params : {
-            page : {dynamic:true}
+            page : {dynamic:true},
+            displayKeys : {dynamic:true}
         },
         views: {
             'result@workspace' : {
