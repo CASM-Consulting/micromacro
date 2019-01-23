@@ -1,18 +1,23 @@
 MicroMacroApp.factory("Queries", function($q, Server) {
 
     return {
-        proxy : function() {
 
-            var config = {
-                target:"",
-                proxy:"",
-                table:"",
-                literals:[],
-                proximity:0,
-                limit:0,
-                partitionKey:null,
-                orderBy:null
-            };
+        binProxyResultByPartition : function (result, partitionKey) {
+
+            var curPartition = null;
+            var idx = -1;
+
+            return result.reduce( (binned, row) => {
+                var partition = row.data[partitionKey];
+                if(partition != curPartition) {
+                    binned.push([row]);
+                    curPartition = partition;
+                    ++idx;
+                } else {
+                    binned[idx].push(row);
+                }
+                return binned;
+            }, []);
         },
 
         load : function(workspaceId, queryId) {

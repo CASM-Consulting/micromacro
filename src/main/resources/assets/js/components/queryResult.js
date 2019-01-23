@@ -5,7 +5,7 @@ MicroMacroApp.component('queryResult', {
         keys: '<',
         result: '<'
     },
-    controller : function($scope, $state, $stateParams) {
+    controller : function($scope, $state, $stateParams, Queries) {
 
         var $ctrl = this;
 
@@ -20,6 +20,7 @@ MicroMacroApp.component('queryResult', {
 
         $ctrl.$onInit = function() {
 
+            //bind display keys to URL
             $scope.selectedKeys = $stateParams.displayKeys || {};
 
             $scope.$watchCollection(angular.bind(this, function() {
@@ -34,8 +35,7 @@ MicroMacroApp.component('queryResult', {
                 $state.go(".", {displayKeys:$scope.selectedKeys});
             });
 
-            $scope.keyList = [];
-
+            //bind page number to URL
             $scope.currentPage = $stateParams.page;
 
             $scope.$watch(angular.bind(this, function() {
@@ -46,24 +46,32 @@ MicroMacroApp.component('queryResult', {
                 }
             });
 
-
-
+            //alphabetical key list
+            $scope.keyList = [];
             for(var key in $ctrl.keys) {
-
                 $scope.selectedKeys[key] = $scope.selectedKeys[key] || false;
                 $scope.keyList.push(key);
             }
-
-
             $scope.keyList.sort();
 
-            $scope.$watch('currentPage + numPerPage', function() {
-                var begin = (($scope.currentPage - 1) * $scope.numPerPage);
-                var end = begin + $scope.numPerPage;
 
-                $scope.page = $ctrl.result.slice(begin, end);
+            $scope.$watch('currentPage + numPerPage', function() {
+                if(isProxy()) {
+                    $scope.page = $scope.pages[$scope.currentPage];
+                } else {
+                    var begin = (($scope.currentPage - 1) * $scope.numPerPage);
+                    var end = begin + $scope.numPerPage;
+                    $scope.page = $ctrl.result.slice(begin, end);
+                }
             });
+
+            if(isProxy()) {
+                $scope.pages = Queries.binProxyResultByPartition($ctrl.result, $ctrl.query.partitionKey);
+            }
+
         };
+
+        var isProxy = () => $ctrl.query.type == "proxy";
 
         $scope.cols = function(max, num) {
             return Math.floor(max/num);
