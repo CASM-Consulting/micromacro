@@ -6,10 +6,21 @@
             <label class="col-sm-12 control-label" for="queryName">Query Name</label>
             <div class="col-sm-12">
                 <input class="form-control input-sm" type="text" id="queryName"
-                       ng-model="$ctrl.queryId">
+                        ng-model="$ctrl.queryId">
             </div>
 
-            <label class="col-sm-12 control-label" for="table">Table</label>
+            <label class="col-sm-12 control-label" for="queryVer">Ver</label>
+            <div class="col-sm-12 input-group">
+                <div class="input-group-addon btn btn-default"
+                     ng-click="undo()">Undo</div>
+                <input class="form-control input-sm" type="number" step="1" max="0" id="queryVer"
+                        ng-model="queryVer"
+                        ng-change="changeVer()">
+                <div class="input-group-addon btn btn-default"
+                    ng-click="redo()">Redo</div>
+            </div>
+
+            <label class="col-sm-12 control-label" for="table" style="width:40px">Table</label>
             <div class="col-sm-12">
                 <select class="form-control input-sm" id="table"
                         ng-model="$ctrl.query.table"

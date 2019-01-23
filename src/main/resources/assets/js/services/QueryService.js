@@ -20,12 +20,13 @@ MicroMacroApp.factory("Queries", function($q, Server) {
             }, []);
         },
 
-        load : function(workspaceId, queryId) {
+        load : function(workspaceId, queryId, ver) {
             return $q(function(resolve) {
                 Server.get("api/workspace/loadQuery", {
                     params : {
                         workspace : workspaceId,
-                        queryName : queryId
+                        queryName : queryId,
+                        ver : ver
                     },
                     success : resolve
                 });

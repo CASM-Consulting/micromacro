@@ -30,6 +30,12 @@ public class Query<T extends DatumQuery> implements Serializable {
         return history.peekLast();
     }
 
+    public T get(int i) {
+
+        return history.get(history.size()-1+i);
+    }
+
+
     public Queue<T> history() {
         return history;
     }

@@ -33,14 +33,16 @@ public class WorkspaceResource {
     @GET
     @Path("loadQuery")
     public Response loadQuery(@QueryParam("workspace") String workspaceName,
-                             @QueryParam("queryName") String queryName) throws SQLException {
+                             @QueryParam("queryName") String queryName,
+                             @QueryParam("ver") int ver
+    ) throws SQLException {
 
         Workspace workspace = workspaces.get(workspaceName);
 
         Query query = workspace.queries().get(queryName);
 
         return Response.status(Response.Status.OK).entity(
-                queryFactory.rep(query.get())
+                queryFactory.rep(query.get(ver))
         ).build();
     }
 

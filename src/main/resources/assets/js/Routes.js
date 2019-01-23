@@ -29,10 +29,13 @@ MicroMacroApp.config(function($stateProvider){
     });
 
     $stateProvider.state('workspace.query', {
-        url: '/query/{queryId}',
+        url: '/query/{queryId}?{ver:int}',
+        params : {
+            ver : 0
+        },
         resolve: {
             query: function(Queries, $stateParams) {
-                return Queries.load($stateParams.workspaceId, $stateParams.queryId);
+                return Queries.load($stateParams.workspaceId, $stateParams.queryId, $stateParams.ver);
             },
             tables: function(Tables) {
                 return Tables.list();
