@@ -13,7 +13,10 @@
                     <div tooltip2="'Remove'" class="basic-note-remove" ng-click="removeNote($index)">x</div>
                     <div class="basic-note-title"></div>
                     <i tooltip2="'Clone'" class="fa fa-clone basic-note-copy" aria-hidden="true" ng-click="copyNote($index)"></i>
-                    <div tooltip2="'Change colour'" class="basic-note-colour" ng-style="{'background-color': note.colour || '#ffd59b'}" popover-template="'popover.html'" popover-placement="{{note.y < 80? 'bottom' : 'top'}}"></div>
+                    <div tooltip2="'Change colour'" class="basic-note-colour"
+                         ng-style="{'background-color': note.colour || '#ffd59b'}"
+                         uib-popover-template="'popover.html'"
+                         uib-popover-placement="{{note.y < 80? 'bottom' : 'top'}}"></div>
                 </div>
                 <!--<textarea class="basic-note-info" ng-model="note.text" ng-blur="onChange()"></textarea>-->
                 <textarea spellcheck="false" class="basic-note-info" ng-model="note.text" ng-trim="false" ng-blur="onChange()" ng-keydown="handleTabKey($event)"></textarea>
