@@ -2,7 +2,7 @@ package uk.ac.susx.shl.micromacro.api;
 
 import java.util.Map;
 
-public class ProxyRep extends AbstractQueryRep {
+public class ProxyRep extends AbstractDatumQueryRep {
 
     public String target;
     public String proxy;

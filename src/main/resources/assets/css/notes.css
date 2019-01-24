@@ -1,0 +1,211 @@
+
+.basic-note {
+    opacity: 0.9;
+    position: absolute;
+    border-radius: 5px;
+    box-sizing: border-box;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+    top: 400px;
+    left: 400px;
+	display: flex;;
+	display: -webkit-flex;
+    flex-flow: column;
+	-webkit-flex-flow: column;
+    -webkit-box-shadow: 3px 3px 14px -1px rgba(0, 0, 0, 0.12);
+    -moz-box-shadow:    3px 3px 14px -1px rgba(0, 0, 0, 0.12);
+    box-shadow:         3px 3px 14px -1px rgba(0, 0, 0, 0.12);
+    border-radius: 5px;
+    background-color: #ffd59b;
+    z-index: 90;
+    border: 1px solid #A8A8A8;
+    font-size: 9pt;
+}
+
+
+.basic-note-midriff {
+	display: flex;;
+	display: -webkit-flex;
+    flex-flow: row;
+	-webkit-flex-flow: row;
+    flex: 1 1 auto;
+	-webkit-flex: 1 1 auto;
+	overflow : hidden;
+}
+
+.basic-note > .resize-ns {
+    flex: 0 0 auto;
+	-webkit-flex: 0 0 auto;
+    height: 6px;
+    margin-top: -3px;
+    margin-bottom: -3px;
+    cursor: ns-resize;
+    z-index:99;
+}
+
+.basic-note-midriff > .resize-we {
+    flex: 0 0 auto;
+	-webkit-flex: 0 0 auto;
+    width: 6px;
+    margin-left: -3px;
+    margin-right: -3px;
+    cursor: ew-resize;
+    z-index: 99;
+}
+
+.basic-note-box-content > .head {
+
+    display: flex;
+    display: -webkit-flex;
+    flex-flow: row;
+	-webkit-flex-flow: row;
+    flex: 0 0 auto;
+	-webkit-flex: 0 0 auto;
+    color: #ffffff;
+    white-space: nowrap;
+    background-color: rgba(0, 0, 0, 0.14);
+    border-radius: 4px 4px 0px 0px;
+}
+
+.basic-note-info:focus {
+    box-shadow: none;
+}
+
+.basic-note-box-content > .note-hover {
+    transition: max-height 0.3s ease 0.4s, opacity 0.2s ease 0.4s;
+
+
+	opacity: 0;
+	max-height: 0;
+}
+
+.basic-note:hover .note-hover {
+    opacity: 1;
+    max-height: 14px;
+    transition: max-height 0.3s ease 0s, opacity 0.2s ease 0s;
+}
+
+.basic-note-title {
+    flex: 1 1 auto;
+	-webkit-flex: 1 1 auto;
+    padding: 1px 5px 0px 5px;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: move;
+}
+
+.basic-note-info {
+    background-color: inherit;
+    overflow: hidden;
+    flex: 1 1 auto;
+	-webkit-flex: 1 1 auto;
+    box-sizing: border-box;
+    padding: 5px;
+    padding-top: 0px;
+    width:inherit;
+    resize:none;
+    border: 0px;
+    border-radius: 0px;
+    overflow-y: visible;
+    font-size: 9pt;
+    padding-bottom: 0px;
+    margin-bottom: 0px;
+
+    -moz-box-shadow: none;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+}
+
+.basic-note-info:hover {
+    background-color:inherit;
+}
+
+.basic-note-box-content {
+    background-color: transparent;
+    flex: 1 1 auto;
+	-webkit-flex: 1 1 auto;
+	display: flex;;
+	display: -webkit-flex;
+    flex-direction: column;
+	-webkit-flex-direction: column;
+	overflow : hidden;
+}
+
+.basic-note > .resize-diag {
+    width: 8px;
+    height: 8px;
+    position: absolute;
+}
+
+.basic-note > .resize-diag.nw {
+    top: -4px;
+    left: -4px;
+    cursor: nwse-resize;
+}
+
+.basic-note > .resize-diag.ne {
+    top: -4px;
+    right: -4px;
+    cursor: nesw-resize;
+}
+
+.basic-note > .resize-diag.sw {
+    bottom: -4px;
+    left: -4px;
+    cursor: nesw-resize;
+}
+
+.basic-note > .resize-diag.se {
+    bottom: -4px;
+    right: -4px;
+    cursor: nwse-resize;
+}
+
+.basic-note-remove {
+    cursor: pointer;
+    border-top-left-radius: 5px;
+    padding-left: 3px;
+    padding-right: 4px;
+    line-height:14px;
+}
+
+.basic-note-colour {
+    cursor: pointer;
+    border-radius:20px;
+    margin-right:2px;
+    margin-top:2px;
+    height:10px;
+    width:10px;
+}
+
+.basic-note-copy {
+    cursor: pointer;
+    margin-right:4px;
+    margin-top: 2px;
+    height:10px;
+    width:10px;
+    font-size: smaller !important;
+}
+
+.basic-note-colour-selection {
+    width:15px;
+    height:15px;
+    margin:0px;
+    border: 1px solid white;
+    cursor: pointer;
+}
+
+.selected-note-colour {
+    border: 1px solid var(--turquoise);
+}
+
+.basic-note-colour-selection:hover {
+    border: 1px solid var(--turquoise);
+}
+
+.basic-note-colour-selection-box {
+    background-color: rgb(255,255,255,1);
+    margin: -5px -14px -8px -10px;
+}

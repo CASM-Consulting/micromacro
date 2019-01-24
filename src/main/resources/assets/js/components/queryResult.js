@@ -57,7 +57,7 @@ MicroMacroApp.component('queryResult', {
 
             $scope.$watch('currentPage + numPerPage', function() {
                 if(isProxy()) {
-                    $scope.page = $scope.pages[$scope.currentPage];
+                    $scope.page = $scope.pages[$scope.currentPage-1];
                 } else {
                     var begin = (($scope.currentPage - 1) * $scope.numPerPage);
                     var end = begin + $scope.numPerPage;
@@ -76,6 +76,14 @@ MicroMacroApp.component('queryResult', {
         $scope.cols = function(max, num) {
             return Math.floor(max/num);
         }
+
+        $scope.totalPages = () => {
+            if(isProxy()) {
+                return $scope.pages.length * $scope.numPerPage -1;
+            } else {
+                return $ctrl.result.length;
+            }
+        };
     }
 });
 

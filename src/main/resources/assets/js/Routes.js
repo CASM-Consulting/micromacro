@@ -42,11 +42,17 @@ MicroMacroApp.config(function($stateProvider){
             },
             keys: function(query, Tables) {
                 return Tables.schema(query.table);
+            },
+            notes : function(Queries, $stateParams) {
+                return Queries.getMeta($stateParams.workspaceId, $stateParams.queryId, "notes"/*, "json", []*/);
             }
         },
         views : {
             config : {
                 component:'queryConfig'
+            },
+            queryNotes : {
+                component:'queryNotes'
             }
         }
     });

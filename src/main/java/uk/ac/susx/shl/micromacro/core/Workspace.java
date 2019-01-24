@@ -1,11 +1,8 @@
 package uk.ac.susx.shl.micromacro.core;
 
-import uk.ac.susx.shl.micromacro.api.AbstractQueryRep;
 import uk.ac.susx.tag.method51.core.data.store2.query.DatumQuery;
 
-import java.io.Serializable;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.UUID;
 

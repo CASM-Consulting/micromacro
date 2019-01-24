@@ -1,0 +1,54 @@
+<notes>
+
+    <button type="button" class='btn btn-default col-sm-12' ng-click="addNote()">Add Note</button>
+
+    <basic-note ng-if="show" ng-repeat="note in $ctrl.notes track by $index" class="basic-note" idx="$index" ng-style="getNoteShape($index)" ng-mousedown="$ctrl.notesCtrl.focusNote($index)">
+        <div class="resize-ns north"></div>
+        <div class="basic-note-midriff">
+            <div class="resize-we west"></div>
+            <div class="basic-note-box-content">
+                <div class="head" ng-class="{'note-hover': !showControls}">
+
+                    <!--<div class="basic-note-remove" m-tooltip="remove" ng-click="removeNote($index)">x</div>-->
+                    <div tooltip2="'Remove'" class="basic-note-remove" ng-click="removeNote($index)">x</div>
+                    <div class="basic-note-title"></div>
+                    <i tooltip2="'Clone'" class="fa fa-clone basic-note-copy" aria-hidden="true" ng-click="copyNote($index)"></i>
+                    <div tooltip2="'Change colour'" class="basic-note-colour" ng-style="{'background-color': note.colour || '#ffd59b'}" popover-template="'popover.html'" popover-placement="{{note.y < 80? 'bottom' : 'top'}}"></div>
+                </div>
+                <!--<textarea class="basic-note-info" ng-model="note.text" ng-blur="onChange()"></textarea>-->
+                <textarea spellcheck="false" class="basic-note-info" ng-model="note.text" ng-trim="false" ng-blur="onChange()" ng-keydown="handleTabKey($event)"></textarea>
+            </div>
+            <div class="resize-we east"></div>
+        </div>
+        <div class="resize-ns south"></div>
+        <div class="resize-diag nw"></div>
+        <div class="resize-diag ne"></div>
+        <div class="resize-diag sw"></div>
+        <div class="resize-diag se"></div>
+    </basic-note>
+
+    <script type="text/ng-template" id="popover.html">
+        <div class="basic-note-colour-selection-box" style="color:black">
+            <table cellpadding="0">
+                <tr>
+                    <td><div m-tooltip="Apricot" class="basic-note-colour-selection" ng-click="note.colour='#ffd59b'; onChange()" style="background-color: #ffd59b" ng-class="{'selected-note-colour' : !note.colour || note.colour=='#ffd59b' }"></div></td>
+                    <td><div m-tooltip="Sandwisp" class="basic-note-colour-selection" ng-click="note.colour='#f5efa1'; onChange()" style="background-color: #f5efa1" ng-class="{'selected-note-colour' : note.colour=='#f5efa1' }"></div></td>
+                    <td><div m-tooltip="Seaweed" class="basic-note-colour-selection" ng-click="note.colour='#d9f0c0'; onChange()" style="background-color: #d9f0c0" ng-class="{'selected-note-colour' : note.colour=='#d9f0c0' }"></div></td>
+                    <td><div m-tooltip="Ice" class="basic-note-colour-selection" ng-click="note.colour='#caf7ee'; onChange()" style="background-color: #caf7ee" ng-class="{'selected-note-colour' : note.colour=='#caf7ee' }"></div></td>
+                </tr>
+                <tr>
+                    <td><div m-tooltip="Sky" class="basic-note-colour-selection" ng-click="note.colour='#b8e0f9'; onChange()" style="background-color: #b8e0f9" ng-class="{'selected-note-colour' : note.colour=='#b8e0f9' }"></div></td>
+                    <td><div m-tooltip="Azure" class="basic-note-colour-selection" ng-click="note.colour='#a1bff5'; onChange()" style="background-color: #a1bff5" ng-class="{'selected-note-colour' : note.colour=='#a1bff5' }"></div></td>
+                    <td><div m-tooltip="Violet" class="basic-note-colour-selection" ng-click="note.colour='#acaff7'; onChange()" style="background-color: #acaff7" ng-class="{'selected-note-colour' : note.colour=='#acaff7' }"></div></td>
+                    <td><div m-tooltip="Mauve" class="basic-note-colour-selection" ng-click="note.colour='#e0b7fb'; onChange()" style="background-color: #e0b7fb" ng-class="{'selected-note-colour' : note.colour=='#e0b7fb' }"></div></td>
+                </tr>
+                <tr>
+                    <td><div m-tooltip="Azalea" class="basic-note-colour-selection" ng-click="note.colour='#f7c8da'; onChange()" style="background-color: #f7c8da" ng-class="{'selected-note-colour' : note.colour=='#f7c8da' }"></div></td>
+                    <td><div m-tooltip="Candyfloss" class="basic-note-colour-selection" ng-click="note.colour='#f7b3cf'; onChange()" style="background-color: #f7b3cf" ng-class="{'selected-note-colour' : note.colour=='#f7b3cf' }"></div></td>
+                    <td><div m-tooltip="Terracotta" class="basic-note-colour-selection" ng-click="note.colour='#e89e8c'; onChange()" style="background-color: #e89e8c" ng-class="{'selected-note-colour' : note.colour=='#e89e8c' }"></div></td>
+                    <td><div m-tooltip="Walnut" class="basic-note-colour-selection" ng-click="note.colour='#e4cb9c'; onChange()" style="background-color: #e4cb9c" ng-class="{'selected-note-colour' : note.colour=='#e4cb9c' }"></div></td>
+                </tr>
+            </table>
+        </div>
+    </script>
+</notes>

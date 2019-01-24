@@ -29,17 +29,6 @@ public class QueryResources {
         this.datumDAO = datumDAO;
     }
 
-//    @GET
-//    @Path("sql")
-//    public Response sql(@QueryParam("sql") String sql)  {
-//
-//        List<DatumWrapper> data = datumDAO.execute(sql);
-//
-//        return Response.status(Response.Status.OK).entity(
-//                data
-//        ).build();
-//    }
-
     @POST
     @Path("select-distinct")
     public Response selectDistinct(SelectDistinctRep rep) throws SQLException {

@@ -7,6 +7,9 @@ server:
     - type: http
       port: 8091
 
+#logging:
+#  level: DEBUG
+
 assets:
   overrides:
     /: src/main/resources/assets/

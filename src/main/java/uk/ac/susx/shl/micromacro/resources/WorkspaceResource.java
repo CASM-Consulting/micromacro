@@ -1,20 +1,14 @@
 package uk.ac.susx.shl.micromacro.resources;
 
 
-import uk.ac.susx.shl.micromacro.api.AbstractQueryRep;
 import uk.ac.susx.shl.micromacro.api.ProxyRep;
 import uk.ac.susx.shl.micromacro.api.SelectRep;
-import uk.ac.susx.shl.micromacro.api.WorkspaceRep;
 import uk.ac.susx.shl.micromacro.core.*;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 
 @Path("workspace")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -31,15 +25,50 @@ public class WorkspaceResource {
 
 
     @GET
+    @Path("getQueryMeta")
+    public Response getQueryMeta(@QueryParam("workspaceId") String workspaceId,
+                                 @QueryParam("queryId") String queryId,
+                                 @QueryParam("metaId") String metaId
+    ) {
+        Workspace workspace = workspaces.get(workspaceId);
+
+        Query query = workspace.queries().get(queryId);
+
+        return Response.status(Response.Status.OK).entity(
+                query.getMeta().get(metaId)
+        ).build();
+    }
+
+    @POST
+    @Path("setQueryMeta")
+    public Response setQueryMeta(@QueryParam("workspaceId") String workspaceId,
+                            @QueryParam("queryId") String queryId,
+                            @QueryParam("metaId") String metaId,
+                            String data
+                            ) {
+        Workspace workspace = workspaces.get(workspaceId);
+
+        Query query = workspace.queries().get(queryId);
+
+        query.setMeta(metaId, data);
+
+        workspaces.save(workspace);
+
+        return Response.status(Response.Status.OK).entity(
+            query.getMeta().get(metaId)
+        ).build();
+    }
+
+    @GET
     @Path("loadQuery")
-    public Response loadQuery(@QueryParam("workspace") String workspaceName,
-                             @QueryParam("queryName") String queryName,
+    public Response loadQuery(@QueryParam("workspaceId") String workspaceId,
+                             @QueryParam("queryId") String queryId,
                              @QueryParam("ver") int ver
     ) throws SQLException {
 
-        Workspace workspace = workspaces.get(workspaceName);
+        Workspace workspace = workspaces.get(workspaceId);
 
-        Query query = workspace.queries().get(queryName);
+        Query query = workspace.queries().get(queryId);
 
         return Response.status(Response.Status.OK).entity(
                 queryFactory.rep(query.get(ver))
@@ -48,35 +77,35 @@ public class WorkspaceResource {
 
     @POST
     @Path("addProxy")
-    public Response addProxy(@QueryParam("workspaceName") String workspaceName,
-                             @QueryParam("queryName") String queryName,
+    public Response addProxy(@QueryParam("workspaceId") String workspaceId,
+                             @QueryParam("queryId") String queryId,
                              ProxyRep query) throws SQLException {
 
-        Workspace workspace = workspaces.get(workspaceName);
+        Workspace workspace = workspaces.get(workspaceId);
 
-        workspace.add(queryName, queryFactory.proxy(query));
+        workspace.add(queryId, queryFactory.proxy(query));
 
         workspaces.save(workspace);
 
         return Response.status(Response.Status.OK).entity(
-                queryFactory.rep(workspaces.get(workspaceName).queries().get(queryName).get())
+                queryFactory.rep(workspaces.get(workspaceId).queries().get(queryId).get())
         ).build();
     }
 
     @POST
     @Path("addSelect")
-    public Response addSelect(@QueryParam("workspaceName") String workspaceName,
-                             @QueryParam("queryName") String queryName,
+    public Response addSelect(@QueryParam("workspaceId") String workspaceId,
+                             @QueryParam("queryId") String queryId,
                              SelectRep query) throws SQLException {
 
-        Workspace workspace = workspaces.get(workspaceName);
+        Workspace workspace = workspaces.get(workspaceId);
 
-        workspace.add(queryName, queryFactory.select(query));
+        workspace.add(queryId, queryFactory.select(query));
 
         workspaces.save(workspace);
 
         return Response.status(Response.Status.OK).entity(
-                queryFactory.rep(workspaces.get(workspaceName).queries().get(queryName).get())
+                queryFactory.rep(workspaces.get(workspaceId).queries().get(queryId).get())
         ).build();
     }
 

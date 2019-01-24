@@ -2,7 +2,7 @@ package uk.ac.susx.shl.micromacro.api;
 
 import java.util.Map;
 
-public class SelectDistinctRep extends AbstractQueryRep{
+public class SelectDistinctRep extends AbstractDatumQueryRep {
 
     public String filter;
     public String distinctKey;

@@ -4,7 +4,7 @@ MicroMacroApp.component('workspace', {
         workspace : '<'
     },
     controller: function($scope) {
-
+        $scope.notesCollapsed = true;
     }
 });
 

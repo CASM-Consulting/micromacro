@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import java.io.Serializable;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class AbstractQueryRep implements Serializable {
+public class AbstractDatumQueryRep implements Serializable {
 
     public transient String type;
     public String table;

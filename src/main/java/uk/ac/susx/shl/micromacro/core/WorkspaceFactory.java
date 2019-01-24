@@ -1,6 +1,7 @@
 package uk.ac.susx.shl.micromacro.core;
 
-import uk.ac.susx.shl.micromacro.api.AbstractQueryRep;
+import uk.ac.susx.shl.micromacro.api.AbstractDatumQueryRep;
+import uk.ac.susx.shl.micromacro.api.QueryRep;
 import uk.ac.susx.shl.micromacro.api.WorkspaceRep;
 import uk.ac.susx.tag.method51.core.data.store2.query.DatumQuery;
 
@@ -25,9 +26,10 @@ public class WorkspaceFactory {
 
         Workspace workspace = new Workspace(rep.name, rep.id);
 
-        for(Map.Entry<String, List<AbstractQueryRep>> entry : rep.queries.entrySet()) {
+        for(Map.Entry<String, QueryRep> entry : rep.queries.entrySet()) {
+            QueryRep qrep = entry.getValue();
 
-            LinkedList<? extends DatumQuery> history = entry.getValue()
+            LinkedList<? extends DatumQuery> history = qrep .history
                     .stream()
                     .map(queryRep -> {
                         try {
@@ -38,7 +40,7 @@ public class WorkspaceFactory {
                     })
                     .collect(Collectors.toCollection(LinkedList::new));
 
-            workspace.setQuery(entry.getKey(), new Query<>(history));
+            workspace.setQuery(entry.getKey(), new Query<>(history, qrep.metadata));
         }
 
         return workspace;
@@ -55,13 +57,17 @@ public class WorkspaceFactory {
 
         for(Map.Entry<String, Query> entry : workspace.queries().entrySet()) {
 
-            LinkedList<AbstractQueryRep> queries = new LinkedList<>();
+            Query query = entry.getValue();
 
-            for(Object query : entry.getValue().history()) {
-                queries.add(queryFactory.rep((DatumQuery)query));
+            QueryRep queryRep = new QueryRep();
+
+            for(Object version : query.history()) {
+                queryRep.history.add(queryFactory.rep((DatumQuery)version));
             }
 
-            rep.queries.put(entry.getKey(), queries);
+            queryRep.metadata = query.getMeta();
+
+            rep.queries.put(entry.getKey(), queryRep);
 
         }
         return rep;

@@ -8,11 +8,13 @@
         </label>
     </div>
 
+    <div>{{totalPages()}}</div>
     <div uib-pagination
             ng-change="pageChange()"
             ng-model="currentPage"
-            total-items="$ctrl.result.length"
-            max-size="maxSize"
+            total-items="totalPages()"
+            items-per-page="numPerPage"
+            max-size="10"
             boundary-links="true">
     </div>
 

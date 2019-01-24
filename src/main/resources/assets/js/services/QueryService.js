@@ -1,4 +1,4 @@
-MicroMacroApp.factory("Queries", function($q, Server) {
+MicroMacroApp.factory("Queries", function($q, Server, $http) {
 
     return {
 
@@ -24,8 +24,8 @@ MicroMacroApp.factory("Queries", function($q, Server) {
             return $q(function(resolve) {
                 Server.get("api/workspace/loadQuery", {
                     params : {
-                        workspace : workspaceId,
-                        queryName : queryId,
+                        workspaceId : workspaceId,
+                        queryId : queryId,
                         ver : ver
                     },
                     success : resolve
@@ -46,8 +46,8 @@ MicroMacroApp.factory("Queries", function($q, Server) {
             return $q(function(resolve) {
                 Server.post("api/workspace/addProxy", query,  {
                     params : {
-                        workspaceName : workspaceId,
-                        queryName : queryId
+                        workspaceId : workspaceId,
+                        queryId : queryId
                     },
                     success : resolve
                 });
@@ -58,8 +58,48 @@ MicroMacroApp.factory("Queries", function($q, Server) {
             return $q(function(resolve) {
                 Server.post("api/workspace/addSelect", query,  {
                     params : {
-                        workspaceName : workspaceId,
-                        queryName : queryId
+                        workspaceId : workspaceId,
+                        queryId : queryId
+                    },
+                    success : resolve
+                });
+            });
+        },
+        setMeta : function(workspaceId, queryId, metaKey, data, type) {
+            return $q(function(resolve) {
+                if(type == "json") {
+                    data = JSON.stringify(data);
+                }
+
+                Server.post("api/workspace/setQueryMeta", data,  {
+                    params : {
+                        workspaceId : workspaceId,
+                        queryId : queryId,
+                        metaId : metaKey
+                    },
+                    success : resolve
+                });
+            });
+        },
+        getMeta : function(workspaceId, queryId, metaKey, type, defaultValue) {
+
+            return $q(function(resolve) {
+
+                if(type == "json") {
+                    resolve = function(data) {
+                        if(!data) {
+                            return defaultValue;
+                        } else {
+                            return resolve(JSON.parse(data));
+                        }
+                    }
+                }
+
+                Server.get("api/workspace/getQueryMeta",  {
+                    params : {
+                        workspaceId : workspaceId,
+                        queryId : queryId,
+                        metaId : metaKey
                     },
                     success : resolve
                 });
