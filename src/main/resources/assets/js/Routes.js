@@ -71,6 +71,9 @@ MicroMacroApp.config(function($stateProvider){
         resolve: {
             result: function(query, Queries) {
                 return Queries.execute(query);
+            },
+            defaultKeys : function(Queries, $stateParams) {
+                return Queries.getKeys($stateParams.workspaceId, $stateParams.queryId);
             }
         }
     });

@@ -104,7 +104,21 @@ MicroMacroApp.factory("Queries", function($q, Server, $http) {
                     success : resolve
                 });
             });
+        },
+
+        getKeys : (workspaceId, queryId) => {
+
+            return $q(function(resolve) {
+                Server.get("api/workspace/getQueryKeys", {
+                    params : {
+                        workspaceId : workspaceId,
+                        queryId : queryId
+                    },
+                    success : resolve
+                });
+            });
         }
+
     }
 
 });

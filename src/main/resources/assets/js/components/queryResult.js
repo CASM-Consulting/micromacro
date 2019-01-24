@@ -3,9 +3,15 @@ MicroMacroApp.component('queryResult', {
     bindings : {
         query: '<',
         keys: '<',
-        result: '<'
+        result: '<',
+        defaultKeys: '<'
     },
     controller : function($scope, $state, $stateParams, Queries) {
+
+        var LABEL = $scope.LABEL = 'uk.ac.susx.tag.method51.twitter.LabelDecision';
+        var STRING = $scope.STRING = 'java.lang.String';
+        var LIST = $scope.LIST = 'java.util.List';
+        var SPAN = $scope.SPAN = 'uk.ac.susx.tag.method51.core.meta.span.Spans';
 
         var $ctrl = this;
 
@@ -20,8 +26,23 @@ MicroMacroApp.component('queryResult', {
 
         $ctrl.$onInit = function() {
 
+            var findTarget = (key) => {
+                for(var i in $ctrl.result) {
+                    var row = $ctrl.result[i].data;
+                    if(row[key]) {
+                        return row[key].target;
+                    }
+                }
+            };
+
             //bind display keys to URL
-            $scope.selectedKeys = $stateParams.displayKeys || {};
+            $scope.selectedKeys = $stateParams.displayKeys || $ctrl.defaultKeys.reduce((keys, key) => {
+                if($ctrl.keys[key].type.class == SPAN) {
+                    keys[findTarget(key)] = true;
+                }
+                keys[key] = true;
+                return keys;
+            }, {});
 
             $scope.$watchCollection(angular.bind(this, function() {
                 return $state.params.displayKeys;

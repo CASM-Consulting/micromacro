@@ -75,6 +75,21 @@ public class WorkspaceResource {
         ).build();
     }
 
+    @GET
+    @Path("getQueryKeys")
+    public Response getQueryKeys(@QueryParam("workspaceId") String workspaceId,
+                                 @QueryParam("queryId") String queryId,
+                                 @QueryParam("ver") int ver
+    ) {
+        Workspace workspace = workspaces.get(workspaceId);
+
+        Query query = workspace.queries().get(queryId);
+
+        return Response.status(Response.Status.OK).entity(
+                queryFactory.keys(query.get(ver).whereKeys())
+        ).build();
+    }
+
     @POST
     @Path("addProxy")
     public Response addProxy(@QueryParam("workspaceId") String workspaceId,

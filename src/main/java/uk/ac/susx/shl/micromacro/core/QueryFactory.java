@@ -18,7 +18,9 @@ import uk.ac.susx.tag.method51.core.meta.filters.logic.LogicParser;
 import uk.ac.susx.tag.method51.core.meta.types.RuntimeType;
 
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -218,6 +220,10 @@ public class QueryFactory {
             throw new UnrecognisedQueryException();
         }
 
+    }
+
+    public List<String> keys(Collection<Key> keys) {
+        return keys.stream().map(key->key.toString()).collect(Collectors.toList());
     }
 
 }
