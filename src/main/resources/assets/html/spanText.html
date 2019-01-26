@@ -1,1 +1,5 @@
-<span ng-repeat="token in $ctrl.tokens" style="color:{{token.color}}">{{token.text}} </span>
+<span ng-repeat="segment in $ctrl.segments" >
+    <span ng-repeat="begin in segment.begins" style="color:{{begin.color}}">[</span>
+    {{segment.text}}
+    <span ng-repeat="end in segment.ends" style="color:{{end.color}}">]</span>
+</span>
