@@ -1,6 +1,5 @@
 'use strict';
 
-
 angular.module('angular-toArrayFilter', []) .filter('toArray', function () {
   return function (obj, addKey) {
     if (!angular.isObject(obj)) return obj;
@@ -19,7 +18,7 @@ angular.module('angular-toArrayFilter', []) .filter('toArray', function () {
   };
 });
 
-var MicroMacroApp = angular.module('MicroMacroApp', ['ui.bootstrap', 'ui.router', 'ui-leaflet', 'angular-toArrayFilter', 'ngAnimate']);
+var MicroMacroApp = angular.module('MicroMacroApp', ['ui.bootstrap', 'ui.router', /*'ui-leaflet',*/ 'angular-toArrayFilter', 'ngAnimate']);
 
 MicroMacroApp.run(function($trace) {
     $trace.enable('TRANSITION');

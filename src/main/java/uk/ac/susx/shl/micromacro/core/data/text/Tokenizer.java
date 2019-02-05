@@ -31,14 +31,14 @@ public class Tokenizer {
         return tokenizer;
     }
 
-    public final static String SUFFIX = "-token";
-    public final static Key<Spans<String,Integer>> TOKEN_KEY = Key.of("tokens", RuntimeType.stringSpans(Integer.class));
+//    public final static String SUFFIX = "-token";
+    public final static Key<Spans<String, String>> TOKEN_KEY = Key.of("tokens", RuntimeType.stringSpans(String.class));
 
     public static Datum tokenize(Datum datum, Key<String> textKey, KeySet retain) {
         String text = datum.get(textKey);
         opennlp.tools.util.Span[] tokeniserSpans = get().tokenizePos(text);
 
-        Spans<String, Integer> tokenSpans = Spans.annotate(textKey, Integer.class);
+        Spans<String, String> tokenSpans = Spans.annotate(textKey, String.class);
 
         int i = 0;
         for(opennlp.tools.util.Span token : tokeniserSpans) {
@@ -46,16 +46,16 @@ public class Tokenizer {
             int start = token.getStart();
             int end = token.getEnd();
 
-//            String t = text.substring(start, end);
+            String t = text.substring(start, end);
 
-            tokenSpans = tokenSpans.with(start, end, i);
+            tokenSpans = tokenSpans.with(start, end, t);
             ++i;
         }
 
         datum = datum.with(TOKEN_KEY, tokenSpans);
 
-        Datum tokenized = datum.stringSpans2List(TOKEN_KEY, retain, SUFFIX);
+//        datum = datum.stringSpans2List(TOKEN_KEY, retain, SUFFIX);
 
-        return tokenized;
+        return datum ;
     }
 }

@@ -7,9 +7,10 @@ MicroMacroApp.component('row', {
         keys : '<'
     },
     templateUrl : 'html/row.html',
-    controller : function($scope, $state) {
+    controller : function($scope, $state, Types) {
         var $ctrl = this;
 
+        //TODO: use Types service
         var LABEL = $scope.LABEL = 'uk.ac.susx.tag.method51.twitter.LabelDecision';
         var STRING = $scope.STRING = 'java.lang.String';
         var LIST = $scope.LIST = 'java.util.List';

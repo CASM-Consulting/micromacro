@@ -536,7 +536,7 @@ public class PubMatcher {
 
                     Datum tokenized = Tokenizer.tokenize(sentence, textKey, keys);
                     KeySet tokenizedKeys = tokenized.getKeys();
-                    Key<List<String>> tokenKey = tokenizedKeys.get(textKey + Tokenizer.SUFFIX);
+                    Key<List<String>> tokenKey = tokenizedKeys.get(textKey + "-token");
 
                     Spans<List<String>, String> pubSpans = pm.matchPubs(tokenized, tokenKey);
 
@@ -656,7 +656,7 @@ public class PubMatcher {
 
                     Datum tokenized = Tokenizer.tokenize(sentence, textKey, keys);
                     KeySet tokenizedKeys = tokenized.getKeys();
-                    Key<List<String>> tokenKey = tokenizedKeys.get(textKey + Tokenizer.SUFFIX);
+                    Key<List<String>> tokenKey = tokenizedKeys.get(textKey + "-token");
 
                     Spans<List<String>, String> pubSpans = pm.matchPubs(tokenized, tokenKey);
 

@@ -6,7 +6,7 @@ MicroMacroApp.component('queryResult', {
         result: '<',
         defaultKeys: '<'
     },
-    controller : function($scope, $state, $stateParams, Queries) {
+    controller : function($scope, $state, $stateParams, Queries, Datums) {
 
         var LABEL = $scope.LABEL = 'uk.ac.susx.tag.method51.twitter.LabelDecision';
         var STRING = $scope.STRING = 'java.lang.String';

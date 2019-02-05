@@ -136,20 +136,20 @@ public class OBResource {
 
 
 
-    @GET
-    @Path("saveStatements2Table")
-    public Response save2Table(@QueryParam("from") LocalDateParam from, @QueryParam("to") LocalDateParam to, @QueryParam("table") String table) throws StoreException {
-        try (Handle handle = jdbi.open()) {
-
-            Connection con = handle.getConnection();
-
-            PostgreSQLConnection connectionParams = new PostgreSQLConnection().setConnection(con);
-
-            PostgreSQLDatumStore.Builder storeBuilder = new PostgreSQLDatumStore.Builder(connectionParams, table);
-
-            obTrials.saveStatements2Table(from.get(), to.get(), storeBuilder);
-
-            return Response.status(Response.Status.OK).build();
-        }
-    }
+//    @GET
+//    @Path("saveStatements2Table")
+//    public Response save2Table(@QueryParam("from") LocalDateParam from, @QueryParam("to") LocalDateParam to, @QueryParam("table") String table) throws StoreException {
+//        try (Handle handle = jdbi.open()) {
+//
+//            Connection con = handle.getConnection();
+//
+//            PostgreSQLConnection connectionParams = new PostgreSQLConnection().setConnection(con);
+//
+//            PostgreSQLDatumStore.Builder storeBuilder = new PostgreSQLDatumStore.Builder(connectionParams, table);
+//
+//            obTrials.saveStatements2Table(from.get(), to.get(), storeBuilder);
+//
+//            return Response.status(Response.Status.OK).build();
+//        }
+//    }
 }

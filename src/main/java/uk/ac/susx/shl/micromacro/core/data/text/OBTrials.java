@@ -3,6 +3,7 @@ package uk.ac.susx.shl.micromacro.core.data.text;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import org.apache.commons.lang3.StringUtils;
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
 import uk.ac.susx.shl.micromacro.client.StanfordNER;
@@ -14,6 +15,7 @@ import uk.ac.susx.tag.method51.core.meta.Datum;
 import uk.ac.susx.tag.method51.core.meta.Key;
 import uk.ac.susx.tag.method51.core.meta.KeySet;
 import uk.ac.susx.tag.method51.core.meta.span.Span;
+import uk.ac.susx.tag.method51.core.meta.span.SpanUtil;
 import uk.ac.susx.tag.method51.core.meta.span.Spans;
 import uk.ac.susx.tag.method51.core.meta.types.RuntimeType;
 
@@ -237,7 +239,8 @@ public class OBTrials {
 //                        .with(crimeDate)
                         ;
 
-                Key<List<String>> tokensKey = Key.of(textKey + Tokenizer.SUFFIX, RuntimeType.list(RuntimeType.STRING));
+//                Key<List<String>> tokensKey = Key.of(textKey + Tokenizer.SUFFIX, RuntimeType.list(RuntimeType.STRING));
+                Key<List<String>> tokensKey = Key.of(textKey + "-token", RuntimeType.list(RuntimeType.STRING));
 
                 int i = 0;
                 for (Datum statement : trial.getSpannedData(statementsKey, retain)) {
@@ -507,7 +510,7 @@ public class OBTrials {
 //                        .with(crimeDate)
                         ;
 
-                Key<List<String>> tokenKey = null;
+                Key<List<String>> tokenKey = Key.of("tokens", RuntimeType.list(RuntimeType.STRING));
 
                 int i = 0;
                 for (Datum statement : trial.getSpannedData(statementsKey, retain)) {
@@ -524,10 +527,6 @@ public class OBTrials {
 
                         KeySet tokenizedKeys = tokenized.getKeys();
 
-                        tokenKey = tokenizedKeys.get(textKey + Tokenizer.SUFFIX);
-
-
-
                         NER2Datum ner2Datum = new NER2Datum(
                                 tokenKey,
                                 ImmutableSet.of("placeName"),
@@ -535,9 +534,9 @@ public class OBTrials {
                                 true
                         );
 
-                        String text = String.join(" ", tokenized.get(tokenKey));
+                        List<String> tokens = SpanUtil.spans2List(tokenized, Tokenizer.TOKEN_KEY);
 
-                        String ner = placeNerService.get(text);
+                        String ner = placeNerService.get(StringUtils.join(tokens, " "));
 
 //                    System.out.println(ner);
                         Datum nerd = ner2Datum.toDatum(ner);
@@ -545,7 +544,7 @@ public class OBTrials {
                         //retain original crime date spans - tokenisation not required
 //                        tokenized = tokenized.with(crimeDateKey, sentence.get(crimeDateKey));
 
-                        if (tokenized.get(tokenKey).size() != nerd.get(tokenKey).size()) {
+                        if (tokens.size() != nerd.get(tokenKey).size()) {
 
                             System.err.println("tokenised mismatch! Expected " + tokenized.get(tokenKey).size() + " got " + nerd.get(tokenKey).size());
                         } else {
@@ -628,6 +627,7 @@ public class OBTrials {
         }
     }
 
+    /*
     public void saveStatements2Table(LocalDate from, LocalDate to, PostgreSQLDatumStore.Builder storeBuilder) throws StoreException {
 
 
@@ -813,7 +813,7 @@ public class OBTrials {
         } catch (Throwable err) {
             err.printStackTrace ();
         }
-    }
+    }*/
 
 
     private Optional<String> getCrimeCat(Datum datum, Key<Spans<String, String>> datesKey ) {

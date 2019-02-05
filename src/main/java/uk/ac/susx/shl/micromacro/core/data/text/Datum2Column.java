@@ -36,7 +36,7 @@ public class Datum2Column {
         String suffix;
         if(!textKey.type.type.getRawClass().isAssignableFrom(List.class)) {
 
-            suffix = Tokenizer.SUFFIX;
+            suffix = "-token";
             listVersion = Tokenizer.tokenize(datum, textKey, KeySet.ofIterable(new ArrayList<>(extractKeys)));
             listKeys = listVersion.getKeys();
             listKey = listKeys.get(textKey.name()+suffix);
