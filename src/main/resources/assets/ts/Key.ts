@@ -16,14 +16,8 @@
         this.namespace = namespace;
     }
 
-    public k():string {
-        return this.namespace+"/"+this.name;
-    }
-
-    public static of<T>(name:string, type:Type<T>):Key<T> {
-        let bits:string[] = name.split('/');
-
-        return new Key(bits[0], bits[1], type);
+    public key():string {
+        return (this.namespace?this.namespace+"/":"")+this.name;
     }
 
 }

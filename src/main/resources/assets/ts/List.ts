@@ -7,7 +7,8 @@ class List<T> extends Array<T> {
     }
 
     public static create<T>(items?: Array<T>):List<T> {
-        return Object.call(List.prototype, items);
+        let list:List<T> = new List(Object.create(List.prototype).concat(items));
+        return list;
     }
 
     public with(val:T):List<T>  {

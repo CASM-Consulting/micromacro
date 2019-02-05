@@ -18,11 +18,10 @@ MicroMacroApp.factory("Spans", function(Datums, Types) {
                 continue;
             }
             var spans = spanss[keyName];
-            for(var jdx in spans) {
-                var span = spans[jdx];
+            angular.forEach(spans, (span) => {
                 spanIndices[span.from].begins.push({color: colours[idx]});
                 spanIndices[Math.min(n,span.to)].ends.push({color: colours[idx]});
-            }
+            });
             ++idx;
         }
 

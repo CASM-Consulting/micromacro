@@ -12,6 +12,7 @@
 // import { Util } from "./Util";
 
 
+
 /*export*/ class Datum {
     
     private readonly keys:Map<string,Key<any>>;
@@ -22,8 +23,18 @@
         this.keys = keys || new Map();
     }
 
-    public get<T>(key:Key<T>):T {
-        return this.data.get(key.k());
+    
+
+    // public get<T>(key:Key<T>):T {
+    //     return this.data.get(key.k());
+    // }
+
+    public get<T>(key:Key<T> | string):T {
+        if(typeof(key) === 'string') {
+            return this.data.get(this.keys.get(key).key());
+        } else {
+            return this.data.get(key.key());
+        }
     }
 
     public getKey<T>(key:string):Key<T> {
@@ -32,7 +43,7 @@
 
     public with<T>(key:Key<T>, value:T):Datum {
         
-        let datum:Datum = new Datum(this.data.set(key.k(),value), this.keys.set(key.k(), key));
+        let datum:Datum = new Datum(this.data.set(key.key(),value), this.keys.set(key.key(), key));
 
         return datum;
     }
@@ -40,10 +51,10 @@
     public without(key:Key<any>) {
 
         const newData = new Map(this.data);
-        newData.delete(key.k());
+        newData.delete(key.key());
 
         const newKeys = new Map(this.keys);
-        newKeys.delete(key.k());
+        newKeys.delete(key.key());
 
         const datum:Datum = new Datum(newData, newKeys);
 
@@ -57,7 +68,7 @@
         if(Util.isTargetTypeSpans(key)) {
             
             const targetKey:Key<Spans<T,V>> = this.get(key).target;
-            const newKey:Key<Spans<T,V>> = Key.of(key.k(), targetKey.type);
+            const newKey:Key<Spans<T,V>> = DatumFactory.key(key.key(), targetKey.type);
 
 
             // key = key.type = targetType;
@@ -68,7 +79,7 @@
                 const from:number = this.get(targetKey).spans[span.from].from;
                 const to:number = this.get(targetKey).spans[span.to-1].to;
 
-                newSpans = newSpans.with(from, to, span.get());
+                newSpans = newSpans.with(new Span(targetKey, from, to, span.get()));
             }
 
             return this.with(key, newSpans).resolve(key);

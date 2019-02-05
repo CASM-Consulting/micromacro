@@ -5,19 +5,19 @@
 
         <div ng-if="targets[key]" class="col-md-10">
             <span-text spanss="targets[key]"
-                       text="$ctrl.data[key]"
+                       text="$ctrl.datum.get(key)"
                        display-keys="$ctrl.selectedKeys">
             </span-text>
         </div>
 
         <div ng-if="type(key)==STRING && !targets[key]" class="col-md-10">
-            {{$ctrl.data[key]}}
+            {{$ctrl.datum.get(key)}}
         </div>
 
     </div>
 
     <div ng-if="type(key)==LABEL" class="col-md-1">
-        {{$ctrl.data[key].label}}
+        {{$ctrl.datum.get(key)}}
     </div>
 
 </div>

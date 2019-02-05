@@ -26,6 +26,8 @@ MicroMacroApp.component('queryResult', {
 
         $ctrl.$onInit = function() {
 
+            $ctrl.data = Datums.data($ctrl.result, $ctrl.keys);
+
             var findTarget = (key) => {
                 for(var i in $ctrl.result) {
                     var row = $ctrl.result[i].data;
@@ -82,12 +84,12 @@ MicroMacroApp.component('queryResult', {
                 } else {
                     var begin = (($scope.currentPage - 1) * $scope.numPerPage);
                     var end = begin + $scope.numPerPage;
-                    $scope.page = $ctrl.result.slice(begin, end);
+                    $scope.page = $ctrl.data.slice(begin, end);
                 }
             });
 
             if(isProxy()) {
-                $scope.pages = Queries.binProxyResultByPartition($ctrl.result, $ctrl.query.partitionKey);
+                $scope.pages = Queries.binProxyResultByPartition($ctrl.data, $ctrl.query.partitionKey);
             }
 
         };

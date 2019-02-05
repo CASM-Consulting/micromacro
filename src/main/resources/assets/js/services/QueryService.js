@@ -8,7 +8,7 @@ MicroMacroApp.factory("Queries", function($q, Server, $http) {
             var idx = -1;
 
             return result.reduce( (binned, row) => {
-                var partition = row.data[partitionKey];
+                var partition = row.get(partitionKey);
                 if(partition != curPartition) {
                     binned.push([row]);
                     curPartition = partition;

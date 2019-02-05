@@ -3,12 +3,10 @@
         "outDir": "./built",
         "allowJs": true,
         "target": "es5",
-        // "moduleResolution": "node",
         "noImplicitAny": true,
         "module": "none",
         "lib": ["es2015"],
-        "downlevelIteration": true,
-        "sourceMap": true
+        "downlevelIteration": true
     },
     "include": [
         "./ts/**/*"

@@ -18,11 +18,11 @@
             boundary-links="true">
     </div>
 
-    <div ng-repeat="result in page" class="row">
+    <div ng-repeat="datum in page" class="row">
 
-        <div class="col-md-1">{{result.id}}</div>
+        <!--<div class="col-md-1">{{result.id}}</div>-->
 
-        <row data="result.data"
+        <row datum="datum"
              selected-keys="selectedKeys"
              widths="widths"
              key-list="keyList"

@@ -1,6 +1,6 @@
 MicroMacroApp.component('row', {
     bindings : {
-        data : '<',
+        datum : '<',
         selectedKeys : '<',
         widths : '<',
         keyList : '<',
@@ -21,14 +21,15 @@ MicroMacroApp.component('row', {
 
             angular.forEach($ctrl.keys, function(key, keyName) {
 
-                if(type(key) == SPAN && $ctrl.data[keyName]) {
+                if( type(key) == SPAN && $ctrl.datum.get(keyName) ) {
 
-                    var target = getTarget($ctrl.data[keyName]);
+                    var target = getTarget($ctrl.datum.get(keyName)).key();
+
                     if( !(target in $scope.targets) ) {
 
                         $scope.targets[target] = {};
                     }
-                    $scope.targets[target][keyName] = $ctrl.data[keyName].spans;
+                    $scope.targets[target][keyName] = $ctrl.datum.get(keyName).spans;
                 }
 
             });
