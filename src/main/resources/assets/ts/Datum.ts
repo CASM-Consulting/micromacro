@@ -31,7 +31,7 @@
 
     public get<T>(key:Key<T> | string):T {
         if(typeof(key) === 'string') {
-            return this.data.get(this.keys.get(key).key());
+            return this.data.get(key);
         } else {
             return this.data.get(key.key());
         }
