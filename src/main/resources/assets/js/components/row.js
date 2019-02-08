@@ -7,7 +7,7 @@ MicroMacroApp.component('row', {
         keys : '<'
     },
     templateUrl : 'html/row.html',
-    controller : function($scope, $state, Types) {
+    controller : function($scope, $state, Rows, Types) {
         var $ctrl = this;
 
         //TODO: use Types service
@@ -19,49 +19,11 @@ MicroMacroApp.component('row', {
         $ctrl.$onInit = function() {
             $scope.targets = {};
 
-            angular.forEach($ctrl.keys, function(key, keyName) {
+            $scope.columns = Rows.getColumns($ctrl.datum, $ctrl.selectedKeys);
 
-                if( type(key) == SPAN && $ctrl.datum.get(keyName) ) {
-
-                    var target = getTarget($ctrl.datum.get(keyName)).key();
-
-                    if( !(target in $scope.targets) ) {
-
-                        $scope.targets[target] = {};
-                    }
-                    $scope.targets[target][keyName] = $ctrl.datum.get(keyName).spans;
-                }
-
+            $scope.$watchCollection("$ctrl.selectedKeys", function() {
+                $scope.columns = Rows.getColumns($ctrl.datum, $ctrl.selectedKeys);
             });
-
-//
-//
-//            $scope.$watchCollection("$ctrl.selectedKeys", function() {
-//                $scope.targets = {};
-//                $scope.display = {};
-//                angular.forEach($ctrl.selectedKeys, function(selected, keyName) {
-//                    if(selected && $ctrl.data[keyName]) {
-//
-//                        var key = $ctrl.keys[keyName];
-//
-//                        if(type(key) == STRING || type(key) == LIST) {
-//
-//                            if(keyName in $ctrl.selectedKeys) {
-//
-//                                $scope.display[keyName]=key;
-//                            }
-//                        } else if(type(key) == SPAN) {
-//
-//                            var target = getTarget($ctrl.data[keyName]);
-//                            if( !(target in $scope.targets) ) {
-//
-//                                $scope.targets[target] = {};
-//                            }
-//                            $scope.targets[target][keyName] = $ctrl.data[keyName].spans;
-//                        }
-//                    }
-//                });
-//            });
         };
 
         var getTarget = $scope.target = function(key) {

@@ -1,8 +1,10 @@
 MicroMacroApp.factory("Spans", function(Datums, Types) {
-    var colours = ['red', 'blue', 'green', 'orange', 'grey']
+    var colours = ['red', 'grey', 'blue', 'green', 'orange']
 
 
-    var segments = function(text, spanss, displayKeys) {
+    var segments = function(spanColumn) {
+        var text = spanColumn.text;
+        var spanss = spanColumn.spans;
         var spanIndices = [];
 
         for(var i = 0; i < text.length; ++i) {
@@ -13,11 +15,8 @@ MicroMacroApp.factory("Spans", function(Datums, Types) {
 
         var n = text.length-1;
 
-        for(var keyName in spanss) {
-            if(!displayKeys[keyName]) {
-                continue;
-            }
-            var spans = spanss[keyName];
+        for(var i in spanss) {
+            var spans = spanss[i].spans.spans;
             angular.forEach(spans, (span) => {
                 spanIndices[span.from].begins.push({color: colours[idx]});
                 spanIndices[Math.min(n,span.to)].ends.push({color: colours[idx]});

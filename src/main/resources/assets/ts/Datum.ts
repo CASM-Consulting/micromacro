@@ -62,7 +62,7 @@
     }
 
     public resolve<T,V>(key:Key<Spans<any,any>>): Spans<T,V> {
-        if(key.type != Types.SPANS) {
+        if(!key.type.equals(Types.SPANS)) {
             throw "not a spans key!";
         }
         if(Util.isTargetTypeSpans(key)) {

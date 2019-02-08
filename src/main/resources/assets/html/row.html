@@ -1,23 +1,14 @@
 
-<div ng-repeat="key in $ctrl.keyList" ng-if="$ctrl.selectedKeys[key]" >
+<div ng-repeat="key in $ctrl.keyList" ng-if="columns[key]" >
 
-    <div ng-if="type(key)==STRING">
-
-        <div ng-if="targets[key]" class="col-md-10">
-            <span-text spanss="targets[key]"
-                       text="$ctrl.datum.get(key)"
-                       display-keys="$ctrl.selectedKeys">
-            </span-text>
+    <div ng-if="columns[key].type=='spans'">
+        <div class="col-md-10">
+            <span-text spanss="columns[key]"> </span-text>
         </div>
-
-        <div ng-if="type(key)==STRING && !targets[key]" class="col-md-10">
-            {{$ctrl.datum.get(key)}}
-        </div>
-
     </div>
 
-    <div ng-if="type(key)==LABEL" class="col-md-1">
-        {{$ctrl.datum.get(key).label}}
+    <div ng-if="columns[key].type!='spans'" class="col-md-1">
+        {{columns[key].text}}
     </div>
 
 </div>

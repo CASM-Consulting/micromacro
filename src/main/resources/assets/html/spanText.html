@@ -1,5 +1,5 @@
 <span ng-repeat="segment in $ctrl.segments" >
     {{segment.text}}
-    <span ng-repeat="begin in segment.begins" style="color:{{begin.color}}">[</span>
-    <span ng-repeat="end in segment.ends" style="color:{{end.color}}">]</span>
+    <span ng-repeat="begin in ::segment.begins" style="color:{{begin.color}}">[</span>
+    <span ng-repeat="end in ::segment.ends" style="color:{{end.color}}">]</span>
 </span>

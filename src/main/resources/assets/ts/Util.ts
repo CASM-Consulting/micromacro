@@ -10,7 +10,7 @@
 /*export*/ class Util {
 
     public static getTargetType<T>(key:Key<T>):Type<T> {
-        if(key.type != Types.SPANS) {
+        if(!key.type.equals(Types.SPANS)) {
             throw "Not an Spans Key";
         }
         
