@@ -155,275 +155,275 @@ public class OBTrials {
      * Marshals OB Corpus XML TEI through NER to DBMap indexes by id and date.
      *
      */
-    public void load(LocalDate from, LocalDate to) {
-
-        Key<String> statementIdKey = Key.of("statementId", RuntimeType.STRING);
-        Key<String> sentenceIdKey = Key.of("sentenceId", RuntimeType.STRING);
-
-        Key<Spans<String, String>> sessionsKey = Key.of("sessionsPaper", RuntimeType.stringSpans(String.class));
-        Key<Spans<String, String>> trialsKey = Key.of("trialAccount", RuntimeType.stringSpans(String.class));
-        Key<Spans<String, String>> statementsKey = Key.of("statement", RuntimeType.stringSpans(String.class));
-        Key<Spans<String, String>> crimeDateKey = Key.of("crimeDate", RuntimeType.stringSpans(String.class));
-        Key<Spans<String, String>> offenceCategoryKey = Key.of("offenceCategory", RuntimeType.stringSpans(String.class));
-        Key<Spans<String, String>> offenceSubcategoryKey = Key.of("offenceSubcategory", RuntimeType.stringSpans(String.class));
-//        Key<Spans<String, String>> entities = Key.of("entities", RuntimeType.stringSpans(String.class));
-
-        Map<Key<Spans<String, String>>, List<XML2Datum.Element>> interestingElements = new HashMap<>();
-
-
-        interestingElements.put(sessionsKey, ImmutableList.of(
-                new XML2Datum.Element("div0", ImmutableMap.of("type", "sessionsPaper"), "sessionsPaper").isContainer(true)
-        ));
-
-        interestingElements.put(trialsKey, ImmutableList.of(
-                new XML2Datum.Element("div1", ImmutableMap.of("type", "trialAccount"), "trialAccount").valueAttribute("id")
-        ));
-
-        interestingElements.put(statementsKey, ImmutableList.of(
-                new XML2Datum.Element("p", ImmutableMap.of(), "statement")
-        ));
-
-        interestingElements.put(offenceCategoryKey, ImmutableList.of(
-                new XML2Datum.Element("interp", ImmutableMap.of("type", "offenceCategory"), "offenceCategory").valueAttribute("value")
-        ));
-
-        interestingElements.put(offenceSubcategoryKey, ImmutableList.of(
-                new XML2Datum.Element("interp", ImmutableMap.of("type", "offenceSubcategory"), "offenceSubcategory").valueAttribute("value")
-        ));
-
-        interestingElements.put(crimeDateKey, ImmutableList.of(
-//                new XML2Datum.Element("placeName", ImmutableMap.of(), "placeName"),
-                new XML2Datum.Element("rs", ImmutableMap.of("type", "crimeDate"), "crimeDate"))
-        );
-
-
-        try {
-
-            Set<Path> files = new OBFiles(start).getFiles(from, to);
-
-            Iterator<Datum> itr = XML2Datum.getData(start, files, interestingElements, "trialAccount", "-id").iterator();
-
-
-            while(itr.hasNext()) {
-                Datum trial = itr.next();
-
-                String trialId = trial.get("trialAccount-id");
-
-                if(trialsById.containsKey(trialId)) {
-                    continue;
-                }
-
-                LocalDate sessionDate = getDate(trialId);
-                Date refDate = Date.from(sessionDate.atTime(0,0,0).toInstant(ZoneOffset.UTC));
-
-                KeySet keys = trial.getKeys();
-
-                Key<String> textKey = keys.get("text");
-
-                Key<String> trialIdKey = trial.getKeys().get("trialAccount-id");
-
-                List<Datum> sentences = new ArrayList<>();
-
-                Key<Spans<List<String>, String>> placeNameSpansKey = Key.of("placeName", RuntimeType.listSpans(String.class));
-                Key<Spans<List<String>, String>> pubSpansKey = Key.of("pub", RuntimeType.listSpans(String.class));
-
-                keys = keys
-                        .with(trialIdKey)
-                        .with(sentenceIdKey)
-                        .with(statementsKey)
-                        .with(placeNameSpansKey)
-                        .with(pubSpansKey)
-                ;
-
-                KeySet retain = keys
-//                        .with(crimeDate)
-                        ;
-
-//                Key<List<String>> tokensKey = Key.of(textKey + Tokenizer.SUFFIX, RuntimeType.list(RuntimeType.STRING));
-                Key<List<String>> tokensKey = Key.of(textKey + "-token", RuntimeType.list(RuntimeType.STRING));
-
-                int i = 0;
-                for (Datum statement : trial.getSpannedData(statementsKey, retain)) {
-
-                    String statementId = trialId + "-" + i++;
-
-                    statement = statement.with(statementIdKey, statementId);
-
-                    List<Datum> sents = Sentizer.sentize(statement, textKey, retain
-                        .with(crimeDateKey)
-                        .with(offenceCategoryKey)
-                        .with(offenceSubcategoryKey)
-                    );
-
-                    int j = 0;
-                    for (Datum sentence : sents) {
-
-                        String sentenceId = statement.get(statementIdKey) + "-" + j++;
-//                        System.out.println(sentenceId);
-
-                        sentence = sentence.with(sentenceIdKey, sentenceId);
-
-                        Datum tokenized = Tokenizer.tokenize(sentence, textKey, retain);
-
-                        //retain original crime date / offcat spans - tokenisation not required
-                        tokenized = tokenized.with(crimeDateKey, sentence.get(crimeDateKey));
-                        tokenized = tokenized.with(offenceCategoryKey, sentence.get(offenceCategoryKey));
-                        tokenized = tokenized.with(offenceSubcategoryKey, sentence.get(offenceSubcategoryKey));
-
-                        KeySet tokenizedKeys = tokenized.getKeys();
-
-                        keys = keys.with(tokenizedKeys);
-
-                        NER2Datum ner2Datum = new NER2Datum(
-                                tokensKey,
-                                ImmutableSet.of("placeName"),
-                                placeNameSpansKey,
-                                true
-                        );
-
-                        String text = String.join(" ", tokenized.get(tokensKey));
-
-                        //merge ner places
-                        String placeNer = placeNerService.get(text);
-    //                    System.out.println(placeNer);
-                        Datum placeNerd = ner2Datum.toDatum(placeNer);
-
-                        boolean error = false;
-                        if (tokenized.get(tokensKey).size() != placeNerd.get(tokensKey).size()) {
-
-                            System.err.println("tokenised mismatch! Expected " + tokenized.get(tokensKey).size() + " got " + placeNerd.get(tokensKey).size());
-                            error = true;
-                        } else {
-                            tokenized = tokenized
-                                    .with(placeNerd.getKeys().get("placeName"), placeNerd.get(placeNameSpansKey));
-                        }
-
-                        //merge ner pubs
-                        String pubNer = pubNerService.get(text);
-    //                    System.out.println(pubNer);
-                        Datum pubNerd = ner2Datum.toDatum(pubNer, ImmutableSet.of("pub"), pubSpansKey);
-                        if (tokenized.get(tokensKey).size() != pubNerd.get(tokensKey).size()) {
-
-                            System.err.println("tokenised mismatch! Expected " + tokenized.get(tokensKey).size() + " got " + pubNerd.get(tokensKey).size());
-                            error = true;
-                        } else {
-                            tokenized = tokenized
-                                    .with(pubNerd.getKeys().get("pub"), pubNerd.get(pubSpansKey));
-                        }
-
-                        if (!error) {
-                            sentences.add(tokenized);
-                        }
-                    }
-                }
-
-                if (!sentences.isEmpty()) {
-
-                    System.out.println(trialId);
-
-                    //figure out date first
-                    Optional<LocalDate> crimeDate = Optional.empty();
-                    Optional<String> offenceCategory = Optional.empty();
-                    Optional<String> offenceSubcategory = Optional.empty();
-
-                    for(Datum sentence : sentences) {
-                        if(!crimeDate.isPresent()) {
-                            crimeDate = getFirstDate(sentence, crimeDateKey, refDate);
-                        }
-                        if(!offenceCategory.isPresent()) {
-                            offenceCategory = getCrimeCat(sentence, offenceCategoryKey);
-                        }
-                        if(!offenceSubcategory.isPresent()) {
-                            offenceSubcategory = getCrimeCat(sentence, offenceSubcategoryKey);
-                        }
-                    }
-
-                    LocalDate date;
-                    boolean usingSessionDate = false;
-                    if(crimeDate.isPresent()) {
-                        date = crimeDate.get();
-                    } else {
-                        date = sessionDate;
-                        usingSessionDate = true;
-                    }
-
-
-                    boolean addByDate = allowSessionDates || !allowSessionDates && !usingSessionDate;
-
-                    ListIterator<Datum> jtr = sentences.listIterator();
-                    while (jtr.hasNext()) {
-                        Datum sentence = jtr.next();
-
-                        String sentenceId = sentence.get(sentenceIdKey);
-
-                        sentence = processPlaceNames(sentence, placeNameSpansKey, tokensKey, trialId, sentenceId, date, offenceCategory, offenceSubcategory);
-
-                        sentence = processPubs(sentence, pubSpansKey, tokensKey, trialId, sentenceId, date, offenceCategory, offenceSubcategory);
-
-                        if(addByDate) {
-
-                            for(Span<List<String>, Map> match : sentence.get(placeMatchKey) ) {
-                                Map metadata = match.get();
-                                matchesByDate.computeIfAbsent(date, k -> new ArrayList<>());
-                                List tmp = matchesByDate.get(date);
-                                tmp.add(metadata);
-                                matchesByDate.put(date, tmp);
-                            }
-
-                            for(Span<List<String>, Map> match : sentence.get(pubMatchKey) ){
-                                Map metadata = match.get();
-                                matchesByDate.computeIfAbsent(date, k -> new ArrayList<>());
-                                List tmp = matchesByDate.get(date);
-                                tmp.add(metadata);
-                                matchesByDate.put(date, tmp);
-                            }
-                        }
-
-                        jtr.set(sentence);
-
-                    }
-
-                    Datum2SimpleDocument<?> datum2SimpleDocument = new Datum2SimpleDocument(tokensKey, ImmutableList.of(
-                            placeNameSpansKey,
-                            placeMatchKey,
-                            pubSpansKey,
-                            pubMatchKey,
-                            Key.of("crimeDate-token", RuntimeType.listSpans(String.class))
-                    ));
-
-                    SimpleDocument document = datum2SimpleDocument.toDocument(trialId, sentences);
-
-                    if(offenceCategory.isPresent()) {
-                        document = document.with("offCat", offenceCategory.get());
-                    }
-
-                    if(offenceSubcategory.isPresent()) {
-                        document = document.with("offSubcat", offenceSubcategory.get());
-                    }
-
-                    if(addByDate) {
-                        if (!trialsByDate.containsKey(date)) {
-                            trialsByDate.put(date, new ArrayList<>());
-                        }
-
-                        List<SimpleDocument> trialsForDate = trialsByDate.get(date);
-                        trialsForDate.add(document);
-                        trialsByDate.put(date, trialsForDate);
-                        if (trialsById.containsKey(trialId)) {
-                            System.err.println(trialId + " already exists");
-                        }
-                    }
-                    trialsById.put(trialId, document);
-                }
-//                });
-//            });
-            }
-            db.commit();
-
-        } catch (Throwable err) {
-            err.printStackTrace ();
-        }
-    }
+//    public void load(LocalDate from, LocalDate to) {
+//
+//        Key<String> statementIdKey = Key.of("statementId", RuntimeType.STRING);
+//        Key<String> sentenceIdKey = Key.of("sentenceId", RuntimeType.STRING);
+//
+//        Key<Spans<String, String>> sessionsKey = Key.of("sessionsPaper", RuntimeType.stringSpans(String.class));
+//        Key<Spans<String, String>> trialsKey = Key.of("trialAccount", RuntimeType.stringSpans(String.class));
+//        Key<Spans<String, String>> statementsKey = Key.of("statement", RuntimeType.stringSpans(String.class));
+//        Key<Spans<String, String>> crimeDateKey = Key.of("crimeDate", RuntimeType.stringSpans(String.class));
+//        Key<Spans<String, String>> offenceCategoryKey = Key.of("offenceCategory", RuntimeType.stringSpans(String.class));
+//        Key<Spans<String, String>> offenceSubcategoryKey = Key.of("offenceSubcategory", RuntimeType.stringSpans(String.class));
+////        Key<Spans<String, String>> entities = Key.of("entities", RuntimeType.stringSpans(String.class));
+//
+//        Map<Key<Spans<String, String>>, List<XML2Datum.Element>> interestingElements = new HashMap<>();
+//
+//
+//        interestingElements.put(sessionsKey, ImmutableList.of(
+//                new XML2Datum.Element("div0", ImmutableMap.of("type", "sessionsPaper"), "sessionsPaper").isContainer(true)
+//        ));
+//
+//        interestingElements.put(trialsKey, ImmutableList.of(
+//                new XML2Datum.Element("div1", ImmutableMap.of("type", "trialAccount"), "trialAccount").valueAttribute("id")
+//        ));
+//
+//        interestingElements.put(statementsKey, ImmutableList.of(
+//                new XML2Datum.Element("p", ImmutableMap.of(), "statement")
+//        ));
+//
+//        interestingElements.put(offenceCategoryKey, ImmutableList.of(
+//                new XML2Datum.Element("interp", ImmutableMap.of("type", "offenceCategory"), "offenceCategory").valueAttribute("value")
+//        ));
+//
+//        interestingElements.put(offenceSubcategoryKey, ImmutableList.of(
+//                new XML2Datum.Element("interp", ImmutableMap.of("type", "offenceSubcategory"), "offenceSubcategory").valueAttribute("value")
+//        ));
+//
+//        interestingElements.put(crimeDateKey, ImmutableList.of(
+////                new XML2Datum.Element("placeName", ImmutableMap.of(), "placeName"),
+//                new XML2Datum.Element("rs", ImmutableMap.of("type", "crimeDate"), "crimeDate"))
+//        );
+//
+//
+//        try {
+//
+//            Set<Path> files = new OBFiles(start).getFiles(from, to);
+//
+//            Iterator<Datum> itr = XML2Datum.getData(start, files, interestingElements, "trialAccount", "-id").iterator();
+//
+//
+//            while(itr.hasNext()) {
+//                Datum trial = itr.next();
+//
+//                String trialId = trial.get("trialAccount-id");
+//
+//                if(trialsById.containsKey(trialId)) {
+//                    continue;
+//                }
+//
+//                LocalDate sessionDate = getDate(trialId);
+//                Date refDate = Date.from(sessionDate.atTime(0,0,0).toInstant(ZoneOffset.UTC));
+//
+//                KeySet keys = trial.getKeys();
+//
+//                Key<String> textKey = keys.get("text");
+//
+//                Key<String> trialIdKey = trial.getKeys().get("trialAccount-id");
+//
+//                List<Datum> sentences = new ArrayList<>();
+//
+//                Key<Spans<List<String>, String>> placeNameSpansKey = Key.of("placeName", RuntimeType.listSpans(String.class));
+//                Key<Spans<List<String>, String>> pubSpansKey = Key.of("pub", RuntimeType.listSpans(String.class));
+//
+//                keys = keys
+//                        .with(trialIdKey)
+//                        .with(sentenceIdKey)
+//                        .with(statementsKey)
+//                        .with(placeNameSpansKey)
+//                        .with(pubSpansKey)
+//                ;
+//
+//                KeySet retain = keys
+////                        .with(crimeDate)
+//                        ;
+//
+////                Key<List<String>> tokensKey = Key.of(textKey + Tokenizer.SUFFIX, RuntimeType.list(RuntimeType.STRING));
+//                Key<List<String>> tokensKey = Key.of(textKey + "-token", RuntimeType.list(RuntimeType.STRING));
+//
+//                int i = 0;
+//                for (Datum statement : trial.getSpannedData(statementsKey, retain)) {
+//
+//                    String statementId = trialId + "-" + i++;
+//
+//                    statement = statement.with(statementIdKey, statementId);
+//
+//                    List<Datum> sents = Sentizer.sentize(statement, textKey, retain
+//                        .with(crimeDateKey)
+//                        .with(offenceCategoryKey)
+//                        .with(offenceSubcategoryKey)
+//                    );
+//
+//                    int j = 0;
+//                    for (Datum sentence : sents) {
+//
+//                        String sentenceId = statement.get(statementIdKey) + "-" + j++;
+////                        System.out.println(sentenceId);
+//
+//                        sentence = sentence.with(sentenceIdKey, sentenceId);
+//
+//                        Datum tokenized = Tokenizer.tokenize(sentence, textKey, retain);
+//
+//                        //retain original crime date / offcat spans - tokenisation not required
+//                        tokenized = tokenized.with(crimeDateKey, sentence.get(crimeDateKey));
+//                        tokenized = tokenized.with(offenceCategoryKey, sentence.get(offenceCategoryKey));
+//                        tokenized = tokenized.with(offenceSubcategoryKey, sentence.get(offenceSubcategoryKey));
+//
+//                        KeySet tokenizedKeys = tokenized.getKeys();
+//
+//                        keys = keys.with(tokenizedKeys);
+//
+//                        NER2Datum ner2Datum = new NER2Datum(
+//                                tokensKey,
+//                                ImmutableSet.of("placeName"),
+//                                placeNameSpansKey,
+//                                true
+//                        );
+//
+//                        String text = String.join(" ", tokenized.get(tokensKey));
+//
+//                        //merge ner places
+//                        String placeNer = placeNerService.get(text);
+//    //                    System.out.println(placeNer);
+//                        Datum placeNerd = ner2Datum.toDatum(placeNer);
+//
+//                        boolean error = false;
+//                        if (tokenized.get(tokensKey).size() != placeNerd.get(tokensKey).size()) {
+//
+//                            System.err.println("tokenised mismatch! Expected " + tokenized.get(tokensKey).size() + " got " + placeNerd.get(tokensKey).size());
+//                            error = true;
+//                        } else {
+//                            tokenized = tokenized
+//                                    .with(placeNerd.getKeys().get("placeName"), placeNerd.get(placeNameSpansKey));
+//                        }
+//
+//                        //merge ner pubs
+//                        String pubNer = pubNerService.get(text);
+//    //                    System.out.println(pubNer);
+//                        Datum pubNerd = ner2Datum.toDatum(pubNer, ImmutableSet.of("pub"), pubSpansKey);
+//                        if (tokenized.get(tokensKey).size() != pubNerd.get(tokensKey).size()) {
+//
+//                            System.err.println("tokenised mismatch! Expected " + tokenized.get(tokensKey).size() + " got " + pubNerd.get(tokensKey).size());
+//                            error = true;
+//                        } else {
+//                            tokenized = tokenized
+//                                    .with(pubNerd.getKeys().get("pub"), pubNerd.get(pubSpansKey));
+//                        }
+//
+//                        if (!error) {
+//                            sentences.add(tokenized);
+//                        }
+//                    }
+//                }
+//
+//                if (!sentences.isEmpty()) {
+//
+//                    System.out.println(trialId);
+//
+//                    //figure out date first
+//                    Optional<LocalDate> crimeDate = Optional.empty();
+//                    Optional<String> offenceCategory = Optional.empty();
+//                    Optional<String> offenceSubcategory = Optional.empty();
+//
+//                    for(Datum sentence : sentences) {
+//                        if(!crimeDate.isPresent()) {
+//                            crimeDate = getFirstDate(sentence, crimeDateKey, refDate);
+//                        }
+//                        if(!offenceCategory.isPresent()) {
+//                            offenceCategory = getCrimeCat(sentence, offenceCategoryKey);
+//                        }
+//                        if(!offenceSubcategory.isPresent()) {
+//                            offenceSubcategory = getCrimeCat(sentence, offenceSubcategoryKey);
+//                        }
+//                    }
+//
+//                    LocalDate date;
+//                    boolean usingSessionDate = false;
+//                    if(crimeDate.isPresent()) {
+//                        date = crimeDate.get();
+//                    } else {
+//                        date = sessionDate;
+//                        usingSessionDate = true;
+//                    }
+//
+//
+//                    boolean addByDate = allowSessionDates || !allowSessionDates && !usingSessionDate;
+//
+//                    ListIterator<Datum> jtr = sentences.listIterator();
+//                    while (jtr.hasNext()) {
+//                        Datum sentence = jtr.next();
+//
+//                        String sentenceId = sentence.get(sentenceIdKey);
+//
+//                        sentence = processPlaceNames(sentence, placeNameSpansKey, tokensKey, trialId, sentenceId, date, offenceCategory, offenceSubcategory);
+//
+//                        sentence = processPubs(sentence, pubSpansKey, tokensKey, trialId, sentenceId, date, offenceCategory, offenceSubcategory);
+//
+//                        if(addByDate) {
+//
+//                            for(Span<List<String>, Map> match : sentence.get(placeMatchKey) ) {
+//                                Map metadata = match.get();
+//                                matchesByDate.computeIfAbsent(date, k -> new ArrayList<>());
+//                                List tmp = matchesByDate.get(date);
+//                                tmp.add(metadata);
+//                                matchesByDate.put(date, tmp);
+//                            }
+//
+//                            for(Span<List<String>, Map> match : sentence.get(pubMatchKey) ){
+//                                Map metadata = match.get();
+//                                matchesByDate.computeIfAbsent(date, k -> new ArrayList<>());
+//                                List tmp = matchesByDate.get(date);
+//                                tmp.add(metadata);
+//                                matchesByDate.put(date, tmp);
+//                            }
+//                        }
+//
+//                        jtr.set(sentence);
+//
+//                    }
+//
+//                    Datum2SimpleDocument<?> datum2SimpleDocument = new Datum2SimpleDocument(tokensKey, ImmutableList.of(
+//                            placeNameSpansKey,
+//                            placeMatchKey,
+//                            pubSpansKey,
+//                            pubMatchKey,
+//                            Key.of("crimeDate-token", RuntimeType.listSpans(String.class))
+//                    ));
+//
+//                    SimpleDocument document = datum2SimpleDocument.toDocument(trialId, sentences);
+//
+//                    if(offenceCategory.isPresent()) {
+//                        document = document.with("offCat", offenceCategory.get());
+//                    }
+//
+//                    if(offenceSubcategory.isPresent()) {
+//                        document = document.with("offSubcat", offenceSubcategory.get());
+//                    }
+//
+//                    if(addByDate) {
+//                        if (!trialsByDate.containsKey(date)) {
+//                            trialsByDate.put(date, new ArrayList<>());
+//                        }
+//
+//                        List<SimpleDocument> trialsForDate = trialsByDate.get(date);
+//                        trialsForDate.add(document);
+//                        trialsByDate.put(date, trialsForDate);
+//                        if (trialsById.containsKey(trialId)) {
+//                            System.err.println(trialId + " already exists");
+//                        }
+//                    }
+//                    trialsById.put(trialId, document);
+//                }
+////                });
+////            });
+//            }
+//            db.commit();
+//
+//        } catch (Throwable err) {
+//            err.printStackTrace ();
+//        }
+//    }
 
 
     public void saveSents2Table(LocalDate from, LocalDate to, PostgreSQLDatumStore.Builder storeBuilder) throws StoreException {
@@ -434,7 +434,7 @@ public class OBTrials {
         Key<List<String>> placeNamesKey =  Key.of("placeNames", RuntimeType.list(RuntimeType.STRING));
         storeBuilder.uniqueIndex(statementIdKey);
 
-        Key<Spans<List<String>, String>> placeNameSpansKey = Key.of("placeName", RuntimeType.listSpans(String.class));
+        Key<Spans<Spans<String, String>, String>> placeNameSpansSpansKey = Key.of("placeNameSpansSpans", RuntimeType.spanSpans(String.class));
 
 
         Key<Spans<String, String>> sessionsKey = Key.of("sessionsPaper", RuntimeType.stringSpans(String.class));
@@ -502,15 +502,17 @@ public class OBTrials {
                 Key<String> trialIdKey = trial.getKeys().get("trialAccount-id");
                 List<Datum> sentences = new ArrayList<>();
 
+
+
                 KeySet retain = keys
                         .with(trialIdKey)
                         .with(statementIdKey)
                         .with(sentenceIdKey)
-                        .with(placeNameSpansKey)
+                        .with(placeNameSpansSpansKey)
 //                        .with(crimeDate)
                         ;
 
-                Key<List<String>> tokenKey = Key.of("tokens", RuntimeType.list(RuntimeType.STRING));
+                Key<Spans<String, String>> tokenKey = Key.of("tokens", RuntimeType.stringSpans(String.class));
 
                 int i = 0;
                 for (Datum statement : trial.getSpannedData(statementsKey, retain)) {
@@ -528,9 +530,10 @@ public class OBTrials {
                         KeySet tokenizedKeys = tokenized.getKeys();
 
                         NER2Datum ner2Datum = new NER2Datum(
+                                textKey,
                                 tokenKey,
+                                placeNameSpansSpansKey,
                                 ImmutableSet.of("placeName"),
-                                placeNameSpansKey,
                                 true
                         );
 
@@ -539,31 +542,33 @@ public class OBTrials {
                         String ner = placeNerService.get(StringUtils.join(tokens, " "));
 
 //                    System.out.println(ner);
-                        Datum nerd = ner2Datum.toDatum(ner);
+                        Datum nerd = ner2Datum.toDatum(tokenized, ner);
 
                         //retain original crime date spans - tokenisation not required
 //                        tokenized = tokenized.with(crimeDateKey, sentence.get(crimeDateKey));
 
-                        if (tokens.size() != nerd.get(tokenKey).size()) {
+                        if (tokens.size() != nerd.get(tokenKey).get().size()) {
 
-                            System.err.println("tokenised mismatch! Expected " + tokenized.get(tokenKey).size() + " got " + nerd.get(tokenKey).size());
+                            System.err.println("tokenised mismatch! Expected " + tokenized.get(tokenKey).get().size() + " got " + nerd.get(tokenKey).get().size());
                         } else {
 
                             tokenized = tokenized
-                                    .with(nerd.getKeys().get("placeName"), nerd.get(placeNameSpansKey))
+                                    .with(nerd.getKeys().get("placeNameSpansSpans"), nerd.get(placeNameSpansSpansKey))
                             ;
 
                             sentences.add(tokenized);
 
                             keys = keys
                                     .with(tokenizedKeys)
-                                    .with(placeNameSpansKey);
+                                    .with(placeNameSpansSpansKey);
                         }
 
                         ++j;
                     }
                     ++i;
                 }
+
+                Key<Spans<String,String>> placeNameSpansKey = Key.of("placeNameSpans", RuntimeType.stringSpans(String.class));
 
                 KeySet storeKeys = KeySet.of(
                     trialIdKey,
@@ -572,6 +577,7 @@ public class OBTrials {
                     textKey,
                     tokenKey,
                     placeNameSpansKey,
+                    placeNameSpansSpansKey,
                     placeNamesKey
                 );
 
@@ -596,15 +602,16 @@ public class OBTrials {
                                 .with(sentenceIdKey, sentence.get(sentenceIdKey))
                                 .with(textKey, sentence.get(textKey))
                                 .with(tokenKey, sentence.get(tokenKey))
+                                .with(placeNameSpansSpansKey, sentence.get(placeNameSpansSpansKey))
                         ;
 
-                        Spans<List<String>, String> placeNameSpans = sentence.get(placeNameSpansKey);
+                        Spans<String, String> placeNameSpans = sentence.resolveSpans(placeNameSpansSpansKey);
                         if(!placeNameSpans.get().isEmpty()){
 
-//                            datum = datum.with(placeNameSpansKey, placeNameSpans);
+//                            datum = datum.with(placeNameSpansSpansKey, placeNameSpans);
 
                             List<String> placeNames = new ArrayList<>();
-                            for(Span<List<String>, String> span : placeNameSpans.get()) {
+                            for(Span<String, String> span : placeNameSpans.get()) {
                                 placeNames.add(String.join(" ", span.getSpanned(sentence)));
                             }
 

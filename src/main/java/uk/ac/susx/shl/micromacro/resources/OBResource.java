@@ -100,21 +100,21 @@ public class OBResource {
 
     }
 
-    @GET
-    @Path("load")
-    public Response load(@QueryParam("from") LocalDateParam from, @QueryParam("to") LocalDateParam to) {
-
-        obTrials.load(from.get(), to.get());
-        List<Map<String, String>> matches = obTrials.getMatches(from.get(), to.get())
-                .values()
-                .stream()
-                .flatMap(List::stream)
-                .collect(Collectors.toList());
-        
-        return Response.status(Response.Status.OK).entity(
-                gson.toJson(matches)
-        ).build();
-    }
+//    @GET
+//    @Path("load")
+//    public Response load(@QueryParam("from") LocalDateParam from, @QueryParam("to") LocalDateParam to) {
+//
+//        obTrials.load(from.get(), to.get());
+//        List<Map<String, String>> matches = obTrials.getMatches(from.get(), to.get())
+//                .values()
+//                .stream()
+//                .flatMap(List::stream)
+//                .collect(Collectors.toList());
+//
+//        return Response.status(Response.Status.OK).entity(
+//                gson.toJson(matches)
+//        ).build();
+//    }
 
 
     @GET

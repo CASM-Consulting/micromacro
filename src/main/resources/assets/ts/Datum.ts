@@ -23,8 +23,6 @@
         this.keys = keys || new Map();
     }
 
-    
-
     // public get<T>(key:Key<T>):T {
     //     return this.data.get(key.k());
     // }
@@ -70,10 +68,9 @@
             const targetKey:Key<Spans<T,V>> = this.get(key).target;
             const newKey:Key<Spans<T,V>> = DatumFactory.key(key.key(), targetKey.type);
 
-
             // key = key.type = targetType;
             let spans:Spans<T,V> = this.get(key);
-            let newSpans = new Spans(targetKey);
+            let newSpans = new Spans(this.get(targetKey).target);
 
             for(const span of spans.spans) {
                 const from:number = this.get(targetKey).spans[span.from].from;
@@ -82,7 +79,7 @@
                 newSpans = newSpans.with(new Span(targetKey, from, to, span.get()));
             }
 
-            return this.with(key, newSpans).resolve(key);
+            return this.with(newKey, newSpans).resolve(newKey);
         } else {
             return this.get(key);
         }

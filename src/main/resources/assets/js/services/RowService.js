@@ -43,8 +43,9 @@ MicroMacroApp.factory("Rows", function(Types) {
 
             if(!datum.get(key) || !display) return;
 
-
             if( key.type.equals(Types.SPANS) ) {
+
+                var spans = datum.resolve(key);
 
                 var target = datum.get(keyName).target.key();
 
@@ -53,7 +54,6 @@ MicroMacroApp.factory("Rows", function(Types) {
                     return;
                 }
 
-                var spans = datum.resolve(key);
 
                 columns[target].type = 'spans';
                 columns[target].spans.push( {

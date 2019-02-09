@@ -21,7 +21,7 @@ MicroMacroApp.component('queryResult', {
 
         $scope.page = [];
         $scope.currentPage = 1;
-        $scope.numPerPage = 30;
+        $scope.numPerPage = 10;
         $scope.maxSize = 10;
 
         $ctrl.$onInit = function() {

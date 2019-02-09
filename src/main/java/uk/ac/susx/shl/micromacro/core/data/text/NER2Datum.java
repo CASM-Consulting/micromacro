@@ -14,27 +14,37 @@ import java.util.Set;
 public class NER2Datum {
 
 
-    private final Key<List<String>> textKey;
+    private final Key<String> textKey;
+    private final Key<Spans<String,String>> tokensKey;
     private final ImmutableSet<String> labels;
-    private final Key<Spans<List<String>, String>> spansKey;
+    private final Key<Spans<Spans<String,String>, String>> spansKey;
     private final boolean iob;
 
-    public NER2Datum(Key<List<String>> textKey, Set<String> labels, Key<Spans<List<String>, String>> spansKey, boolean iob) {
+    public NER2Datum(Key<String> textKey, Key<Spans<String,String>> tokensKey, Key<Spans<Spans<String,String>, String>> spansKey,  Set<String> labels, boolean iob) {
         this.textKey = textKey;
+        this.tokensKey = tokensKey;
         this.labels = ImmutableSet.copyOf(labels);
         this.spansKey = spansKey;
         this.iob = iob;
     }
 
-    public Datum toDatum(String ner) {
-        return toDatum(ner, labels, spansKey);
+    public Datum toDatum(Datum datum, String ner) {
+        return toDatum(datum, ner, labels, spansKey);
     }
 
-    public Datum toDatum(String ner, Set<String> labels, Key<Spans<List<String>, String>> spansKey) {
+    /**
+     *
+     * @param datum original datum
+     * @param ner the ner'd string [token]/[iob-][label]
+     * @param labels valid ner labels
+     * @param spansKey output spans
+     * @return
+     */
 
-        Datum datum = new Datum();
+    public Datum toDatum(Datum datum, String ner, Set<String> labels, Key<Spans<Spans<String,String>, String>> spansKey) {
 
-        Spans<List<String>, String> spans = Spans.annotate(textKey, String.class);
+
+        Spans<Spans<String,String>, String> spans = Spans.annotate(tokensKey, String.class);
 
         String[] chunks = ner.split(" ");
 
@@ -65,7 +75,7 @@ public class NER2Datum {
             if(from.isPresent()) {
                 l = (iob ? label.replace("-I", "") : label);
                 if(!labels.contains(l)) {
-                    Span<List<String>, String> span = Span.annotate(textKey, from.get(), i, chunkLabel);
+                    Span<Spans<String,String>, String> span = Span.annotate(tokensKey, from.get(), i, chunkLabel);
                     spans = spans.with(span);
                     from = Optional.empty();
                 }
@@ -80,7 +90,6 @@ public class NER2Datum {
         }
 
         datum = datum
-            .with(textKey, tokens)
             .with(spansKey, spans);
 
 

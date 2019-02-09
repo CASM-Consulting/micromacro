@@ -20,7 +20,7 @@
 
     public static isTargetTypeSpans<T>(key:Key<T>):boolean {
 
-        return Util.getTargetType(key) == Types.SPANS;
+        return Util.getTargetType(key).equals(Types.SPANS);
     }
 
 }
