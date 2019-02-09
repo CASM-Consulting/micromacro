@@ -9,6 +9,7 @@ import io.dropwizard.setup.Environment;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.jdbi.v3.core.Jdbi;
 import uk.ac.susx.shl.micromacro.core.QueryFactory;
+import uk.ac.susx.shl.micromacro.core.QueryResultCache;
 import uk.ac.susx.shl.micromacro.core.WorkspaceFactory;
 import uk.ac.susx.shl.micromacro.core.Workspaces;
 import uk.ac.susx.shl.micromacro.jdbi.DatumDAO;
@@ -45,12 +46,12 @@ public class MicroMacroApplication extends Application<MicroMacroConfiguration> 
 
         Files.createDirectories(Paths.get("data"));
 
-        JdbiFactory factory = new JdbiFactory();
+        final JdbiFactory factory = new JdbiFactory();
 
-        Jdbi jdbi = factory.build(environment, configuration.getDataSourceFactory(), "postgresql");
+        final Jdbi jdbi = factory.build(environment, configuration.getDataSourceFactory(), "postgresql");
 
-        PubMatcher pubMatcher = new PubMatcher(false, false);
-        Method52DAO method52DAO = new Method52DAO(jdbi);
+        final PubMatcher pubMatcher = new PubMatcher(false, false);
+        final Method52DAO method52DAO = new Method52DAO(jdbi);
 
         final PlacesResource places = new PlacesResource(configuration.geoJsonPath, pubMatcher);
         environment.jersey().register(places);
@@ -69,17 +70,19 @@ public class MicroMacroApplication extends Application<MicroMacroConfiguration> 
 
         environment.jersey().register(new Method52Resouce(method52DAO));
 
+        QueryResultCache cache = new QueryResultCache(configuration.resultsCachePath);
+
         final DatumDAO datumDAO = new DatumDAO(jdbi, method52DAO);
 
-        QueryFactory queryFactory = new QueryFactory(method52DAO);
+        final QueryFactory queryFactory = new QueryFactory(method52DAO);
 
-        environment.jersey().register(new QueryResources(queryFactory, datumDAO));
+        environment.jersey().register(new QueryResources(queryFactory, datumDAO, cache));
 
         environment.jersey().register(new TableResource(method52DAO));
 
-        WorkspaceFactory workspaceFactory = new WorkspaceFactory(queryFactory);
+        final WorkspaceFactory workspaceFactory = new WorkspaceFactory(queryFactory);
 
-        Workspaces workspaces = new Workspaces(configuration.workspaceMapPath, workspaceFactory);
+        final Workspaces workspaces = new Workspaces(configuration.workspaceMapPath, workspaceFactory);
 
         environment.jersey().register(new WorkspacesResource(workspaces, workspaceFactory));
 

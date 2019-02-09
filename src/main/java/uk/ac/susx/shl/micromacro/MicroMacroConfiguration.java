@@ -9,6 +9,7 @@ import io.dropwizard.db.DataSourceFactory;
 
 import javax.validation.Valid;
 import javax.validation.constraints.*;
+import java.nio.file.Path;
 import java.util.Map;
 
 public class MicroMacroConfiguration extends Configuration implements AssetsBundleConfiguration {
@@ -26,6 +27,9 @@ public class MicroMacroConfiguration extends Configuration implements AssetsBund
     @JsonProperty
     String obCacheTable;
 
+    @NotNull
+    @JsonProperty
+    Path resultsCachePath;
 
     @NotNull
     @JsonProperty

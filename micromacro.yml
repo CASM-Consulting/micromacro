@@ -14,6 +14,8 @@ assets:
   overrides:
     /: src/main/resources/assets/
 
+
+resultsCachePath: data/resultsCache
 sessionsPath: data/sessionsPapers
 obMapPath: data/cache2
 workspaceMapPath: data/workspaces

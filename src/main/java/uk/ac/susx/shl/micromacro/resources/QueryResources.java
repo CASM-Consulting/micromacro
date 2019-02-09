@@ -6,6 +6,7 @@ import uk.ac.susx.shl.micromacro.api.ProxyRep;
 import uk.ac.susx.shl.micromacro.api.SelectDistinctRep;
 import uk.ac.susx.shl.micromacro.api.SelectRep;
 import uk.ac.susx.shl.micromacro.core.QueryFactory;
+import uk.ac.susx.shl.micromacro.core.QueryResultCache;
 import uk.ac.susx.shl.micromacro.jdbi.DatumDAO;
 import uk.ac.susx.tag.method51.core.data.store2.query.Proxy;
 import uk.ac.susx.tag.method51.core.data.store2.query.Select;
@@ -23,10 +24,12 @@ public class QueryResources {
 
     private final QueryFactory queryFactory;
     private final DatumDAO datumDAO;
+    private final QueryResultCache cache;
 
-    public QueryResources(QueryFactory queryFactory, DatumDAO datumDAO) {
+    public QueryResources(QueryFactory queryFactory, DatumDAO datumDAO, QueryResultCache cache) {
         this.queryFactory = queryFactory;
         this.datumDAO = datumDAO;
+        this.cache = cache;
     }
 
     @POST
@@ -48,7 +51,7 @@ public class QueryResources {
 
         Select select = queryFactory.select(rep);
 
-        List<DatumRep> data = datumDAO.execute2Rep(select);
+        List<DatumRep> data = cache.cache(rep, () -> datumDAO.execute2Rep(select) );
 
         return Response.status(Response.Status.OK).entity(
                 data
@@ -62,7 +65,7 @@ public class QueryResources {
 
         Proxy proxy = queryFactory.proxy(proxyRep);
 
-        List<DatumRep> data = datumDAO.execute2Rep(proxy);
+        List<DatumRep> data = cache.cache(proxyRep, () -> datumDAO.execute2Rep(proxy) );
 
         return Response.status(Response.Status.OK).entity(
             data
