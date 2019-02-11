@@ -122,6 +122,22 @@ MicroMacroApp.factory("Queries", function($q, Server, $http) {
                     success : resolve
                 });
             });
+        },
+
+        limitOffset : (query, limit, offset) => {
+
+            query = angular.copy(query);
+
+            if(query.type == "select") {
+                query.limit = limit;
+                query.offset = offset;
+            } else if(query.type == "proxy") {
+                query.innerLimit = limit;
+                query.innerOffset = offset;
+//                query.outerLimit = block;
+            }
+
+            return query;
         }
 
     }

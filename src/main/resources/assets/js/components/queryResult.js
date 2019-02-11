@@ -89,13 +89,19 @@ MicroMacroApp.component('queryResult', {
                 } else {
                     var begin = (($scope.currentPage - 1) * $scope.numPerPage);
                     var end = begin + $scope.numPerPage;
-                    $scope.page = Datums.data($ctrl.results.slice(begin, end), $ctrl.keys);
+                    $scope.page = Datums.data($ctrl.result.slice(begin, end), $ctrl.keys);
                 }
 
                 resolveSelectedKeys();
             });
 
 
+            Queries.execute(Queries.limitOffset($ctrl.query, 1000, 1000)).then( (moreData)=> {
+                $ctrl.result = $ctrl.result.concat(moreData);
+                if(isProxy()) {
+                    $scope.pages = Queries.binProxyResultByPartition($ctrl.result, $ctrl.query.partitionKey);
+                }
+            });
         };
 
         var isProxy = () => $ctrl.query.type == "proxy";

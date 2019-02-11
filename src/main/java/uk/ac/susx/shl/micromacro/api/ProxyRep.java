@@ -11,8 +11,11 @@ public class ProxyRep extends AbstractDatumQueryRep {
     public String partitionKey;
     public String orderBy;
     public int proximity;
-    public int limit;
+    public int innerLimit;
+    public int innerOffset;
+    public int outerLimit;
     public Map<String, Map<String,String>> literals;
+
 
     @Override
     public boolean equals(Object o) {
@@ -20,7 +23,9 @@ public class ProxyRep extends AbstractDatumQueryRep {
         if (o == null || getClass() != o.getClass()) return false;
         ProxyRep proxyRep = (ProxyRep) o;
         return proximity == proxyRep.proximity &&
-                limit == proxyRep.limit &&
+                innerLimit == proxyRep.innerLimit &&
+                innerOffset == proxyRep.innerOffset &&
+                outerLimit == proxyRep.outerLimit &&
                 Objects.equal(target, proxyRep.target) &&
                 Objects.equal(proxy, proxyRep.proxy) &&
                 Objects.equal(partitionKey, proxyRep.partitionKey) &&
@@ -30,6 +35,6 @@ public class ProxyRep extends AbstractDatumQueryRep {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(target, proxy, partitionKey, orderBy, proximity, limit, literals);
+        return Objects.hashCode(target, proxy, partitionKey, orderBy, proximity, innerLimit, innerOffset, outerLimit, literals);
     }
 }

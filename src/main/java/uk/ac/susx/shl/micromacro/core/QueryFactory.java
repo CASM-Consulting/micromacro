@@ -47,7 +47,7 @@ public class QueryFactory {
 
         DatumFilter datumFilter = parser.parse(null, rep.filter);
 
-        Select select = new Select(rep.table, datumFilter, ImmutableList.of(), rep.limit);
+        Select select = new Select(rep.table, datumFilter, ImmutableList.of(), rep.limit, rep.offset);
 
         return select;
     }
@@ -82,7 +82,7 @@ public class QueryFactory {
         OrderBy orderBy = processOrderBy(rep.orderBy);
         orderBy = orderBy.numeric(true);
 
-        Proxy proxy = new Proxy(rep.table, targetFilter, proxyFilter, partitionKey, rep.proximity, orderBy, rep.limit);
+        Proxy proxy = new Proxy(rep.table, targetFilter, proxyFilter, partitionKey, rep.proximity, orderBy, rep.innerLimit, rep.innerOffset, rep.outerLimit);
 
         return proxy;
     }
@@ -91,7 +91,9 @@ public class QueryFactory {
         ProxyRep rep = new ProxyRep();
         rep.type = "proxy";
         rep.table = proxy.table();
-        rep.limit = proxy.limit();
+        rep.innerLimit = proxy.innerLimit();
+        rep.innerOffset = proxy.innerOffset();
+        rep.outerLimit = proxy.outerLimit();
         rep.orderBy = proxy.orderBy().key().toString();
         rep.proximity = proxy.proximity();
         rep.partitionKey = proxy.partitionKey().toString();
@@ -118,6 +120,7 @@ public class QueryFactory {
         rep.type = "select";
         rep.table = select.table();
         rep.limit = select.limit();
+        rep.offset = select.offset();
 //        rep.orderBy = select.orderBy().key().toString();
         rep.orderBy = ImmutableList.of();
 
