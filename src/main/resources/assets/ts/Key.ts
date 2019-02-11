@@ -10,10 +10,10 @@
     public readonly namespace:string;
     public readonly type:Type<T>;
 
-    constructor(name:string, namespace:string, type:Type<T>) {
+    constructor(namespace:string, name:string, type:Type<T>) {
         this.type = type;
-        this.name = name;
         this.namespace = namespace;
+        this.name = name;
     }
 
     public key():string {

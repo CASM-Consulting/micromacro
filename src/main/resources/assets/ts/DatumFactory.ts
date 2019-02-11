@@ -29,7 +29,15 @@ class DatumFactory {
 
         let bits:string[] = name.split('/');
 
-        return new Key(bits[0], bits[1], type);
+        if(bits.length == 2) {
+            return new Key(bits[0], bits[1], type);
+        } else if(bits.length == 1) {
+            return new Key(null, bits[0], type);
+        } else {
+            throw "invalid key name: '"+name+"'";
+        }
+
+        
     }
 
     public static Type<T>(raw:Obj):Type<T> {
