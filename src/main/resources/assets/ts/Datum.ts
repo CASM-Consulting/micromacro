@@ -59,7 +59,10 @@
         return datum;
     }
 
-    public resolve<T,V>(key:Key<Spans<any,any>>): Spans<T,V> {
+    public resolve<T,V>(key:Key<Spans<any,any>> | string): Spans<T,V> {
+        if(typeof key === 'string') {
+            key = this.getKey(key);
+        }
         if(!key.type.equals(Types.SPANS)) {
             throw "not a spans key!";
         }

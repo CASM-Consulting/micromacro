@@ -16,7 +16,12 @@ MicroMacroApp.factory("Datums", function() {
         return data;
     };
 
+    var datum = function(rawDatum, rawKeys) {
+        return DatumFactory.datum(rawDatum, rawKeys);
+    }
+
     return {
-        data : data
+        data : data,
+        datum : datum
     };
 });

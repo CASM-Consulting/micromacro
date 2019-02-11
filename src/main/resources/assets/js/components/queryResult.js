@@ -26,25 +26,33 @@ MicroMacroApp.component('queryResult', {
 
         $ctrl.$onInit = function() {
 
-            $ctrl.data = Datums.data($ctrl.result, $ctrl.keys);
-
-            var findTarget = (key) => {
-                for(var i in $ctrl.result) {
-                    var row = $ctrl.result[i].data;
-                    if(row[key]) {
-                        return row[key].target;
+            var resolveSelectedKeys = function() {
+                var findTarget = (key) => {
+                    for(var i in $ctrl.result) {
+                        var datum = Datums.datum($ctrl.result[i], $ctrl.keys);
+                        if( datum.get(key) ) {
+                            return datum.resolve(key).target.key();
+                        }
                     }
-                }
-            };
+                };
 
-            //bind display keys to URL
-            $scope.selectedKeys = $stateParams.displayKeys || $ctrl.defaultKeys.reduce((keys, key) => {
-                if($ctrl.keys[key].type.class == SPAN) {
-                    keys[findTarget(key)] = true;
+                //bind display keys to URL
+                $scope.selectedKeys = $stateParams.displayKeys || $ctrl.defaultKeys.reduce((keys, key) => {
+                    if($ctrl.keys[key].type.class == SPAN) {
+                        keys[findTarget(key)] = true;
+                    }
+                    keys[key] = true;
+                    return keys;
+                }, {});
+
+                //alphabetical key list
+                $scope.keyList = [];
+                for(var key in $ctrl.keys) {
+                    $scope.selectedKeys[key] = $scope.selectedKeys[key] || false;
+                    $scope.keyList.push(key);
                 }
-                keys[key] = true;
-                return keys;
-            }, {});
+                $scope.keyList.sort();
+            };
 
             $scope.$watchCollection(angular.bind(this, function() {
                 return $state.params.displayKeys;
@@ -69,28 +77,24 @@ MicroMacroApp.component('queryResult', {
                 }
             });
 
-            //alphabetical key list
-            $scope.keyList = [];
-            for(var key in $ctrl.keys) {
-                $scope.selectedKeys[key] = $scope.selectedKeys[key] || false;
-                $scope.keyList.push(key);
-            }
-            $scope.keyList.sort();
 
+
+            if(isProxy()) {
+                $scope.pages = Queries.binProxyResultByPartition($ctrl.result, $ctrl.query.partitionKey);
+            }
 
             $scope.$watch('currentPage + numPerPage', function() {
                 if(isProxy()) {
-                    $scope.page = $scope.pages[$scope.currentPage-1];
+                    $scope.page = Datums.data($scope.pages[$scope.currentPage-1], $ctrl.keys);
                 } else {
                     var begin = (($scope.currentPage - 1) * $scope.numPerPage);
                     var end = begin + $scope.numPerPage;
-                    $scope.page = $ctrl.data.slice(begin, end);
+                    $scope.page = Datums.data($ctrl.results.slice(begin, end), $ctrl.keys);
                 }
+
+                resolveSelectedKeys();
             });
 
-            if(isProxy()) {
-                $scope.pages = Queries.binProxyResultByPartition($ctrl.data, $ctrl.query.partitionKey);
-            }
 
         };
 
