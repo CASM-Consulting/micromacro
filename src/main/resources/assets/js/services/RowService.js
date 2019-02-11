@@ -1,6 +1,6 @@
 MicroMacroApp.factory("Rows", function(Types) {
 
-    var getColumns = function(datum, displayKeys) {
+    var getRowColumns = function(datum, displayKeys) {
 
         var columns = {};
 
@@ -66,7 +66,17 @@ MicroMacroApp.factory("Rows", function(Types) {
         return columns;
     }
 
+    var getRowsColumns = function(data, displayKeys) {
+        var rows = data.reduce( (datums, datum) => {
+            datums.push(getRowColumns(datum, displayKeys));
+            return datums;
+        },[]);
+        return rows;
+    }
+
     return {
-        getColumns : getColumns
+        getRowColumns : getRowColumns,
+        getRowsColumns : getRowsColumns
+
     };
 });

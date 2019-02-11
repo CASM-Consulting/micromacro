@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/notes.css">
     <link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="node_modules/angular-ui-grid/ui-grid.min.css">
     <!--<link rel="stylesheet" href="node_modules/leaflet/dist/leaflet.css">-->
     <!--<link rel="stylesheet" href="node_modules/nvd3/build/nv.d3.min.css">-->
     <style>
@@ -14,7 +15,7 @@
 </head>
 <body ng-app="MicroMacroApp">
 
-<div class="container-fluid">
+<div class="container">
     <workspaces></workspaces>
 </div>
 
@@ -28,6 +29,9 @@
 <!--<script src="node_modules/angular-ui/build/angular-ui.min.js" charset="utf-8"></script>-->
 <script src="node_modules/angular-ui-bootstrap/dist/ui-bootstrap.js" charset="utf-8"></script>
 <script src="node_modules/angular-ui-bootstrap/dist/ui-bootstrap-tpls.js" charset="utf-8"></script>
+<script src="node_modules/angular-ui-grid/ui-grid.core.min.js" charset="utf-8"></script>
+<script src="node_modules/angular-ui-grid/ui-grid.auto-resize.min.js" charset="utf-8"></script>
+<script src="node_modules/angular-ui-grid/ui-grid.resize-columns.min.js" charset="utf-8"></script>
 
 <script src="node_modules/angular-simple-logger/dist/angular-simple-logger.js"></script>
 <!--<script src="node_modules/d3/d3.min.js" charset="utf-8"></script>-->
@@ -60,7 +64,6 @@
 <script src="/js/components/queryResult.js"></script>
 <script src="/js/components/literals.js"></script>
 <script src="/js/components/spanText.js"></script>
-<script src="/js/components/row.js"></script>
 <script src="/js/components/notes.js"></script>
 <!--<script src="/js/components/proxyConfig.js"></script>-->
 

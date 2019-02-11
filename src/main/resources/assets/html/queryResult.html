@@ -4,7 +4,8 @@
         <label class="btn btn-primary"
                ng-repeat="key in keyList"
                ng-model="selectedKeys[key]"
-               uib-btn-checkbox>{{key}}
+               uib-btn-checkbox>
+            {{key}}
         </label>
     </div>
 
@@ -18,17 +19,32 @@
             boundary-links="true">
     </div>
 
-    <div ng-repeat="datum in page" class="row">
+    <div ui-grid="$ctrl.gridOptions" ui-grid-auto-resize ui-grid-resize-columns></div>
 
-        <!--<div class="col-md-1">{{result.id}}</div>-->
+    <!--<div ng-repeat="datum in page" class="row">-->
 
-        <row datum="datum"
-             selected-keys="selectedKeys"
-             widths="widths"
-             key-list="keyList"
-             keys="$ctrl.keys"
-        ></row>
+        <!--&lt;!&ndash;<div class="col-md-1">{{result.id}}</div>&ndash;&gt;-->
 
-    </div>
+        <!--<row datum="datum"-->
+             <!--selected-keys="selectedKeys"-->
+             <!--widths="widths"-->
+             <!--key-list="keyList"-->
+             <!--keys="$ctrl.keys"-->
+        <!--&gt;</row>-->
 
+    <!--</div>-->
+
+    <script type="text/ng-template" id="cell.html">
+        <div class="ui-grid-cell-contents">
+            <div ng-if="COL_FIELD.type=='spans'">
+                <div>
+                    <span-text spanss="COL_FIELD"> </span-text>
+                </div>
+            </div>
+
+            <div ng-if="COL_FIELD.type!='spans'" >
+                {{COL_FIELD.text}}
+            </div>
+        </div>
+    </script>
 </div>
