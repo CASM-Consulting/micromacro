@@ -2,19 +2,19 @@
 
     <div class="btn-group">
         <label class="btn btn-primary"
-               ng-repeat="key in keyList"
-               ng-model="selectedKeys[key]"
+               ng-repeat="key in $ctrl.keyList"
+               ng-model="$ctrl.selectedKeys[key]"
                uib-btn-checkbox>
             {{key}}
         </label>
     </div>
 
-    <div>{{totalPages()}}</div>
+    <div>{{$ctrl.totalPages()}}</div>
     <div uib-pagination
-            ng-change="pageChange()"
-            ng-model="currentPage"
-            total-items="totalPages()"
-            items-per-page="numPerPage"
+            ng-change="$ctrl.pageChange()"
+            ng-model="$ctrl.currentPage"
+            total-items="$ctrl.totalPages()"
+            items-per-page="$ctrl.numPerPage"
             max-size="10"
             boundary-links="true">
     </div>
@@ -24,12 +24,12 @@
         <table class="table table-striped">
             <thead>
             <tr>
-                <th ng-repeat="key in displayKeys" style="width:{{widths[key]}}%">{{key}}</th>
+                <th ng-repeat="key in $ctrl.displayKeys" style="width:{{$ctrl.widths[key]}}%">{{key}}</th>
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="row in page">
-                <td ng-repeat="key in displayKeys" style="width:{{widths[key]}}%">
+            <tr ng-repeat="row in $ctrl.page">
+                <td ng-repeat="key in $ctrl.displayKeys" style="width:{{$ctrl.widths[key]}}%">
                     <div ng-include="'cell.html'" ng-init="COL_FIELD = row[key]"></div>
                 </td>
             </tr>

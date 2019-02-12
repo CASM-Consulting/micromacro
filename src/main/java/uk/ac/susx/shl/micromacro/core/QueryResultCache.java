@@ -11,8 +11,11 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
+import java.util.logging.Logger;
 
 public class QueryResultCache {
+
+    private static final Logger LOG = Logger.getLogger(QueryResultCache.class.getName());
 
     private final Map<AbstractDatumQueryRep, List<DatumRep>> cache;
 
@@ -33,13 +36,24 @@ public class QueryResultCache {
 
 
     public <T extends AbstractDatumQueryRep> List<DatumRep> cache(T query, Supplier<List<DatumRep>> dataSupplier) {
-        if(cache.containsKey(query)) {
-            return cache.get(query);
-        } else {
-            List<DatumRep> results = dataSupplier.get();
-            cache.put(query, results);
-            db.commit();
-            return results;
+        long tic = System.nanoTime();
+
+        List<DatumRep> cached = cache.get(query);
+        LOG.info("lookup time " + (System.nanoTime()-tic)/1000000);
+
+        try {
+
+            if(cached != null) {
+                return cached;
+            } else {
+                LOG.info("query");
+                List<DatumRep> results = dataSupplier.get();
+                cache.put(query, results);
+                db.commit();
+                return results;
+            }
+        } finally {
+            LOG.info("return time " + (System.nanoTime()-tic)/1000000);
         }
     }
 

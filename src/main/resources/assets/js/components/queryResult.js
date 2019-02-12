@@ -7,33 +7,33 @@ MicroMacroApp.component('queryResult', {
         defaultKeys: '<'
     },
     controller : function($scope, $state, $stateParams, Queries, Datums, Rows, ScrollEvent) {
-
-        var LABEL = $scope.LABEL = 'uk.ac.susx.tag.method51.twitter.LabelDecision';
-        var STRING = $scope.STRING = 'java.lang.String';
-        var LIST = $scope.LIST = 'java.util.List';
-        var SPAN = $scope.SPAN = 'uk.ac.susx.tag.method51.core.meta.span.Spans';
-
         var $ctrl = this;
 
-        $scope.pageChange = function() {
-            $state.go(".", {page:$scope.currentPage});
+        var LABEL = $ctrl.LABEL = 'uk.ac.susx.tag.method51.twitter.LabelDecision';
+        var STRING = $ctrl.STRING = 'java.lang.String';
+        var LIST = $ctrl.LIST = 'java.util.List';
+        var SPAN = $ctrl.SPAN = 'uk.ac.susx.tag.method51.core.meta.span.Spans';
+
+
+        $ctrl.pageChange = function() {
+            $state.go(".", {page:$ctrl.currentPage});
         };
 
-        $scope.widths = {};
+        $ctrl.widths = {};
 
-        $scope.page = [];
-        $scope.currentPage = 1;
-        $scope.numPerPage = 10;
-        $scope.maxSize = 10;
+        $ctrl.page = [];
+        $ctrl.currentPage = 1;
+        $ctrl.numPerPage = 10;
+        $ctrl.maxSize = 10;
 
         $ctrl.$onInit = function() {
 
             //alphabetical key list
-            $scope.keyList = [];
+            $ctrl.keyList = [];
             for(var key in $ctrl.keys) {
-                $scope.keyList.push(key);
+                $ctrl.keyList.push(key);
             }
-            $scope.keyList.sort();
+            $ctrl.keyList.sort();
 
             //bind display keys to URL
             var bindSelectedKeys = function(){
@@ -47,7 +47,7 @@ MicroMacroApp.component('queryResult', {
                     return false;
                 };
 
-                $scope.selectedKeys = ($stateParams.display || $ctrl.defaultKeys).reduce((keys, key) => {
+                $ctrl.selectedKeys = ($stateParams.display || $ctrl.defaultKeys).reduce((keys, key) => {
                     if($ctrl.keys[key].type.class == SPAN) {
                         var target = findTarget(key);
                         if(target) {
@@ -62,18 +62,18 @@ MicroMacroApp.component('queryResult', {
                 $scope.$watchCollection(angular.bind(this, function() {
                     return $state.params.selected;
                 }), function(selected) {
-                    if($scope.selectedKeys != selected && selected) {
-                        $scope.selectedKeys = selected.reduce((keys, key)=> {
+                    if($ctrl.selectedKeys != selected && selected) {
+                        $ctrl.selectedKeys = selected.reduce((keys, key)=> {
                             keys[key] = true;
                             return keys;
                         }, {});
                     }
                 });
 
-                $scope.$watchCollection("selectedKeys", function(selected, old){
+                $scope.$watchCollection("$ctrl.selectedKeys", function(selected, old){
                     var urlKeys = [];
 
-                    angular.forEach($scope.selectedKeys, (selected, key)=> {
+                    angular.forEach($ctrl.selectedKeys, (selected, key)=> {
                         if(selected) {
                             urlKeys.push(key);
                         }
@@ -86,21 +86,21 @@ MicroMacroApp.component('queryResult', {
             }();
 
             //bind page number to URL
-            $scope.currentPage = $stateParams.page;
+            $ctrl.currentPage = $stateParams.page;
 
             $scope.$watch(angular.bind(this, function() {
                 return $state.params.page;
             }), function(page){
-                if($scope.currentPage != page) {
-                    $scope.currentPage = page;
+                if($ctrl.currentPage != page) {
+                    $ctrl.currentPage = page;
                 }
             });
 
             if(isProxy()) {
-                $scope.pages = Queries.binProxyResultByPartition($ctrl.result, $ctrl.query.partitionKey);
+                $ctrl.pages = Queries.binProxyResultByPartition($ctrl.result, $ctrl.query.partitionKey);
             }
 
-            $scope.$watch('currentPage + numPerPage', function() {
+            $scope.$watch('$ctrl.currentPage + $ctrl.numPerPage', function() {
                 resolveDisplayKeys();
                 updateData();
             });
@@ -109,20 +109,20 @@ MicroMacroApp.component('queryResult', {
             Queries.execute(Queries.limitOffset($ctrl.query, 1000, 1000)).then( (moreData)=> {
                 $ctrl.result = $ctrl.result.concat(moreData);
                 if(isProxy()) {
-                    $scope.pages = Queries.binProxyResultByPartition($ctrl.result, $ctrl.query.partitionKey);
+                    $ctrl.pages = Queries.binProxyResultByPartition($ctrl.result, $ctrl.query.partitionKey);
                 }
             });
         };
 
         var isProxy = () => $ctrl.query.type == "proxy";
 
-        $scope.cols = function(max, num) {
+        $ctrl.cols = function(max, num) {
             return Math.floor(max/num);
         }
 
-        $scope.totalPages = () => {
+        $ctrl.totalPages = () => {
             if(isProxy()) {
-                return $scope.pages.length * $scope.numPerPage -1;
+                return $ctrl.pages.length * $ctrl.numPerPage -1;
             } else {
                 return $ctrl.result.length;
             }
@@ -130,11 +130,11 @@ MicroMacroApp.component('queryResult', {
 
         var resolveDisplayKeys = function() {
 
-            $scope.widths = {};
-            $scope.displayKeys = $scope.keyList.reduce((keys, key)=>{
-                if($scope.selectedKeys[key] && $ctrl.keys[key].type.class != SPAN) {
+            $ctrl.widths = {};
+            $ctrl.displayKeys = $ctrl.keyList.reduce((keys, key)=>{
+                if($ctrl.selectedKeys[key] && $ctrl.keys[key].type.class != SPAN) {
                     keys.push(key);
-                    $scope.widths[key] = 20;
+                    $ctrl.widths[key] = 20;
                 }
                 return keys;
             }, []);
@@ -144,11 +144,11 @@ MicroMacroApp.component('queryResult', {
         var updateData = function() {
             resolveDisplayKeys();
             if(isProxy()) {
-                $scope.page = Rows.getRowsColumns(Datums.data($scope.pages[$scope.currentPage-1], $ctrl.keys), $scope.selectedKeys);
+                $ctrl.page = Rows.getRowsColumns(Datums.data($ctrl.pages[$ctrl.currentPage-1], $ctrl.keys), $ctrl.selectedKeys);
             } else {
-                var begin = (($scope.currentPage - 1) * $scope.numPerPage);
-                var end = begin + $scope.numPerPage;
-                $scope.page = Rows.getRowsColumns(Datums.data($ctrl.result.slice(begin, end), $ctrl.keys), $scope.selectedKeys);
+                var begin = (($ctrl.currentPage - 1) * $ctrl.numPerPage);
+                var end = begin + $ctrl.numPerPage;
+                $ctrl.page = Rows.getRowsColumns(Datums.data($ctrl.result.slice(begin, end), $ctrl.keys), $ctrl.selectedKeys);
             }
         };
 
