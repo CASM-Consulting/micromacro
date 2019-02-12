@@ -19,10 +19,28 @@
             boundary-links="true">
     </div>
 
-    <div ui-grid="$ctrl.gridOptions"
-         class="results-table"
-         ui-grid-auto-resize
-         ui-grid-resize-columns></div>
+    <div class="table">
+
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th ng-repeat="key in keyList" ng-if="displayKeys[key]" style="width:{{widths[key]}}%">{{key}}</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="row in page">
+                <td ng-repeat="key in keyList" ng-if="displayKeys[key]" style="width:{{widths[key]}}%">
+                    <div ng-include="'cell.html'" ng-init="COL_FIELD = row[key]"></div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!--<div ui-grid="$ctrl.gridOptions"-->
+         <!--class="results-table"-->
+         <!--ui-grid-auto-resize-->
+         <!--ui-grid-resize-columns></div>-->
 
     <!--<div ng-repeat="datum in page" class="row">-->
 
@@ -38,7 +56,8 @@
     <!--</div>-->
 
     <script type="text/ng-template" id="cell.html">
-        <div class="ui-grid-cell-contents">
+        <!-- <div class="ui-grid-cell-contents"> -->
+        <div>
             <div ng-if="COL_FIELD.type=='spans'">
                 <div>
                     <span-text spanss="COL_FIELD"> </span-text>

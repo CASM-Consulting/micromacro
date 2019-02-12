@@ -19,6 +19,8 @@ MicroMacroApp.component('queryResult', {
             $state.go(".", {page:$scope.currentPage});
         };
 
+        $scope.widths = {};
+
         $scope.page = [];
         $scope.currentPage = 1;
         $scope.numPerPage = 10;
@@ -26,29 +28,14 @@ MicroMacroApp.component('queryResult', {
 
         $ctrl.$onInit = function() {
 
-            $ctrl.gridOptions = {
-                data : $scope.page,
-                useExternalPagination: true,
-                enableColumnResizing: true,
-                customScroller: function myScrolling(uiGridViewport, scrollHandler) {
-                    uiGridViewport.on('mousewheel', function myScrollingOverride(event) {
-// comment out these lines in src/main/resources/assets/node_modules/angular-ui-grid/ui-grid.core.js:2878  v4.7.1
+            //alphabetical key list
+            $scope.keyList = [];
+            for(var key in $ctrl.keys) {
+                $scope.keyList.push(key);
+            }
+            $scope.keyList.sort();
 
-//                        if (!((event.deltaY !== 0 && (scrollEvent.atTop(scrollTop) || scrollEvent.atBottom(scrollTop))) ||
-//                                (event.deltaX !== 0 && (scrollEvent.atLeft(scrollLeft) || scrollEvent.atRight(scrollLeft))))) {
-//                                event.preventDefault();
-//                                event.stopPropagation();
-//                                scrollEvent.fireThrottledScrollingEvent('', scrollEvent);
-//                          }
-                        scrollHandler(event);
-                    });
-                }
-//                useExternalSorting: true,
-
-            };
-
-            var resolveSelectedKeys = function() {
-                if($scope.selectedKeys) return;
+            var resolveDisplayKeys = function() {
                 var findTarget = (key) => {
                     for(var i in $ctrl.result) {
                         var datum = Datums.datum($ctrl.result[i], $ctrl.keys);
@@ -56,35 +43,50 @@ MicroMacroApp.component('queryResult', {
                             return datum.resolve(key).target.key();
                         }
                     }
+                    return false;
                 };
+
 
                 //bind display keys to URL
                 $scope.selectedKeys = ($stateParams.display || $ctrl.defaultKeys).reduce((keys, key) => {
                     if($ctrl.keys[key].type.class == SPAN) {
-                        keys[findTarget(key)] = true;
+                        var target = findTarget(key);
+                        if(target) {
+                            keys[target] = true;
+                        }
                     }
+
                     keys[key] = true;
                     return keys;
                 }, {});
 
-                //alphabetical key list
-                $scope.keyList = [];
-                for(var key in $ctrl.keys) {
-                    $scope.selectedKeys[key] = $scope.selectedKeys[key] || false;
-                    $scope.keyList.push(key);
-                }
-                $scope.keyList.sort();
+                $scope.widths = {};
+                $scope.displayKeys = {};
+
+                angular.forEach($scope.selectedKeys, (selected, key)=>{
+
+                    if($ctrl.keys[key].type.class != SPAN) {
+                        $scope.displayKeys[key] = true;
+                        $scope.widths[key] = 20;
+                    }
+                });
+
             };
 
+            resolveDisplayKeys();
+
             $scope.$watchCollection(angular.bind(this, function() {
-                return $state.params.displayKeys;
-            }), function(displayKeys){
-                if($scope.selectedKeys != displayKeys && displayKeys) {
-                    $scope.selectedKeys = displayKeys;
+                return $state.params.selected;
+            }), function(selected) {
+                if($scope.selected != selected && selected) {
+                    $scope.selectedKeys = selected.reduce((keys, key)=> {
+                        keys[key] = true;
+                        return keys;
+                    }, {});
                 }
             });
 
-            $scope.$watchCollection("selectedKeys", function(displayKeys){
+            $scope.$watchCollection("selectedKeys", function(selected){
                 var urlKeys = [];
 
                 angular.forEach($scope.selectedKeys, (selected, key)=> {
@@ -93,21 +95,9 @@ MicroMacroApp.component('queryResult', {
                     }
                 });
 
-                var columnDefs = [];
-                angular.forEach($scope.keyList, (key) => {
-                    if($scope.selectedKeys[key] && $ctrl.keys[key].type.class != SPAN) {
-
-                        columnDefs.push({
-                            name : key,
-                            cellTemplate : 'cell.html'
-                        });
-                    }
-                });
-
-                $ctrl.gridOptions.columnDefs = columnDefs;
-
                 updateData();
-                $state.go(".", {display:urlKeys});
+
+                $state.go(".", {selected:urlKeys});
             });
 
             //bind page number to URL
@@ -128,7 +118,7 @@ MicroMacroApp.component('queryResult', {
             }
 
             $scope.$watch('currentPage + numPerPage', function() {
-                resolveSelectedKeys();
+                resolveDisplayKeys();
 
                 updateData();
             });
@@ -159,11 +149,11 @@ MicroMacroApp.component('queryResult', {
 
         var updateData = function() {
             if(isProxy()) {
-                $ctrl.gridOptions.data = $scope.page = Rows.getRowsColumns(Datums.data($scope.pages[$scope.currentPage-1], $ctrl.keys), $scope.selectedKeys);
+                $scope.page = Rows.getRowsColumns(Datums.data($scope.pages[$scope.currentPage-1], $ctrl.keys), $scope.selectedKeys);
             } else {
                 var begin = (($scope.currentPage - 1) * $scope.numPerPage);
                 var end = begin + $scope.numPerPage;
-                $ctrl.gridOptions.data = $scope.page = Rows.getRowsColumns(Datums.data($ctrl.result.slice(begin, end), $ctrl.keys), $scope.selectedKeys);
+                $scope.page = Rows.getRowsColumns(Datums.data($ctrl.result.slice(begin, end), $ctrl.keys), $scope.selectedKeys);
             }
         };
 
