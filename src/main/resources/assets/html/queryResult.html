@@ -24,12 +24,12 @@
         <table class="table table-striped">
             <thead>
             <tr>
-                <th ng-repeat="key in keyList" ng-if="displayKeys[key]" style="width:{{widths[key]}}%">{{key}}</th>
+                <th ng-repeat="key in displayKeys" style="width:{{widths[key]}}%">{{key}}</th>
             </tr>
             </thead>
             <tbody>
             <tr ng-repeat="row in page">
-                <td ng-repeat="key in keyList" ng-if="displayKeys[key]" style="width:{{widths[key]}}%">
+                <td ng-repeat="key in displayKeys" style="width:{{widths[key]}}%">
                     <div ng-include="'cell.html'" ng-init="COL_FIELD = row[key]"></div>
                 </td>
             </tr>
