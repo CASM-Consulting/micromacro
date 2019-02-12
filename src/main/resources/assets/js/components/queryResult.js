@@ -6,7 +6,7 @@ MicroMacroApp.component('queryResult', {
         result: '<',
         defaultKeys: '<'
     },
-    controller : function($scope, $state, $stateParams, Queries, Datums, Rows) {
+    controller : function($scope, $state, $stateParams, Queries, Datums, Rows, ScrollEvent) {
 
         var LABEL = $scope.LABEL = 'uk.ac.susx.tag.method51.twitter.LabelDecision';
         var STRING = $scope.STRING = 'java.lang.String';
@@ -29,11 +29,26 @@ MicroMacroApp.component('queryResult', {
             $ctrl.gridOptions = {
                 data : $scope.page,
                 useExternalPagination: true,
-                enableColumnResizing: true
+                enableColumnResizing: true,
+                customScroller: function myScrolling(uiGridViewport, scrollHandler) {
+                    uiGridViewport.on('mousewheel', function myScrollingOverride(event) {
+// comment out these lines in src/main/resources/assets/node_modules/angular-ui-grid/ui-grid.core.js:2878  v4.7.1
+
+//                        if (!((event.deltaY !== 0 && (scrollEvent.atTop(scrollTop) || scrollEvent.atBottom(scrollTop))) ||
+//                                (event.deltaX !== 0 && (scrollEvent.atLeft(scrollLeft) || scrollEvent.atRight(scrollLeft))))) {
+//                                event.preventDefault();
+//                                event.stopPropagation();
+//                                scrollEvent.fireThrottledScrollingEvent('', scrollEvent);
+//                          }
+                        scrollHandler(event);
+                    });
+                }
 //                useExternalSorting: true,
+
             };
 
             var resolveSelectedKeys = function() {
+                if($scope.selectedKeys) return;
                 var findTarget = (key) => {
                     for(var i in $ctrl.result) {
                         var datum = Datums.datum($ctrl.result[i], $ctrl.keys);
