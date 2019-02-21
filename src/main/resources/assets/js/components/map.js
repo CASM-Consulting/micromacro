@@ -224,11 +224,14 @@ MicroMacroApp.component('map', {
             },
 
             defaults: {
-                scrollWheelZoom: true,
+//                scrollWheelZoom: true,
                 minZoom: 10,
                 maxZoom: 14,
                 wheelDebounceTime: 100,
-                scrollWheelZoom:false
+//                scrollWheelZoom:false,
+                zoomSnap: 0,
+                zoomDelta: 0.1,
+                wheelPxPerZoomLevel : 10
             },
 
             tiles: tilesDict.oldlondon,

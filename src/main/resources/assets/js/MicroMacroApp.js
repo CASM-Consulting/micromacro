@@ -19,7 +19,7 @@ angular.module('angular-toArrayFilter', []) .filter('toArray', function () {
 });
 
 var MicroMacroApp = angular.module('MicroMacroApp', ['ui.bootstrap', 'ui.router', 'ui-leaflet', 'angular-toArrayFilter',
-'ngAnimate', 'ui.grid', 'ui.grid.autoResize', 'ui.grid.resizeColumns']);
+'ngAnimate']);
 
 MicroMacroApp.run(function($trace) {
     $trace.enable('TRANSITION');

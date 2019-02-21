@@ -15,8 +15,11 @@ import uk.ac.susx.tag.method51.core.meta.Datum;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.ObjectInputStream;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 @Path("query")
 @Produces(MediaType.APPLICATION_JSON)
@@ -51,7 +54,7 @@ public class QueryResources {
 
         Select select = queryFactory.select(rep);
 
-        List<DatumRep> data = cache.cache(rep, () -> datumDAO.execute2Rep(select) );
+        Stream<DatumRep> data = cache.cache(rep, () -> datumDAO.execute2Rep(select) );
 
         return Response.status(Response.Status.OK).entity(
                 data
@@ -65,7 +68,7 @@ public class QueryResources {
 
         Proxy proxy = queryFactory.proxy(proxyRep);
 
-        List<DatumRep> data = cache.cache(proxyRep, () -> datumDAO.execute2Rep(proxy) );
+        Stream<DatumRep> data = cache.cache(proxyRep, () -> datumDAO.execute2Rep(proxy) );
 
         return Response.status(Response.Status.OK).entity(
             data

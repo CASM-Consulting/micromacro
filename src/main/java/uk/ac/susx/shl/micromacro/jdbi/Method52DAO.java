@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.Jdbi;
+import org.postgresql.util.PSQLException;
 import uk.ac.susx.tag.method51.core.data.PostgreSQLConnection;
 import uk.ac.susx.tag.method51.core.data.PostgresUtils;
 import uk.ac.susx.tag.method51.core.data.StoreException;
@@ -52,6 +53,9 @@ public class Method52DAO {
             KeySet keys = gson.fromJson(keysMeta, KeySet.class);
 
             return keys;
+        } catch (PSQLException e) {
+
+            return KeySet.of();
         }
     }
 

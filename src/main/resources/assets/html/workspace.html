@@ -5,13 +5,46 @@
         <h3>Queries</h3>
         <button class='btn btn-default' ui-sref=".newQuery({type:'proxy'})">New Proxy</button>
         <button class='btn btn-default' ui-sref=".newQuery({type:'select'})">New Select</button>
-        <ul>
-            <li ng-repeat="(name, query) in $ctrl.workspace.queries"><a ui-sref=".query({queryId: name})">{{name}}</a></li>
-        </ul>
+        <!--<ul>-->
+            <!--<li ng-repeat="(name, query) in $ctrl.workspace.queries"><a ui-sref=".query({queryId: name})">{{name}}</a></li>-->
+        <!--</ul>-->
 
         <div ui-view="config"></div>
     </div>
 
+
+    <div class="col-md-10">
+        <div >
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Table</th>
+                    <th>Versions</th>
+                    <th># Returned</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="name in $ctrl.queryList">
+                    <td> <a href ng-click="$ctrl.active = $index">{{name}}</a> </td>
+                    <td> {{$ctrl.workspace.queries[name].history[0].type}} </td>
+                    <td> {{$ctrl.workspace.queries[name].history[0].table}} </td>
+                    <td> {{$ctrl.workspace.queries[name].history.length}} </td>
+                    <td> ### </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <uib-tabset active="$ctrl.active">
+            <uib-tab ng-repeat="name in $ctrl.queryList"
+                     index="$index"
+                     heading="{{name}}"
+                     select="$ctrl.loadQuery(name)">
+                <div ui-view="summary"></div>
+            </uib-tab>
+        </uib-tabset>
+    </div>
 
     <div class="col-md-10">
         <div ui-view="result"></div>

@@ -6,7 +6,7 @@ MicroMacroApp.component('queryResult', {
         result: '<',
         defaultKeys: '<'
     },
-    controller : function($scope, $state, $stateParams, Queries, Datums, Rows, ScrollEvent) {
+    controller : function($scope, $state, $stateParams, Queries, Datums, Rows) {
         var $ctrl = this;
 
         var LABEL = $ctrl.LABEL = 'uk.ac.susx.tag.method51.twitter.LabelDecision';

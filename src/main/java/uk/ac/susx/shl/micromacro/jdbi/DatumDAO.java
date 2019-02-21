@@ -7,7 +7,9 @@ import uk.ac.susx.tag.method51.core.meta.Datum;
 import uk.ac.susx.tag.method51.core.meta.KeySet;
 
 import java.sql.SQLException;
+import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Stream;
 
 public class DatumDAO {
 
@@ -34,10 +36,10 @@ public class DatumDAO {
     }
 
 
-    public <T extends DatumQuery> List<DatumRep> execute2Rep(T query) {
+    public <T extends DatumQuery> Stream<DatumRep> execute2Rep(T query) {
         return jdbi.withHandle(handle -> handle.createQuery(query.sql())
                 .map(new DatumRepMapper())
-                .list()
+                .stream()
         );
     }
 

@@ -7,6 +7,11 @@ MicroMacroApp.config(function($stateProvider){
         resolve: {
             workspace: function(Workspaces, $stateParams) {
                 return Workspaces.load($stateParams.workspaceId);
+            },
+            queryList: function(workspace) {
+                var queryList = Object.keys(workspace.queries);
+                queryList.sort();
+                return queryList;
             }
         }
     });
@@ -53,6 +58,9 @@ MicroMacroApp.config(function($stateProvider){
             },
             queryNotes : {
                 component:'queryNotes'
+            },
+            summary: {
+                component:'summary'
             }
         }
     });

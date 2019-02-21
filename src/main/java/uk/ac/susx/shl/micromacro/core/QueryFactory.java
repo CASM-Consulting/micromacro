@@ -31,7 +31,7 @@ public class QueryFactory {
 
     private final static String KEY_NAME = "key";
     private final static String ARGS = "args";
-    private final static String FILTER_NAME = "filter";
+    private final static String FILTER_TYPE = "type";
 
 
     public QueryFactory(Method52DAO method52DAO) {
@@ -73,6 +73,10 @@ public class QueryFactory {
 
         Key partitionKey = keys.get(rep.partitionKey);
 
+        if(partitionKey == null) {
+            partitionKey = Key.of(rep.partitionKey, RuntimeType.ANY);
+        }
+
         Map<String, KeyFilter> literals = processLiterals(rep.literals, keys);
 
         LogicParser parser = new LogicParser(literals);
@@ -82,7 +86,8 @@ public class QueryFactory {
         OrderBy orderBy = processOrderBy(rep.orderBy);
         orderBy = orderBy.numeric(true);
 
-        Proxy proxy = new Proxy(rep.table, targetFilter, proxyFilter, partitionKey, rep.proximity, orderBy, rep.innerLimit, rep.innerOffset, rep.outerLimit);
+        Proxy proxy = new Proxy(rep.table, targetFilter, proxyFilter, partitionKey, rep.proximity, orderBy,
+                rep.innerLimit, rep.innerOffset, rep.outerLimit);
 
         return proxy;
     }
@@ -185,6 +190,9 @@ public class QueryFactory {
             Map<String, String> spec = entry.getValue();
 
             Key key = keys.get(spec.get("key"));
+            if(key == null ) {
+                key = Key.of(spec.get("key"), RuntimeType.ANY);
+            }
             String args = spec.get("args");
             String name = spec.get("type");
 
