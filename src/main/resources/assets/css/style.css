@@ -15,3 +15,7 @@
 .results-table {
     height: 500px;
 }
+
+.span-begin, .span-end {
+    font-weight:bold;
+}

@@ -38,10 +38,25 @@ MicroMacroApp.factory("Queries", function($q, Server, $http) {
             });
         },
 
-        execute : function(query) {
+        execute : function(query, cacheOnly, skip, limit) {
+            var params = {};
+            params.cacheOnly = cacheOnly || false;
+            if(query.type=="proxy") {
+                if(skip !== undefined) {
+                    params.page = skip;
+                }
+            } else {
+                if(skip !== undefined) {
+                    params.skip = skip;
+                }
+                if(limit !== undefined) {
+                    params.limit = limit;
+                }
+            }
             return $q(function(resolve) {
                 var type = query.type;
                 Server.post("api/query/"+type, query, {
+                    params : params,
                     success : resolve
                 });
             });
@@ -138,8 +153,18 @@ MicroMacroApp.factory("Queries", function($q, Server, $http) {
             }
 
             return query;
-        }
+        },
 
+        optimise : (query) => {
+            return $q(function(resolve) {
+                return $q(function(resolve) {
+                    var type = query.type;
+                    Server.post("api/query/optimise/"+type, query, {
+                        success : resolve
+                    });
+                });
+            });
+        }
     }
 
 });

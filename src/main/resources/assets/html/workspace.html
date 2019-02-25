@@ -23,6 +23,7 @@
                     <th>Table</th>
                     <th>Versions</th>
                     <th># Returned</th>
+                    <th>Operations</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -32,6 +33,9 @@
                     <td> {{$ctrl.workspace.queries[name].history[0].table}} </td>
                     <td> {{$ctrl.workspace.queries[name].history.length}} </td>
                     <td> ### </td>
+                    <td>
+                        <button class="btn btn-sm" ng-click="$ctrl.optimise($ctrl.workspace.queries[name].history[0])">Optimise</button>
+                    </td>
                 </tr>
                 </tbody>
             </table>

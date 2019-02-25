@@ -3,6 +3,7 @@ package uk.ac.susx.shl.micromacro;
 import io.dropwizard.Application;
 import io.dropwizard.bundles.assets.ConfiguredAssetsBundle;
 import io.dropwizard.jdbi3.JdbiFactory;
+import io.dropwizard.jersey.jackson.JsonProcessingExceptionMapper;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 
@@ -43,6 +44,8 @@ public class MicroMacroApplication extends Application<MicroMacroConfiguration> 
                     final Environment environment) throws IOException {
 
         environment.servlets().setSessionHandler(new SessionHandler());
+
+        environment.jersey().register(new JsonProcessingExceptionMapper(true));
 
         Files.createDirectories(Paths.get("data"));
 

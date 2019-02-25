@@ -9,11 +9,11 @@
         </label>
     </div>
 
-    <div>{{$ctrl.totalPages()}}</div>
+    <div>{{$ctrl.totalItems}}</div>
     <div uib-pagination
             ng-change="$ctrl.pageChange()"
             ng-model="$ctrl.currentPage"
-            total-items="$ctrl.totalPages()"
+            total-items="$ctrl.totalItems"
             items-per-page="$ctrl.numPerPage"
             max-size="10"
             boundary-links="true">

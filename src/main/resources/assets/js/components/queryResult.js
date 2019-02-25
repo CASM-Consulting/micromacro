@@ -28,6 +28,7 @@ MicroMacroApp.component('queryResult', {
 
         $ctrl.$onInit = function() {
 
+            $ctrl.totalItems = $ctrl.result.length;
             //alphabetical key list
             $ctrl.keyList = [];
             for(var key in $ctrl.keys) {
@@ -98,6 +99,7 @@ MicroMacroApp.component('queryResult', {
 
             if(isProxy()) {
                 $ctrl.pages = Queries.binProxyResultByPartition($ctrl.result, $ctrl.query.partitionKey);
+                $ctrl.page = Rows.getRowsColumns(Datums.data($ctrl.pages[$ctrl.currentPage-1], $ctrl.keys), $ctrl.selectedKeys);
             }
 
             $scope.$watch('$ctrl.currentPage + $ctrl.numPerPage', function() {
@@ -106,11 +108,12 @@ MicroMacroApp.component('queryResult', {
             });
 
 
-            Queries.execute(Queries.limitOffset($ctrl.query, 1000, 1000)).then( (moreData)=> {
-                $ctrl.result = $ctrl.result.concat(moreData);
-                if(isProxy()) {
-                    $ctrl.pages = Queries.binProxyResultByPartition($ctrl.result, $ctrl.query.partitionKey);
-                }
+            Queries.execute($ctrl.query, true).then( (count)=> {
+                $ctrl.totalItems = count;
+//                $ctrl.result = $ctrl.result.concat(moreData);
+//                if(isProxy()) {
+//                    $ctrl.pages = Queries.binProxyResultByPartition($ctrl.result, $ctrl.query.partitionKey);
+//                }
             });
         };
 
@@ -120,13 +123,13 @@ MicroMacroApp.component('queryResult', {
             return Math.floor(max/num);
         }
 
-        $ctrl.totalPages = () => {
-            if(isProxy()) {
-                return $ctrl.pages.length * $ctrl.numPerPage -1;
-            } else {
-                return $ctrl.result.length;
-            }
-        };
+//        $ctrl.totalItems = () => {
+//            if(isProxy()) {
+//                return $ctrl.pages.length * $ctrl.numPerPage -1;
+//            } else {
+//                return $ctrl.result.length;
+//            }
+//        };
 
         var resolveDisplayKeys = function() {
 
@@ -144,11 +147,25 @@ MicroMacroApp.component('queryResult', {
         var updateData = function() {
             resolveDisplayKeys();
             if(isProxy()) {
-                $ctrl.page = Rows.getRowsColumns(Datums.data($ctrl.pages[$ctrl.currentPage-1], $ctrl.keys), $ctrl.selectedKeys);
+                var page = $ctrl.currentPage - 1;
+                if($ctrl.pages[$ctrl.currentPage-1]) {
+                    $ctrl.page = Rows.getRowsColumns(Datums.data($ctrl.pages[$ctrl.currentPage-1], $ctrl.keys), $ctrl.selectedKeys);
+                } else {
+                    Queries.execute($ctrl.query, false, page).then( (data)=> {
+                        $ctrl.page = Rows.getRowsColumns(Datums.data(data, $ctrl.keys), $ctrl.selectedKeys);
+                    });
+                }
             } else {
-                var begin = (($ctrl.currentPage - 1) * $ctrl.numPerPage);
-                var end = begin + $ctrl.numPerPage;
-                $ctrl.page = Rows.getRowsColumns(Datums.data($ctrl.result.slice(begin, end), $ctrl.keys), $ctrl.selectedKeys);
+
+                var skip = ($ctrl.currentPage - 1) * $ctrl.numPerPage;
+                var limit = $ctrl.numPerPage;
+                if($ctrl.result[skip] && $ctrl.result[skip+limit]) {
+                    $ctrl.page = Rows.getRowsColumns(Datums.data($ctrl.result.slice(skip, skip+limit), $ctrl.keys), $ctrl.selectedKeys);
+                } else {
+                    Queries.execute($ctrl.query, false, skip, limit).then( (data)=> {
+                        $ctrl.page = Rows.getRowsColumns(Datums.data(data, $ctrl.keys), $ctrl.selectedKeys);
+                    });
+                }
             }
         };
 

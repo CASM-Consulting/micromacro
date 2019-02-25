@@ -1,23 +1,25 @@
 package uk.ac.susx.shl.micromacro.resources;
 
 
-import uk.ac.susx.shl.micromacro.api.DatumRep;
-import uk.ac.susx.shl.micromacro.api.ProxyRep;
-import uk.ac.susx.shl.micromacro.api.SelectDistinctRep;
-import uk.ac.susx.shl.micromacro.api.SelectRep;
+import uk.ac.susx.shl.micromacro.api.*;
 import uk.ac.susx.shl.micromacro.core.QueryFactory;
 import uk.ac.susx.shl.micromacro.core.QueryResultCache;
 import uk.ac.susx.shl.micromacro.jdbi.DatumDAO;
-import uk.ac.susx.tag.method51.core.data.store2.query.Proxy;
-import uk.ac.susx.tag.method51.core.data.store2.query.Select;
+import uk.ac.susx.tag.method51.core.data.store2.query.*;
 import uk.ac.susx.tag.method51.core.meta.Datum;
 
 import javax.ws.rs.*;
+import javax.ws.rs.container.AsyncResponse;
+import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.ObjectInputStream;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -36,6 +38,28 @@ public class QueryResources {
     }
 
     @POST
+    @Path("optimise/proxy")
+    public Response optimiseProxy(ProxyRep rep) throws SQLException {
+
+        datumDAO.optimiseTable(queryFactory.proxy(rep));
+
+        return Response.status(Response.Status.OK).entity(
+                "OK"
+        ).build();
+    }
+
+    @POST
+    @Path("optimise/select")
+    public Response optimiseSelect(SelectRep rep) throws SQLException {
+
+        datumDAO.optimiseTable(queryFactory.select(rep));
+
+        return Response.status(Response.Status.OK).entity(
+                "OK"
+        ).build();
+    }
+
+    @POST
     @Path("select-distinct")
     public Response selectDistinct(SelectDistinctRep rep) throws SQLException {
 
@@ -50,28 +74,62 @@ public class QueryResources {
 
     @POST
     @Path("select")
-    public Response select(SelectRep rep) throws SQLException {
+    public void select(@Suspended final AsyncResponse asyncResponse,
+                           @QueryParam("cacheOnly") @DefaultValue("false") Boolean cacheOnly,
+                           @QueryParam("skip") Integer skip,
+                           @QueryParam("limit") Integer limit,
+                           SelectRep rep) throws SQLException {
 
+        Response response;
         Select select = queryFactory.select(rep);
+        QueryResultCache.CachedQueryResult<SelectRep> cached = cache.cache(rep, () -> datumDAO.execute2Rep(select) );
 
-        Stream<DatumRep> data = cache.cache(rep, () -> datumDAO.execute2Rep(select) );
+        if(cacheOnly) {
+            response = Response.status(Response.Status.OK).entity( cached.count() ).build();
+        } else if(skip != null && limit != null) {
+            response = Response.status(Response.Status.OK).entity( cached.get(skip, skip+limit) ).build();
+        } else {
+            response = Response.status(Response.Status.OK).entity( cached.stream() ).build();
+        }
+        CompletableFuture<Response> promise = new CompletableFuture();
+        promise.complete(response);
+        promise.thenAccept(resp->
+                asyncResponse.resume(resp)
+        ).thenRun(()->
+                cached.close()
+        );
 
-        return Response.status(Response.Status.OK).entity(
-                data
-        ).build();
     }
 
 
     @POST
     @Path("proxy")
-    public Response proxy(ProxyRep proxyRep) throws SQLException {
+    public void proxy(@Suspended final AsyncResponse asyncResponse,
+                          @QueryParam("cacheOnly") @DefaultValue("false") Boolean cacheOnly,
+                          @QueryParam("page") Integer page,
+                          ProxyRep proxyRep) throws SQLException {
 
+
+        Response response;
         Proxy proxy = queryFactory.proxy(proxyRep);
+        QueryResultCache.CachedQueryResult<ProxyRep> cached = cache.cache(proxyRep, () -> datumDAO.execute2Rep(proxy) , new QueryResultCache.ProxyPager());
 
-        Stream<DatumRep> data = cache.cache(proxyRep, () -> datumDAO.execute2Rep(proxy) );
+        if(cacheOnly) {
+            response = Response.status(Response.Status.OK).entity( cached.count() ).build();
+        } else if(page != null) {
+            int[] indices = cached.indices(page);
 
-        return Response.status(Response.Status.OK).entity(
-            data
-        ).build();
+            response = Response.status(Response.Status.OK).entity( cached.get(indices[0], indices[1]) ).build();
+        } else {
+            response = Response.status(Response.Status.OK).entity( cached.stream() ).build();
+        }
+
+        CompletableFuture<Response> promise = new CompletableFuture();
+        promise.complete(response);
+        promise.thenAccept(resp->
+                asyncResponse.resume(resp)
+        ).thenRun(()->
+                cached.close()
+        );
     }
 }
