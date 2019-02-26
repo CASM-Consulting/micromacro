@@ -117,13 +117,17 @@ MicroMacroApp.component('queryResult', {
             });
         };
 
+        $ctrl.$postLink = () => {
+//            spinnerService.show('booksSpinner');
+        }
+
         var isProxy = () => $ctrl.query.type == "proxy";
 
         $ctrl.cols = function(max, num) {
             return Math.floor(max/num);
         }
 
-//        $ctrl.totalItems = () => {
+//        $ctrl.totalItems = npm install spin.js() => {
 //            if(isProxy()) {
 //                return $ctrl.pages.length * $ctrl.numPerPage -1;
 //            } else {

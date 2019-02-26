@@ -91,14 +91,9 @@ public class QueryResources {
         } else {
             response = Response.status(Response.Status.OK).entity( cached.stream() ).build();
         }
-        CompletableFuture<Response> promise = new CompletableFuture();
+        CompletableFuture<Response> promise = new CompletableFuture<>();
         promise.complete(response);
-        promise.thenAccept(resp->
-                asyncResponse.resume(resp)
-        ).thenRun(()->
-                cached.close()
-        );
-
+        promise.thenAccept(asyncResponse::resume).thenRun(cached::close);
     }
 
 
@@ -108,7 +103,6 @@ public class QueryResources {
                           @QueryParam("cacheOnly") @DefaultValue("false") Boolean cacheOnly,
                           @QueryParam("page") Integer page,
                           ProxyRep proxyRep) throws SQLException {
-
 
         Response response;
         Proxy proxy = queryFactory.proxy(proxyRep);
@@ -124,12 +118,8 @@ public class QueryResources {
             response = Response.status(Response.Status.OK).entity( cached.stream() ).build();
         }
 
-        CompletableFuture<Response> promise = new CompletableFuture();
+        CompletableFuture<Response> promise = new CompletableFuture<>();
         promise.complete(response);
-        promise.thenAccept(resp->
-                asyncResponse.resume(resp)
-        ).thenRun(()->
-                cached.close()
-        );
+        promise.thenAccept(asyncResponse::resume).thenRun(cached::close);
     }
 }

@@ -4,7 +4,7 @@ MicroMacroApp.component('workspace', {
         workspace : '<',
         queryList : '<'
     },
-    controller: function($scope, $state, $stateParams, Queries) {
+    controller: function($scope, $state, $stateParams, Queries, spinnerService) {
         var $ctrl = this;
 
 
