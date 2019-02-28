@@ -1,5 +1,6 @@
 package uk.ac.susx.shl.micromacro.jdbi;
 
+import com.google.gson.Gson;
 import org.jdbi.v3.core.Jdbi;
 import uk.ac.susx.shl.micromacro.api.DatumRep;
 import uk.ac.susx.tag.method51.core.data.store2.query.CreateIndex;
@@ -18,10 +19,12 @@ public class DatumDAO {
 
     private final Jdbi jdbi;
     private final Method52DAO method52DAO;
+    private final Gson gson;
 
-    public DatumDAO(Jdbi jdbi, Method52DAO method52DAO) {
+    public DatumDAO(Jdbi jdbi, Method52DAO method52DAO, Gson gson) {
         this.jdbi = jdbi;
         this.method52DAO = method52DAO;
+        this.gson = gson;
     }
 
     public <T extends DatumQuery> List<Datum> execute(T query) throws SQLException {
@@ -40,8 +43,9 @@ public class DatumDAO {
 
 
     public <T extends DatumQuery> Stream<DatumRep> execute2Rep(T query) {
+        KeySet keys = method52DAO.schema(query.table());
         return jdbi.withHandle(handle -> handle.createQuery(query.sql())
-                .map(new DatumRepMapper())
+                .map(new DatumRepMapper(keys))
                 .stream()
         );
     }

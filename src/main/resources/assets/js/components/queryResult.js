@@ -25,16 +25,18 @@ MicroMacroApp.component('queryResult', {
             $ctrl.totalItems = $ctrl.result.length;
             //alphabetical key list
             $ctrl.keyList = [];
-            for(var [key, value] of $ctrl.keys) {
+            for(var key in $ctrl.keys) {
                 $ctrl.keyList.push(key);
             }
             $ctrl.keyList.sort();
 
             //bind display keys to URL
             var bindSelectedKeys = function(){
+                var keyMap = new Map(Object.entries($ctrl.keys));
+
                 var findTarget = (key) => {
                     for(var i in $ctrl.result) {
-                        var datum = Datums.datum($ctrl.result[i], $ctrl.keys);
+                        var datum = Datums.datum($ctrl.result[i], keyMap);
                         if( datum.get(key) ) {
                             return datum.resolve(key).target.key();
                         }
@@ -43,7 +45,7 @@ MicroMacroApp.component('queryResult', {
                 };
 
                 $ctrl.selectedKeys = ($stateParams.display || $ctrl.defaultKeys).reduce((keys, keyName) => {
-                    if($ctrl.keys.get(keyName).type.equals(Types.SPANS)) {
+                    if($ctrl.keys[keyName].type.equals(Types.SPANS)) {
                         var target = findTarget(keyName);
                         if(target) {
                             keys[target] = true;
@@ -93,7 +95,7 @@ MicroMacroApp.component('queryResult', {
 
             if(isProxy()) {
                 $ctrl.pages = Queries.binProxyResultByPartition($ctrl.result, $ctrl.query.partitionKey);
-                $ctrl.page = Rows.getRowsColumns(Datums.data($ctrl.pages[$ctrl.currentPage-1], $ctrl.keys), $ctrl.selectedKeys);
+                $ctrl.page = Rows.getRowsColumns($ctrl.pages[$ctrl.currentPage-1], $ctrl.keys, $ctrl.selectedKeys);
             }
 
             $scope.$watch('$ctrl.currentPage + $ctrl.numPerPage', function() {
@@ -133,7 +135,7 @@ MicroMacroApp.component('queryResult', {
 
             $ctrl.widths = {};
             $ctrl.displayKeys = $ctrl.keyList.reduce((keys, keyName)=>{
-                if($ctrl.selectedKeys[keyName] && !$ctrl.keys.get(keyName).type.equals(Types.SPANS)) {
+                if($ctrl.selectedKeys[keyName] && !$ctrl.keys[keyName].type.equals(Types.SPANS)) {
                     keys.push(keyName);
                     $ctrl.widths[keyName] = 20;
                 }
@@ -147,10 +149,10 @@ MicroMacroApp.component('queryResult', {
             if(isProxy()) {
                 var page = $ctrl.currentPage - 1;
                 if($ctrl.pages[$ctrl.currentPage-1]) {
-                    $ctrl.page = Rows.getRowsColumns(Datums.data($ctrl.pages[$ctrl.currentPage-1], $ctrl.keys), $ctrl.selectedKeys);
+                    $ctrl.page = Rows.getRowsColumns($ctrl.pages[$ctrl.currentPage-1], $ctrl.keys, $ctrl.selectedKeys);
                 } else {
                     Queries.execute($ctrl.query, false, page).then( (data)=> {
-                        $ctrl.page = Rows.getRowsColumns(Datums.data(data, $ctrl.keys), $ctrl.selectedKeys);
+                        $ctrl.page = Rows.getRowsColumns(data, $ctrl.keys, $ctrl.selectedKeys);
                     });
                 }
             } else {
@@ -158,10 +160,10 @@ MicroMacroApp.component('queryResult', {
                 var skip = ($ctrl.currentPage - 1) * $ctrl.numPerPage;
                 var limit = $ctrl.numPerPage;
                 if($ctrl.result[skip] && $ctrl.result[skip+limit]) {
-                    $ctrl.page = Rows.getRowsColumns(Datums.data($ctrl.result.slice(skip, skip+limit), $ctrl.keys), $ctrl.selectedKeys);
+                    $ctrl.page = Rows.getRowsColumns($ctrl.result.slice(skip, skip+limit), $ctrl.keys, $ctrl.selectedKeys);
                 } else {
                     Queries.execute($ctrl.query, false, skip, limit).then( (data)=> {
-                        $ctrl.page = Rows.getRowsColumns(Datums.data(data, $ctrl.keys), $ctrl.selectedKeys);
+                        $ctrl.page = Rows.getRowsColumns(data, $ctrl.keys, $ctrl.selectedKeys);
                     });
                 }
             }

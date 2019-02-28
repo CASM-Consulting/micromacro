@@ -15,10 +15,10 @@ MicroMacroApp.factory("Tables", function($q, Server) {
                         table : table
                     },
                     success : function(keySet) {
-                        var keys = new Map();
+                        var keys = {};
                         angular.forEach(keySet, (value, key) => {
                             var type = DatumFactory.type(value.type);
-                            keys.set(key, DatumFactory.key(key, type));
+                            keys[key] = DatumFactory.key(key, type);
                         });
 
                         resolve(keys);

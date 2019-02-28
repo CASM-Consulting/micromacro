@@ -41,7 +41,7 @@ public class Method52DAO {
         });
     }
 
-    public KeySet schema(String table) throws SQLException {
+    public KeySet schema(String table) {
 
         Gson gson = GsonBuilderFactory.get().create();
 
@@ -53,7 +53,7 @@ public class Method52DAO {
             KeySet keys = gson.fromJson(keysMeta, KeySet.class);
 
             return keys;
-        } catch (PSQLException e) {
+        } catch (SQLException e) {
 
             return KeySet.of();
         }
