@@ -4,6 +4,7 @@ MicroMacroApp.factory("Types", function() {
         LABEL : Types.LABEL,
         STRING : Types.STRING,
         LIST : Types.LIST,
-        LONG : Types.LONG
+        LONG : Types.LONG,
+        BOOLEAN : Types.BOOLEAN
     }
 });

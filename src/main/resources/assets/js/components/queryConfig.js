@@ -52,6 +52,14 @@ MicroMacroApp.component('queryConfig', {
             });
         };
 
+        $ctrl.partitionSelect = () => {
+            if($ctrl.query.partition) {
+                delete $ctrl.query.partition;
+            } else {
+                $ctrl.query.partition = {};
+            }
+        };
+
         $scope.changeVer = () => $state.go(".", {ver:$scope.queryVer});
 
         $scope.undo = () => {

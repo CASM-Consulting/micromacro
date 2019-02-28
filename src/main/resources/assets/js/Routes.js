@@ -20,7 +20,7 @@ MicroMacroApp.config(function($stateProvider){
         url: '/new-query/{type}',
         resolve: {
             query: function($stateParams) {
-                return {type:$stateParams.type};
+                return {_TYPE:$stateParams.type};
             },
             tables: function(Tables) {
                 return Tables.list();

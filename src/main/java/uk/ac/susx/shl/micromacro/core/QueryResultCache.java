@@ -5,11 +5,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.mapdb.*;
 import uk.ac.susx.shl.micromacro.api.*;
+import uk.ac.susx.tag.method51.core.data.store2.query.DatumQuery;
+import uk.ac.susx.tag.method51.core.data.store2.query.Proxy;
 
 
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
@@ -24,7 +27,11 @@ public class QueryResultCache {
 
     private final DB db;
 
-    public QueryResultCache(Path queryCachePath) {
+    private final Map<Map, String> queryIds;
+
+    private final QueryFactory queryFactory;
+
+    public QueryResultCache(Path queryCachePath, QueryFactory queryFactory) {
 
         db = DBMaker
                 .fileDB(queryCachePath.toFile())
@@ -34,52 +41,62 @@ public class QueryResultCache {
                 .closeOnJvmShutdown()
 //                .readOnly()
                 .make();
+
+        this.queryFactory = queryFactory;
+
+        queryIds = db.hashMap("queryIds", Serializer.ELSA, Serializer.STRING).createOrOpen();
     }
 
 
-    public <T extends AbstractDatumQueryRep> CachedQueryResult<T> cache(T query, Supplier<Stream<DatumRep>> dataSupplier) {
+    public <T extends DatumQuery> CachedQueryResult<T> cache(T query, Supplier<Stream<DatumRep>> dataSupplier) {
         return cache(query, dataSupplier, (q, c) -> d -> d);
     }
 
-    public <T extends AbstractDatumQueryRep> CachedQueryResult<T> cache(T query, Supplier<Stream<DatumRep>> resultSupplier,
-                                                                    BiFunction<T, CachedQueryResult<T>, Function<DatumRep, DatumRep>> pager) {
+    public <T extends DatumQuery> CachedQueryResult<T> cache(T query, Supplier<Stream<DatumRep>> resultSupplier,
+                                                             BiFunction<T, CachedQueryResult<T>, Function<DatumRep, DatumRep>> pager) {
 
         CachedQueryResult cached = new CachedQueryResult<>(query, resultSupplier, pager);
 
         return cached;
     }
 
-    public class CachedQueryResult<T extends AbstractDatumQueryRep> implements AutoCloseable {
+    public <T extends DatumQuery> String getQueryId(T query) {
+        String id;
+        if(queryIds.containsKey(query)) {
+            id = queryIds.get(query);
+        } else {
+            id = UUID.randomUUID().toString();
+            queryIds.put(queryFactory.rep(query), id);
+        }
+        return id;
+    }
 
-        public final String name;
+    public class CachedQueryResult<T extends DatumQuery> implements AutoCloseable {
+
+        public final String id;
         public final Map<Integer, int[]> pages;
         public final List<Object> result;
         public final Stream<DatumRep> resultStream;
         private final Atomic.Boolean cached;
 
 
-        public CachedQueryResult(T rep, Supplier<Stream<DatumRep>> resultSupplier,
+        public CachedQueryResult(T query, Supplier<Stream<DatumRep>> resultSupplier,
                                  BiFunction<T, CachedQueryResult<T>, Function<DatumRep, DatumRep>> pager) {
-            try {
-                String json = new ObjectMapper().writeValueAsString(rep);
-                name = DigestUtils.sha1Hex(json);
-                result = db.indexTreeList(name).createOrOpen();
-                cached = db.atomicBoolean(name+"-cached").createOrOpen();
-                pages = (Map<Integer,int[]>)db.hashMap(name+"-pages").createOrOpen();
+            id = getQueryId(query);
+            result = db.indexTreeList(id).createOrOpen();
+            cached = db.atomicBoolean(id +"-cached").createOrOpen();
+            pages = (Map<Integer,int[]>)db.hashMap(id +"-pages").createOrOpen();
 
-                if(cached.get()) {
-                    resultStream = (Stream)result.stream();
-                } else {
-                    resultStream = resultSupplier.get().sequential().map(datumRep -> {
-                        result.add(datumRep);
-                        return datumRep;
-                    }).map(pager.apply(rep, this)).onClose(()-> {
-                        cached.set(true);
-                        db.commit();
-                    });
-                }
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
+            if(cached.get()) {
+                resultStream = (Stream)result.stream();
+            } else {
+                resultStream = resultSupplier.get().sequential().map(datumRep -> {
+                    result.add(datumRep);
+                    return datumRep;
+                }).map(pager.apply(query, this)).onClose(()-> {
+                    cached.set(true);
+                    db.commit();
+                });
             }
         }
 
@@ -110,16 +127,16 @@ public class QueryResultCache {
         }
     }
 
-    public static class ProxyPager implements BiFunction<ProxyRep, CachedQueryResult<ProxyRep>, Function<DatumRep, DatumRep>> {
+    public static class ProxyPager implements BiFunction<Proxy, CachedQueryResult<Proxy>, Function<DatumRep, DatumRep>> {
 
         @Override
-        public Function<DatumRep, DatumRep> apply(ProxyRep proxyRep, CachedQueryResult cachedQueryResult) {
+        public Function<DatumRep, DatumRep> apply(Proxy proxyRep, CachedQueryResult cachedQueryResult) {
             AtomicReference<String> partitionId = new AtomicReference<>("");
             AtomicInteger page = new AtomicInteger(0);
             AtomicInteger i = new AtomicInteger(0);
             AtomicReference<int[]> pageIndices = new AtomicReference<>(null);
             return (DatumRep d) -> {
-                String partition = d.data.get(proxyRep.partitionKey).toString();
+                String partition = d.data.get(proxyRep.partitionKey()).toString();
                 if(!partition.equals(partitionId.get())) {
                     if(pageIndices.get() == null) {
                         pageIndices.getAndSet(new int[]{0,0});

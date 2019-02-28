@@ -16,8 +16,8 @@ public class Query<T extends DatumQuery> implements Serializable {
         metadata = new HashMap<>();
     }
 
-    public Query(LinkedList<T> history, Map<String,Object> metadata) {
-        this.history = history;
+    public Query(List<T> history, Map<String,Object> metadata) {
+        this.history = new LinkedList<>(history);
         this.metadata = metadata;
     }
 

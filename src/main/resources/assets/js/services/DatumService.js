@@ -1,6 +1,6 @@
 MicroMacroApp.factory("Datums", function() {
 
-    var data = function(rawData, rawKeys) {
+    var data = function(rawData, keys) {
 
         var data = [];
 
@@ -8,7 +8,7 @@ MicroMacroApp.factory("Datums", function() {
 
             var rawDatum = rawData[i];
 
-            var datum = DatumFactory.datum(rawDatum, rawKeys);
+            var datum = DatumFactory.datum(rawDatum, keys);
 
             data.push(datum);
         }

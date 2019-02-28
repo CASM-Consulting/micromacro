@@ -31,13 +31,7 @@ public class WorkspaceFactory {
 
             LinkedList<? extends DatumQuery> history = qrep .history
                     .stream()
-                    .map(queryRep -> {
-                        try {
-                            return queryFactory.query(queryRep);
-                        } catch (SQLException e) {
-                            throw new RuntimeException(e);
-                        }
-                    })
+                    .map(queryFactory::query)
                     .collect(Collectors.toCollection(LinkedList::new));
 
             workspace.setQuery(entry.getKey(), new Query<>(history, qrep.metadata));
@@ -47,7 +41,7 @@ public class WorkspaceFactory {
     }
 
 
-    public WorkspaceRep rep(Workspace workspace) {
+    public <T extends DatumQuery> WorkspaceRep rep(Workspace workspace) {
 
         WorkspaceRep rep = new WorkspaceRep();
 

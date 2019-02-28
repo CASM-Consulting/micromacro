@@ -1,5 +1,6 @@
 package uk.ac.susx.shl.micromacro;
 
+import com.google.gson.Gson;
 import io.dropwizard.Application;
 import io.dropwizard.bundles.assets.ConfiguredAssetsBundle;
 import io.dropwizard.jdbi3.JdbiFactory;
@@ -9,15 +10,13 @@ import io.dropwizard.setup.Environment;
 
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.jdbi.v3.core.Jdbi;
-import uk.ac.susx.shl.micromacro.core.QueryFactory;
-import uk.ac.susx.shl.micromacro.core.QueryResultCache;
-import uk.ac.susx.shl.micromacro.core.WorkspaceFactory;
-import uk.ac.susx.shl.micromacro.core.Workspaces;
+import uk.ac.susx.shl.micromacro.core.*;
 import uk.ac.susx.shl.micromacro.jdbi.DatumDAO;
 import uk.ac.susx.shl.micromacro.jdbi.Method52DAO;
 import uk.ac.susx.shl.micromacro.core.data.text.PubMatcher;
 import uk.ac.susx.shl.micromacro.health.DefaultHealthCheck;
 import uk.ac.susx.shl.micromacro.resources.*;
+import uk.ac.susx.tag.method51.core.gson.GsonBuilderFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -46,15 +45,20 @@ public class MicroMacroApplication extends Application<MicroMacroConfiguration> 
         environment.servlets().setSessionHandler(new SessionHandler());
 
         environment.jersey().register(new JsonProcessingExceptionMapper(true));
-
-        Files.createDirectories(Paths.get("data"));
+        environment.jersey().register(GsonMessageBodyHandler.class);
 
         final JdbiFactory factory = new JdbiFactory();
-
         final Jdbi jdbi = factory.build(environment, configuration.getDataSourceFactory(), "postgresql");
 
-        final PubMatcher pubMatcher = new PubMatcher(false, false);
         final Method52DAO method52DAO = new Method52DAO(jdbi);
+
+        final Gson gson = GsonBuilderFactory.get()/*.registerTypeAdapterFactory(StreamTypeAdapter.get())*/.create();
+        final DatumDAO datumDAO = new DatumDAO(jdbi, method52DAO);
+
+        final QueryFactory queryFactory = new QueryFactory(method52DAO, gson);
+        Files.createDirectories(Paths.get("data"));
+
+        final PubMatcher pubMatcher = new PubMatcher(false, false);
 
         final PlacesResource places = new PlacesResource(configuration.geoJsonPath, pubMatcher);
         environment.jersey().register(places);
@@ -73,11 +77,7 @@ public class MicroMacroApplication extends Application<MicroMacroConfiguration> 
 
         environment.jersey().register(new Method52Resouce(method52DAO));
 
-        QueryResultCache cache = new QueryResultCache(configuration.resultsCachePath);
-
-        final DatumDAO datumDAO = new DatumDAO(jdbi, method52DAO);
-
-        final QueryFactory queryFactory = new QueryFactory(method52DAO);
+        QueryResultCache cache = new QueryResultCache(configuration.resultsCachePath, queryFactory);
 
         environment.jersey().register(new QueryResources(queryFactory, datumDAO, cache));
 

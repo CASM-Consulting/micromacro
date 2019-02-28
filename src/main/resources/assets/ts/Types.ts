@@ -7,4 +7,5 @@
     public static readonly STRING:Type<string> = Type.of('java.lang.String');
     public static readonly LIST:Type<Array<any>> = Type.of('java.util.List');
     public static readonly LONG:Type<number> = Type.of('java.lang.Long');
+    public static readonly BOOLEAN:Type<number> = Type.of('java.lang.Boolean');
 }

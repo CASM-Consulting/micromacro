@@ -3,16 +3,8 @@ type Obj = { [key: string]: any };
 class DatumFactory {
 
 
-    public static datum(rawData:Obj, rawKeys:Obj):Datum {
-        
-        const keys:Map<string,Key<any>> = new Map();
-
-        for(let i in rawKeys) {
-            const rawKey = rawKeys[i];
-            const key:Key<any> = DatumFactory.key(i, Type.from(rawKey.type));
-            keys.set(i, key);
-        }
-
+    public static datum(rawData:Obj, keys:Map<string,Key<any>>):Datum {
+      
         const data:Map<string,any> = new Map();
 
         for(let i in rawData.data) {
@@ -40,7 +32,7 @@ class DatumFactory {
         
     }
 
-    public static Type<T>(raw:Obj):Type<T> {
+    public static type<T>(raw:Obj):Type<T> {
     
         const clazz = raw['class'];
 
@@ -89,8 +81,11 @@ class DatumFactory {
             return obj;
         } else if(key.type.equals(Types.LONG)) {
             return obj;
+        }  else if(key.type.equals(Types.BOOLEAN)){
+            return obj;
+        } else {
+            // console.log("WARN: Unknown type - " + key.type.getKlass());
+            return obj;   
         }
-
-        throw "Unknown type " + key.type.getClazz();
     }
 }

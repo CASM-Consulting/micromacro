@@ -39,7 +39,7 @@
             </div>
 
 
-            <div ng-if="$ctrl.query.type=='proxy'">
+            <div ng-if="$ctrl.query._TYPE=='proxy'">
                 <label class="col-sm-12 control-label" >Target</label>
                 <div class="col-sm-12">
                     <input class="form-control" type="text"
@@ -76,10 +76,37 @@
             </div>
 
 
-            <div ng-if="$ctrl.query.type=='select'">
+            <div ng-if="$ctrl.query._TYPE=='select'">
+
+                <label class="col-sm-12 control-label">Partition</label>
+                <div class="col-sm-12">
+                    <input type="checkbox" class="form-control"
+                           ng-click="$ctrl.partitionSelect()">
+                </div>
+
+                <div ng-if="$ctrl.query.partition">
+
+                    <label class="col-sm-12 control-label">Partition Key</label>
+                    <div class="col-sm-12">
+                        <select class="form-control"
+                                ng-model="$ctrl.query.partition.partitionKey"
+                                ng-options="key as id for (id, key) in $ctrl.keys"></select>
+                    </div>
+
+
+                    <label class="col-sm-12 control-label">Function</label>
+                    <div class="col-sm-12">
+                        <select class="form-control"
+                                ng-model="$ctrl.query.partition.function">
+                            <option value="ROW_NUMBER">Row Number</option>
+                        </select>
+                    </div>
+
+                </div>
+
                 <label class="col-sm-12 control-label">Filter</label>
                 <div class="col-sm-12">
-                    <input class="form-control"
+                    <input type="text" class="form-control"
                            ng-model="$ctrl.query.filter">
                 </div>
                 <button type="button" class='btn btn-default col-sm-12' ng-click="addSelect()">Save</button>

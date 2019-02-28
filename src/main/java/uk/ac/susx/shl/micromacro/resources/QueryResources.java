@@ -39,9 +39,9 @@ public class QueryResources {
 
     @POST
     @Path("optimise/proxy")
-    public Response optimiseProxy(ProxyRep rep) throws SQLException {
+    public Response optimiseProxy(Proxy proxy) throws SQLException {
 
-        datumDAO.optimiseTable(queryFactory.proxy(rep));
+        datumDAO.optimiseTable(proxy);
 
         return Response.status(Response.Status.OK).entity(
                 "OK"
@@ -50,9 +50,9 @@ public class QueryResources {
 
     @POST
     @Path("optimise/select")
-    public Response optimiseSelect(SelectRep rep) throws SQLException {
+    public Response optimiseSelect(Select select) throws SQLException {
 
-        datumDAO.optimiseTable(queryFactory.select(rep));
+        datumDAO.optimiseTable(select);
 
         return Response.status(Response.Status.OK).entity(
                 "OK"
@@ -61,9 +61,9 @@ public class QueryResources {
 
     @POST
     @Path("select-distinct")
-    public Response selectDistinct(SelectDistinctRep rep) throws SQLException {
+    public Response selectDistinct(SelectDistinct selectDistinct) throws SQLException {
 
-        String sql = queryFactory.selectDistinct(rep).sql();
+        String sql = selectDistinct.sql();
 
         List<String> data = datumDAO.selectString(sql);
 
@@ -78,18 +78,18 @@ public class QueryResources {
                            @QueryParam("cacheOnly") @DefaultValue("false") Boolean cacheOnly,
                            @QueryParam("skip") Integer skip,
                            @QueryParam("limit") Integer limit,
-                           SelectRep rep) throws SQLException {
+                           final Select select) throws SQLException {
 
         Response response;
-        Select select = queryFactory.select(rep);
-        QueryResultCache.CachedQueryResult<SelectRep> cached = cache.cache(rep, () -> datumDAO.execute2Rep(select) );
+        QueryResultCache.CachedQueryResult<Select> cached = cache.cache(select, () -> datumDAO.execute2Rep(select) );
 
         if(cacheOnly) {
             response = Response.status(Response.Status.OK).entity( cached.count() ).build();
         } else if(skip != null && limit != null) {
             response = Response.status(Response.Status.OK).entity( cached.get(skip, skip+limit) ).build();
         } else {
-            response = Response.status(Response.Status.OK).entity( cached.stream() ).build();
+//            response = Response.status(Response.Status.OK).entity( StreamSupport.stream(cached.stream().spliterator(), false) ).build();
+            response = Response.status(Response.Status.OK).entity( StreamSupport.stream(cached.stream().spliterator(), false) ).build();
         }
         CompletableFuture<Response> promise = new CompletableFuture<>();
         promise.complete(response);
@@ -102,11 +102,11 @@ public class QueryResources {
     public void proxy(@Suspended final AsyncResponse asyncResponse,
                           @QueryParam("cacheOnly") @DefaultValue("false") Boolean cacheOnly,
                           @QueryParam("page") Integer page,
-                          ProxyRep proxyRep) throws SQLException {
+                          final Proxy proxy) throws SQLException {
 
         Response response;
-        Proxy proxy = queryFactory.proxy(proxyRep);
-        QueryResultCache.CachedQueryResult<ProxyRep> cached = cache.cache(proxyRep, () -> datumDAO.execute2Rep(proxy) , new QueryResultCache.ProxyPager());
+
+        QueryResultCache.CachedQueryResult<Proxy> cached = cache.cache(proxy, () -> datumDAO.execute2Rep(proxy) , new QueryResultCache.ProxyPager());
 
         if(cacheOnly) {
             response = Response.status(Response.Status.OK).entity( cached.count() ).build();
@@ -115,7 +115,7 @@ public class QueryResources {
 
             response = Response.status(Response.Status.OK).entity( cached.get(indices[0], indices[1]) ).build();
         } else {
-            response = Response.status(Response.Status.OK).entity( cached.stream() ).build();
+            response = Response.status(Response.Status.OK).entity( StreamSupport.stream(cached.stream().spliterator(), false) ).build();
         }
 
         CompletableFuture<Response> promise = new CompletableFuture<>();

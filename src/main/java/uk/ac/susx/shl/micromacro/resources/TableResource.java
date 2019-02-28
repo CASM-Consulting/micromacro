@@ -42,12 +42,10 @@ public class TableResource {
     @Path("schema")
     public Response listKeys(@QueryParam("table") String table) throws SQLException {
 
-        Gson gson = GsonBuilderFactory.get().create();
-
         KeySet keys = data.schema(table);
 
         return Response.status(Response.Status.OK).entity(
-                gson.toJson(keys)
+                keys
         ).build();
 
     }

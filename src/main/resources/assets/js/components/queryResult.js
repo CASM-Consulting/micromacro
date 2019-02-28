@@ -6,14 +6,8 @@ MicroMacroApp.component('queryResult', {
         result: '<',
         defaultKeys: '<'
     },
-    controller : function($scope, $state, $stateParams, Queries, Datums, Rows) {
+    controller : function($scope, $state, $stateParams, Queries, Datums, Rows, Types) {
         var $ctrl = this;
-
-        var LABEL = $ctrl.LABEL = 'uk.ac.susx.tag.method51.twitter.LabelDecision';
-        var STRING = $ctrl.STRING = 'java.lang.String';
-        var LIST = $ctrl.LIST = 'java.util.List';
-        var SPAN = $ctrl.SPAN = 'uk.ac.susx.tag.method51.core.meta.span.Spans';
-
 
         $ctrl.pageChange = function() {
             $state.go(".", {page:$ctrl.currentPage});
@@ -31,7 +25,7 @@ MicroMacroApp.component('queryResult', {
             $ctrl.totalItems = $ctrl.result.length;
             //alphabetical key list
             $ctrl.keyList = [];
-            for(var key in $ctrl.keys) {
+            for(var [key, value] of $ctrl.keys) {
                 $ctrl.keyList.push(key);
             }
             $ctrl.keyList.sort();
@@ -48,15 +42,15 @@ MicroMacroApp.component('queryResult', {
                     return false;
                 };
 
-                $ctrl.selectedKeys = ($stateParams.display || $ctrl.defaultKeys).reduce((keys, key) => {
-                    if($ctrl.keys[key].type.class == SPAN) {
-                        var target = findTarget(key);
+                $ctrl.selectedKeys = ($stateParams.display || $ctrl.defaultKeys).reduce((keys, keyName) => {
+                    if($ctrl.keys.get(keyName).type.equals(Types.SPANS)) {
+                        var target = findTarget(keyName);
                         if(target) {
                             keys[target] = true;
                         }
                     }
 
-                    keys[key] = true;
+                    keys[keyName] = true;
                     return keys;
                 }, {});
 
@@ -138,10 +132,10 @@ MicroMacroApp.component('queryResult', {
         var resolveDisplayKeys = function() {
 
             $ctrl.widths = {};
-            $ctrl.displayKeys = $ctrl.keyList.reduce((keys, key)=>{
-                if($ctrl.selectedKeys[key] && $ctrl.keys[key].type.class != SPAN) {
-                    keys.push(key);
-                    $ctrl.widths[key] = 20;
+            $ctrl.displayKeys = $ctrl.keyList.reduce((keys, keyName)=>{
+                if($ctrl.selectedKeys[keyName] && !$ctrl.keys.get(keyName).type.equals(Types.SPANS)) {
+                    keys.push(keyName);
+                    $ctrl.widths[keyName] = 20;
                 }
                 return keys;
             }, []);

@@ -4,6 +4,8 @@ package uk.ac.susx.shl.micromacro.resources;
 import uk.ac.susx.shl.micromacro.api.ProxyRep;
 import uk.ac.susx.shl.micromacro.api.SelectRep;
 import uk.ac.susx.shl.micromacro.core.*;
+import uk.ac.susx.tag.method51.core.data.store2.query.Proxy;
+import uk.ac.susx.tag.method51.core.data.store2.query.Select;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -94,11 +96,11 @@ public class WorkspaceResource {
     @Path("addProxy")
     public Response addProxy(@QueryParam("workspaceId") String workspaceId,
                              @QueryParam("queryId") String queryId,
-                             ProxyRep query) throws SQLException {
+                             Proxy proxy) throws SQLException {
 
         Workspace workspace = workspaces.get(workspaceId);
 
-        workspace.add(queryId, queryFactory.proxy(query));
+        workspace.add(queryId, proxy);
 
         workspaces.save(workspace);
 
@@ -111,11 +113,11 @@ public class WorkspaceResource {
     @Path("addSelect")
     public Response addSelect(@QueryParam("workspaceId") String workspaceId,
                              @QueryParam("queryId") String queryId,
-                             SelectRep query) throws SQLException {
+                             Select select) throws SQLException {
 
         Workspace workspace = workspaces.get(workspaceId);
 
-        workspace.add(queryId, queryFactory.select(query));
+        workspace.add(queryId, select);
 
         workspaces.save(workspace);
 

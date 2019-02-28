@@ -41,7 +41,7 @@ MicroMacroApp.factory("Queries", function($q, Server, $http) {
         execute : function(query, cacheOnly, skip, limit) {
             var params = {};
             params.cacheOnly = cacheOnly || false;
-            if(query.type=="proxy") {
+            if(query._TYPE=="proxy") {
                 if(skip !== undefined) {
                     params.page = skip;
                 }
@@ -54,7 +54,7 @@ MicroMacroApp.factory("Queries", function($q, Server, $http) {
                 }
             }
             return $q(function(resolve) {
-                var type = query.type;
+                var type = query._TYPE;
                 Server.post("api/query/"+type, query, {
                     params : params,
                     success : resolve
@@ -143,10 +143,10 @@ MicroMacroApp.factory("Queries", function($q, Server, $http) {
 
             query = angular.copy(query);
 
-            if(query.type == "select") {
+            if(query._TYPE == "select") {
                 query.limit = limit;
                 query.offset = offset;
-            } else if(query.type == "proxy") {
+            } else if(query._TYPE == "proxy") {
                 query.innerLimit = limit;
                 query.innerOffset = offset;
 //                query.outerLimit = block;

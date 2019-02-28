@@ -9,7 +9,7 @@
 
     <label class="col-sm-12 control-label" for="literal-key">Key</label>
     <select class="form-control" id="literal-key"
-            ng-options="id as id for (id, key) in $ctrl.keys"
+            ng-options="key as id for (id, key) in $ctrl.keys"
             ng-model="key"
     ></select>
 
