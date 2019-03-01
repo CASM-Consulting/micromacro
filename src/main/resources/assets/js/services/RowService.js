@@ -52,7 +52,7 @@ MicroMacroApp.factory("Rows", function(Types, Datums) {
 
                 var spans = datum.resolve(key);
 
-                var target = datum.get(keyName).target.key();
+                var target = spans.target.key();
 
                 if(! (target in columns) ) {
                     console.log("span target not present!");

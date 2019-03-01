@@ -40,8 +40,11 @@
     }
 
     public with<T>(key:Key<T>, value:T):Datum {
+
+        let newData = new Map(this.data);
+        let newKeys = new Map(this.keys);
         
-        let datum:Datum = new Datum(this.data.set(key.key(),value), this.keys.set(key.key(), key));
+        let datum:Datum = new Datum(newData.set(key.key(),value), newKeys.set(key.key(), key));
 
         return datum;
     }
