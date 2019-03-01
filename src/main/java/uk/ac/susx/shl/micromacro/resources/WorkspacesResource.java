@@ -1,7 +1,6 @@
 package uk.ac.susx.shl.micromacro.resources;
 
 
-import uk.ac.susx.shl.micromacro.api.ProxyRep;
 import uk.ac.susx.shl.micromacro.api.WorkspaceRep;
 import uk.ac.susx.shl.micromacro.core.*;
 

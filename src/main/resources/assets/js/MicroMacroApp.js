@@ -88,7 +88,7 @@ MicroMacroApp.directive('invertedCheckbox', function ()
         },
         link: function (scope, elm, attrs)
         {
-            var onChange =
+//            var onChange =
             elm.prop("checked",!scope.model[scope.key]);
             elm.change(function() {
                 scope.model[scope.key] = !this.checked;

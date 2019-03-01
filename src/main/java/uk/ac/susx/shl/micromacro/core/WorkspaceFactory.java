@@ -1,6 +1,5 @@
 package uk.ac.susx.shl.micromacro.core;
 
-import uk.ac.susx.shl.micromacro.api.AbstractDatumQueryRep;
 import uk.ac.susx.shl.micromacro.api.QueryRep;
 import uk.ac.susx.shl.micromacro.api.WorkspaceRep;
 import uk.ac.susx.tag.method51.core.data.store2.query.DatumQuery;

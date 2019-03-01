@@ -81,7 +81,7 @@ MicroMacroApp.config(function($stateProvider){
         },
         resolve: {
             result: function(query, Queries) {
-                return Queries.execute(Queries.limitOffset(query, 1000));
+                return Queries.execute(Queries.limitOffset(query, 100));
             },
             defaultKeys : function(Queries, $stateParams) {
                 return Queries.getKeys($stateParams.workspaceId, $stateParams.queryId);

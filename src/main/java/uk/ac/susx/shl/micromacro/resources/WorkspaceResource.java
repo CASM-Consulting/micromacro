@@ -1,8 +1,6 @@
 package uk.ac.susx.shl.micromacro.resources;
 
 
-import uk.ac.susx.shl.micromacro.api.ProxyRep;
-import uk.ac.susx.shl.micromacro.api.SelectRep;
 import uk.ac.susx.shl.micromacro.core.*;
 import uk.ac.susx.tag.method51.core.data.store2.query.Proxy;
 import uk.ac.susx.tag.method51.core.data.store2.query.Select;

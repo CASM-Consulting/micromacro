@@ -32,6 +32,11 @@ MicroMacroApp.factory("Rows", function(Types, Datums) {
                     type : 'long',
                     text : datum.get(key)
                 };
+            } else {
+                columns[keyName] = {
+                    type : 'text',
+                    text : datum.get(key)
+                };
             }
         });
 

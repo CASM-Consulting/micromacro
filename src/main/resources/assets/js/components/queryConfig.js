@@ -28,6 +28,10 @@ MicroMacroApp.component('queryConfig', {
             $ctrl.query.literals = $ctrl.query.literals || {};
             $scope.queryVer = $stateParams.ver;
 //            $ctrl.notes = JSON.parse($ctrl.notes || "[]");
+
+            if($ctrl.query._TYPE=='select' && !$ctrl.query.orderBy) {
+                $ctrl.query.orderBy = [];
+            }
         };
 
         $scope.execute = () => {
