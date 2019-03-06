@@ -27,7 +27,7 @@ public class QueryResultCache {
 
     private final DB db;
 
-    private final Map<Map, String> queryIds;
+    private final Map<String, String> queryIds;
 
     private final QueryFactory queryFactory;
 
@@ -62,11 +62,14 @@ public class QueryResultCache {
 
     public <T extends DatumQuery> String getQueryId(T query) {
         String id;
-        if(queryIds.containsKey(query)) {
-            id = queryIds.get(query);
+        String sql = query.sql();
+
+        if(queryIds.containsKey(sql)) {
+            id = queryIds.get(sql);
         } else {
             id = UUID.randomUUID().toString();
-            queryIds.put(queryFactory.rep(query), id);
+            queryIds.put(sql, id);
+            db.commit();
         }
         return id;
     }

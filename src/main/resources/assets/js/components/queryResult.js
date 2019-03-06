@@ -103,15 +103,13 @@ MicroMacroApp.component('queryResult', {
                 updateData();
             });
 
-
-            Queries.execute($ctrl.query, true).then( (count)=> {
-                $ctrl.totalItems = count;
-//                $ctrl.result = $ctrl.result.concat(moreData);
-//                if(isProxy()) {
-//                    $ctrl.pages = Queries.binProxyResultByPartition($ctrl.result, $ctrl.query.partitionKey);
-//                }
-            });
         };
+
+        $ctrl.cacheResults  = () => {
+            Queries.execute($ctrl.query, true).then( (count) => {
+                $ctrl.totalItems = count;
+            });
+        }
 
         $ctrl.$postLink = () => {
 //            spinnerService.show('booksSpinner');
@@ -159,7 +157,7 @@ MicroMacroApp.component('queryResult', {
 
                 var skip = ($ctrl.currentPage - 1) * $ctrl.numPerPage;
                 var limit = $ctrl.numPerPage;
-                if($ctrl.result[skip] && $ctrl.result[skip+limit]) {
+                if($ctrl.result[skip] && $ctrl.result[skip+limit-1]) {
                     $ctrl.page = Rows.getRowsColumns($ctrl.result.slice(skip, skip+limit), $ctrl.keys, $ctrl.selectedKeys);
                 } else {
                     Queries.execute($ctrl.query, false, skip, limit).then( (data)=> {

@@ -120,10 +120,17 @@
                     <input type="text" class="form-control"
                            ng-model="$ctrl.query.filter">
                 </div>
+
+                <!--<label class="col-sm-12 control-label">Limit</label>-->
+                <!--<div class="col-sm-12">-->
+                    <!--<input type="number" min="0" class="form-control"-->
+                           <!--ng-model="$ctrl.query.limit">-->
+                <!--</div>-->
+
                 <button type="button" class='btn btn-default col-sm-12' ng-click="addSelect()">Save</button>
             </div>
 
-            <button type="button" class='btn btn-default col-sm-12' ui-sref="^.query.execute({page:1})">Execute</button>
+            <button type="button" class='btn btn-default col-sm-12' ng-click="$ctrl.execute()" >Execute</button>
 
         </div>
     </form>

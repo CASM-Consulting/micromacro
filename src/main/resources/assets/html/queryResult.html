@@ -10,6 +10,9 @@
     </div>
 
     <div>{{$ctrl.totalItems}}</div>
+
+    <div><button class="btn btn-default" ng-click="$ctrl.cacheResults()">More Results</button></div>
+
     <div uib-pagination
             ng-change="$ctrl.pageChange()"
             ng-model="$ctrl.currentPage"
