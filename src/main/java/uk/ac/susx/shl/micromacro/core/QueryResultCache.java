@@ -139,7 +139,7 @@ public class QueryResultCache {
             AtomicInteger i = new AtomicInteger(0);
             AtomicReference<int[]> pageIndices = new AtomicReference<>(null);
             return (DatumRep d) -> {
-                String partition = d.data.get(proxyRep.partitionKey()).toString();
+                String partition = d.data.get(proxyRep.partitionKey().toString()).toString();
                 if(!partition.equals(partitionId.get())) {
                     if(pageIndices.get() == null) {
                         pageIndices.getAndSet(new int[]{0,0});

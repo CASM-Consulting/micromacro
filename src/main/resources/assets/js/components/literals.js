@@ -4,22 +4,22 @@ MicroMacroApp.component("literals", {
         literals : '<',
         keys : '<'
     },
-    controller : function($scope, Tables) {
+    controller : function(Tables) {
         var $ctrl = this;
 
-        $scope.addLiteral = function() {
-            $ctrl.literals[$scope.letter] = {
-                key: $scope.key,
-                type: $scope.type,
-                args: $scope.args
+        $ctrl.addLiteral = function() {
+            $ctrl.literals[$ctrl.letter] = {
+                key: $ctrl.key,
+                type: $ctrl.type,
+                args: $ctrl.args
             };
         };
 
-        $scope.setLiteral = function(letter, literal) {
-            $scope.letter = letter;
-            $scope.key = literal.key;
-            $scope.type = literal.type;
-            $scope.args = literal.args;
+        $ctrl.setLiteral = function(letter, literal) {
+            $ctrl.letter = letter;
+            $ctrl.key = literal.key;
+            $ctrl.type = literal.type;
+            $ctrl.args = literal.args;
         };
 
     }

@@ -31,6 +31,8 @@ MicroMacroApp.component('queryConfig', {
 
             if($ctrl.query._TYPE=='select' && !$ctrl.query.orderBy) {
                 $ctrl.query.orderBy = [];
+            } else if($ctrl.query._TYPE=='proxy' && !$ctrl.query.orderBy) {
+                $ctrl.query.orderBy = {};
             }
 
             $ctrl.query.limit = $ctrl.query.limit || 0;

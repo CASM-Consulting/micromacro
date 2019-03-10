@@ -40,6 +40,12 @@
 
 
             <div ng-if="$ctrl.query._TYPE=='proxy'">
+                <label class="col-sm-12 control-label" >Table Where</label>
+                <div class="col-sm-12">
+                    <input class="form-control" type="text"
+                           ng-model="$ctrl.query.tableWhere">
+                </div>
+
                 <label class="col-sm-12 control-label" >Target</label>
                 <div class="col-sm-12">
                     <input class="form-control" type="text"
@@ -56,14 +62,14 @@
                 <div class="col-sm-12">
                     <select class="form-control"
                             ng-model="$ctrl.query.partitionKey"
-                            ng-options="key as id for (id, key) in $ctrl.keys track by (key.namespace + key.name)"></select>
+                            ng-options="key as id for (id, key) in $ctrl.keys track by ((key.namespace || '') + key.name)"></select>
                 </div>
 
                 <label class="col-sm-12 control-label">Order By</label>
                 <div class="col-sm-12">
                     <select class="form-control"
-                            ng-model="$ctrl.query.orderBy"
-                            ng-options="key as id for (id, key) in $ctrl.keys track by (key.namespace + key.name)"></select>
+                            ng-model="$ctrl.query.orderBy.key"
+                            ng-options="key as id for (id, key) in $ctrl.keys track by ((key.namespace || '') + key.name)"></select>
                 </div>
 
                 <label class="col-sm-12 control-label">Proximity</label>
@@ -82,7 +88,7 @@
                 <div ng-repeat="ob in $ctrl.query.orderBy" class="col-sm-12">
                     <select class="form-control"
                             ng-model="ob.key"
-                            ng-options="key as id for (id, key) in $ctrl.keys track by (key.namespace + key.name)"></select>
+                            ng-options="key as id for (id, key) in $ctrl.keys track by ((key.namespace || '') + key.name)"></select>
                     <span><a href ng-click="$ctrl.query.orderBy.splice($index,1)">-</a></span>
                 </div>
 
@@ -101,7 +107,7 @@
                     <div class="col-sm-12">
                         <select class="form-control"
                                 ng-model="$ctrl.query.partition.partitionKey"
-                                ng-options="key as id for (id, key) in $ctrl.keys track by (key.namespace + key.name)"></select>
+                                ng-options="key as id for (id, key) in $ctrl.keys track by ((key.namespace || '') + key.name)"></select>
                     </div>
 
 
