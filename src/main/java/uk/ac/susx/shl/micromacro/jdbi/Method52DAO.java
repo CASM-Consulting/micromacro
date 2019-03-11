@@ -5,7 +5,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.Jdbi;
-import org.postgresql.util.PSQLException;
 import uk.ac.susx.tag.method51.core.data.PostgreSQLConnection;
 import uk.ac.susx.tag.method51.core.data.PostgresUtils;
 import uk.ac.susx.tag.method51.core.data.StoreException;
@@ -19,11 +18,14 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.logging.Logger;
 
 /**
  * Created by sw206 on 12/09/2018.
  */
 public class Method52DAO {
+
+    private static final Logger LOG = Logger.getLogger(Method52DAO.class.getName());
 
     private final Jdbi jdbi;
 
@@ -47,14 +49,38 @@ public class Method52DAO {
 
         try (Handle handle  = jdbi.open()) {
             Connection con = handle.getConnection();
-            //no need to close - hadle does it
+            //no need to close - handle does it
             JsonElement keysMeta = gson.fromJson(PostgresUtils.getComment(con, table), JsonObject.class).get("keys");
 
             KeySet keys = gson.fromJson(keysMeta, KeySet.class);
 
             return keys;
         } catch (SQLException e) {
+            LOG.warning(e.getMessage());
+            return KeySet.of();
+        }
+    }
 
+    public KeySet addKey(String table, Key key) {
+
+        Gson gson = GsonBuilderFactory.get().create();
+
+        try (Handle handle  = jdbi.open()) {
+            Connection con = handle.getConnection();
+            //no need to close - hadle does it
+            JsonObject tableMeta = gson.fromJson(PostgresUtils.getComment(con, table), JsonObject.class);
+
+            KeySet keys = gson.fromJson(tableMeta.get("keys"), KeySet.class);
+
+            keys = keys.with(key);
+
+            tableMeta.add("keys", gson.toJsonTree(keys, KeySet.class));
+
+            PostgresUtils.setComment(con, table, gson.toJson(tableMeta));
+
+            return keys;
+        } catch (SQLException e) {
+            LOG.warning(e.getMessage());
             return KeySet.of();
         }
     }

@@ -1,26 +1,57 @@
 <div>
 
-    <div class="btn-group">
-        <label class="btn btn-primary"
-               ng-repeat="key in $ctrl.keyList"
-               ng-model="$ctrl.selectedKeys[key]"
-               uib-btn-checkbox>
-            {{key}}
-        </label>
+    <div class="row">
+
+        <div class="btn-group ">
+            <label class="btn btn-primary"
+                   ng-repeat="key in $ctrl.keyList"
+                   ng-model="$ctrl.selectedKeys[key]"
+                   uib-btn-checkbox>
+                {{key}}
+            </label>
+        </div>
     </div>
 
-    <div>{{$ctrl.totalItems}}</div>
+    <!--<div>{{$ctrl.totalItems}}</div>-->
 
-    <div><button class="btn btn-default" ng-click="$ctrl.cacheResults()">More Results</button></div>
-
-    <div uib-pagination
-            ng-change="$ctrl.pageChange()"
-            ng-model="$ctrl.currentPage"
-            total-items="$ctrl.totalItems"
-            items-per-page="$ctrl.numPerPage"
-            max-size="10"
-            boundary-links="true">
+    <div class="row">
+        <div class="col-sm-5">
+            <span ng-if="$ctrl.query.isCached">
+                <input class="form-control"
+                       type="text"
+                       ng-model="$ctrl.annotate.key"
+                       placeholder="namespace/name"
+                       uib-typeahead="key for key in $ctrl.keyList | filter:$viewValue">
+                <input class="form-control"
+                       type="text"
+                       ng-model="$ctrl.annotate.type"
+                       placeholder="type"
+                       uib-typeahead="type for type in $ctrl.typeList | filter:$viewValue">
+                <input class="form-control" type="text" ng-model="$ctrl.annotate.value" placeholder="value">
+                <button class="btn btn-primary" ng-click="$ctrl.annotateQuery()">Annotate Selection</button>
+            </span>
+            <span ng-if="!$ctrl.query.isCached"><button class="btn btn-default" ng-click="$ctrl.cacheResults()">More Results</button></span>
+        </div>
     </div>
+
+
+    <div class="row">
+        <span class="col-md-2">
+            <input class="form-control" ng-model="$ctrl.currentPage">
+        </span>
+    </div>
+
+    <div class="row">
+        <span class="col-md-12" uib-pagination
+              ng-change="$ctrl.pageChange()"
+              ng-model="$ctrl.currentPage"
+              total-items="$ctrl.totalItems"
+              items-per-page="$ctrl.numPerPage"
+              max-size="10"
+              boundary-link-numbers="true">
+        </span>
+    </div>
+
 
     <div class="table">
 
@@ -33,43 +64,22 @@
             <tbody>
             <tr ng-repeat="row in $ctrl.page">
                 <td ng-repeat="key in $ctrl.displayKeys" style="width:{{$ctrl.widths[key]}}%">
-                    <div ng-include="'cell.html'" ng-init="COL_FIELD = row[key]"></div>
+                    <div>
+                        <div ng-if="row[key].type=='spans'">
+                            <div>
+                                <span-text spanss="row[key]"> </span-text>
+                            </div>
+                        </div>
+
+                        <div ng-if="COL_FIELD.type!='spans'" >
+                            {{row[key].text}}
+                        </div>
+                    </div>
                 </td>
             </tr>
             </tbody>
         </table>
     </div>
 
-    <!--<div ui-grid="$ctrl.gridOptions"-->
-         <!--class="results-table"-->
-         <!--ui-grid-auto-resize-->
-         <!--ui-grid-resize-columns></div>-->
 
-    <!--<div ng-repeat="datum in page" class="row">-->
-
-        <!--&lt;!&ndash;<div class="col-md-1">{{result.id}}</div>&ndash;&gt;-->
-
-        <!--<row datum="datum"-->
-             <!--selected-keys="selectedKeys"-->
-             <!--widths="widths"-->
-             <!--key-list="keyList"-->
-             <!--keys="$ctrl.keys"-->
-        <!--&gt;</row>-->
-
-    <!--</div>-->
-
-    <script type="text/ng-template" id="cell.html">
-        <!-- <div class="ui-grid-cell-contents"> -->
-        <div>
-            <div ng-if="COL_FIELD.type=='spans'">
-                <div>
-                    <span-text spanss="COL_FIELD"> </span-text>
-                </div>
-            </div>
-
-            <div ng-if="COL_FIELD.type!='spans'" >
-                {{COL_FIELD.text}}
-            </div>
-        </div>
-    </script>
 </div>

@@ -5,6 +5,9 @@ MicroMacroApp.factory("Types", function() {
         STRING : Types.STRING,
         LIST : Types.LIST,
         LONG : Types.LONG,
-        BOOLEAN : Types.BOOLEAN
+        DOUBLE : Types.DOUBLE,
+        BOOLEAN : Types.BOOLEAN,
+        DATE : Types.DATE,
+        DATE2 : Types.DATE2
     }
 });

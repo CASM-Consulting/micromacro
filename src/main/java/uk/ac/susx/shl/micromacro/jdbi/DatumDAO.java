@@ -8,6 +8,7 @@ import uk.ac.susx.tag.method51.core.data.store2.query.DatumQuery;
 import uk.ac.susx.tag.method51.core.data.store2.query.Index;
 import uk.ac.susx.tag.method51.core.data.store2.query.Proxy;
 import uk.ac.susx.tag.method51.core.meta.Datum;
+import uk.ac.susx.tag.method51.core.meta.Key;
 import uk.ac.susx.tag.method51.core.meta.KeySet;
 
 import java.sql.SQLException;
@@ -41,6 +42,15 @@ public class DatumDAO {
         );
     }
 
+    public <T extends DatumQuery> int executeUpdate(T query) throws SQLException {
+
+        String table = query.table();
+
+        String sql = query.sql();
+
+        return jdbi.withHandle( handle -> handle.createUpdate(sql).execute() );
+    }
+
 
     public <T extends DatumQuery> Stream<DatumRep> execute2Rep(T query) {
         KeySet keys = method52DAO.schema(query.table());
@@ -71,5 +81,8 @@ public class DatumDAO {
         }
     }
 
+    public void addKey(String table, Key key) {
+        method52DAO.addKey(table, key);
+    }
 }
 

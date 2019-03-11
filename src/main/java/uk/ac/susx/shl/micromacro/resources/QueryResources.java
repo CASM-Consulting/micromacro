@@ -1,26 +1,18 @@
 package uk.ac.susx.shl.micromacro.resources;
 
 
-import uk.ac.susx.shl.micromacro.api.*;
-import uk.ac.susx.shl.micromacro.core.QueryFactory;
 import uk.ac.susx.shl.micromacro.core.QueryResultCache;
 import uk.ac.susx.shl.micromacro.jdbi.DatumDAO;
 import uk.ac.susx.tag.method51.core.data.store2.query.*;
-import uk.ac.susx.tag.method51.core.meta.Datum;
 
 import javax.ws.rs.*;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.ObjectInputStream;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 @Path("query")
@@ -118,5 +110,33 @@ public class QueryResources {
         CompletableFuture<Response> promise = new CompletableFuture<>();
         promise.complete(response);
         promise.thenAccept(asyncResponse::resume).thenRun(cached::close);
+    }
+
+    @POST
+    @Path("selectUpdate")
+    public void update(@Suspended final AsyncResponse asyncResponse,
+            final Update update) throws SQLException {
+
+        Response response = Response.status(Response.Status.OK).entity( datumDAO.executeUpdate(update) ).build();
+
+        CompletableFuture<Response> promise = new CompletableFuture<>();
+        promise.complete(response);
+        promise.thenAccept(asyncResponse::resume).thenRun(() -> {
+            datumDAO.addKey(update.table(), update.key());
+        });
+    }
+
+    @POST
+    @Path("proxyUpdate")
+    public void proxyUpdate(@Suspended final AsyncResponse asyncResponse,
+                            final ProxyUpdate update) throws SQLException {
+
+        Response response = Response.status(Response.Status.OK).entity( datumDAO.executeUpdate(update) ).build();
+
+        CompletableFuture<Response> promise = new CompletableFuture<>();
+        promise.complete(response);
+        promise.thenAccept(asyncResponse::resume).thenRun(() -> {
+            datumDAO.addKey(update.table(), update.key());
+        });
     }
 }

@@ -9,6 +9,12 @@ MicroMacroApp.component('queryResult', {
     controller : function($scope, $state, $stateParams, Queries, Datums, Rows, Types) {
         var $ctrl = this;
 
+        $ctrl.typeList = [];
+        for(var key in Types) {
+            $ctrl.typeList.push(key);
+        }
+        $ctrl.typeList.sort();
+
         $ctrl.pageChange = function() {
             $state.go(".", {page:$ctrl.currentPage});
         };
@@ -16,9 +22,8 @@ MicroMacroApp.component('queryResult', {
         $ctrl.widths = {};
 
         $ctrl.page = [];
-        $ctrl.currentPage = 1;
+//        $ctrl.currentPage = 1;
         $ctrl.numPerPage = 10;
-        $ctrl.maxSize = 10;
 
         $ctrl.$onInit = function() {
 
@@ -110,6 +115,8 @@ MicroMacroApp.component('queryResult', {
                 }
             });
 
+            $ctrl.annotate = {};
+
         };
 
         $ctrl.cacheResults  = () => {
@@ -172,6 +179,19 @@ MicroMacroApp.component('queryResult', {
                     });
                 }
             }
+        };
+
+        $ctrl.annotateQuery = function() {
+
+            var updateQuery = angular.copy($ctrl.query);
+            var type = Types[$ctrl.annotate.type];
+
+            updateQuery.key = DatumFactory.key($ctrl.annotate.key, type);
+            updateQuery.value = $ctrl.annotate.value;
+
+            updateQuery._TYPE += "Update";
+
+            Queries.execute(updateQuery);
         };
 
     }
