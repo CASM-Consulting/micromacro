@@ -160,7 +160,7 @@ MicroMacroApp.component('queryResult', {
                 if($ctrl.result[skip] && $ctrl.result[skip+limit-1]) {
                     $ctrl.page = Rows.getRowsColumns($ctrl.result.slice(skip, skip+limit), $ctrl.keys, $ctrl.selectedKeys);
                 } else {
-                    Queries.execute($ctrl.query, false, skip, limit).then( (data)=> {
+                    Queries.execute($ctrl.query, false, $ctrl.currentPage - 1).then( (data)=> {
                         $ctrl.page = Rows.getRowsColumns(data, $ctrl.keys, $ctrl.selectedKeys);
                     });
                 }
