@@ -77,9 +77,9 @@ public class MicroMacroApplication extends Application<MicroMacroConfiguration> 
 
         environment.jersey().register(new Method52Resouce(method52DAO));
 
-        QueryResultCache cache = new QueryResultCache(configuration.resultsCachePath, queryFactory);
+        QueryResultCache cache = new QueryResultCache(configuration.resultsCachePath);
 
-        environment.jersey().register(new QueryResources(queryFactory, datumDAO, cache));
+        environment.jersey().register(new QueryResources(datumDAO, cache));
 
         environment.jersey().register(new TableResource(method52DAO));
 
@@ -89,7 +89,7 @@ public class MicroMacroApplication extends Application<MicroMacroConfiguration> 
 
         environment.jersey().register(new WorkspacesResource(workspaces, workspaceFactory));
 
-        environment.jersey().register(new WorkspaceResource(workspaces, queryFactory));
+        environment.jersey().register(new WorkspaceResource(workspaces, queryFactory, cache));
     }
 
 }

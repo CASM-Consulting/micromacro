@@ -29,9 +29,7 @@ public class QueryResultCache {
 
     private final Map<String, String> queryIds;
 
-    private final QueryFactory queryFactory;
-
-    public QueryResultCache(Path queryCachePath, QueryFactory queryFactory) {
+    public QueryResultCache(Path queryCachePath) {
 
         db = DBMaker
                 .fileDB(queryCachePath.toFile())
@@ -41,8 +39,6 @@ public class QueryResultCache {
                 .closeOnJvmShutdown()
 //                .readOnly()
                 .make();
-
-        this.queryFactory = queryFactory;
 
         queryIds = db.hashMap("queryIds", Serializer.ELSA, Serializer.STRING).createOrOpen();
     }
@@ -57,6 +53,12 @@ public class QueryResultCache {
 
         CachedQueryResult cached = new CachedQueryResult<>(query, resultSupplier, pager);
 
+        return cached;
+    }
+
+    public <T extends DatumQuery> boolean isCached(T query) {
+        String id = getQueryId(query);
+        boolean cached = db.atomicBoolean(id +"-cached").createOrOpen().get();
         return cached;
     }
 

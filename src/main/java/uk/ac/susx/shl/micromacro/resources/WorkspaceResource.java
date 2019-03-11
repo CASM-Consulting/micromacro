@@ -9,6 +9,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.sql.SQLException;
+import java.util.Map;
 
 @Path("workspace")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -17,10 +18,12 @@ public class WorkspaceResource {
 
     private final Workspaces workspaces;
     private final QueryFactory queryFactory;
+    private final QueryResultCache cache;
 
-    public WorkspaceResource(Workspaces workspaces, QueryFactory queryFactory) {
+    public WorkspaceResource(Workspaces workspaces, QueryFactory queryFactory, QueryResultCache cache) {
         this.workspaces = workspaces;
         this.queryFactory = queryFactory;
+        this.cache = cache;
     }
 
 
@@ -64,14 +67,20 @@ public class WorkspaceResource {
     public Response loadQuery(@QueryParam("workspaceId") String workspaceId,
                              @QueryParam("queryId") String queryId,
                              @QueryParam("ver") int ver
-    ) throws SQLException {
+    ) {
 
         Workspace workspace = workspaces.get(workspaceId);
 
         Query query = workspace.queries().get(queryId);
 
+        Map rep = queryFactory.rep(query.get(ver));
+
+        boolean isCached = cache.isCached(query.get(ver));
+
+        rep.put("isCached", isCached);
+
         return Response.status(Response.Status.OK).entity(
-                queryFactory.rep(query.get(ver))
+            rep
         ).build();
     }
 

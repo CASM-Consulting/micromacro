@@ -17,6 +17,7 @@ MicroMacroApp.component('workspace', {
                 } else {
                     $state.go('workspace.query', {workspaceId:$stateParams.workspaceId, queryId: name});
                 }
+//                $state.go('workspace.query', {workspaceId:$stateParams.workspaceId, queryId: name});
             }
 
             $ctrl.optimise = (query) => {

@@ -49,7 +49,7 @@ MicroMacroApp.config(function($stateProvider){
                 return Tables.schema(query.table);
             },
             notes : function(Queries, $stateParams) {
-                return Queries.getMeta($stateParams.workspaceId, $stateParams.queryId, "notes"/*, "json", []*/);
+                return Queries.getMeta($stateParams.workspaceId, $stateParams.queryId, "notes");
             }
         },
         views : {
@@ -66,9 +66,15 @@ MicroMacroApp.config(function($stateProvider){
     });
 
     $stateProvider.state('workspace.query.execute', {
-        url: '/execute/{page:int}?{selected:string}',
+        url: '/execute/{page:int}?{selected:string}&{sampleSize:int}',
         params : {
-            page : {dynamic:true},
+            page : {
+                dynamic:true,
+                value:100
+            },
+            page : {
+                dynamic:true
+            },
             selected : {
                 dynamic:true,
                 array:true
@@ -80,8 +86,8 @@ MicroMacroApp.config(function($stateProvider){
             }
         },
         resolve: {
-            result: function(query, Queries) {
-                return Queries.execute(Queries.limitOffset(query, 100));
+            result: function(query, Queries, $stateParams) {
+                return Queries.execute(Queries.limitOffset(query, $stateParams.sampleSize));
             },
             defaultKeys : function(Queries, $stateParams) {
                 return Queries.getKeys($stateParams.workspaceId, $stateParams.queryId);

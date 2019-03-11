@@ -38,21 +38,7 @@ MicroMacroApp.factory("Queries", function($q, Server, $http) {
             });
         },
 
-        execute : function(query, cacheOnly, skip, limit) {
-            var params = {};
-            params.cacheOnly = cacheOnly || false;
-            if(query._TYPE=="proxy") {
-                if(skip !== undefined) {
-                    params.page = skip;
-                }
-            } else {
-                if(skip !== undefined) {
-                    params.skip = skip;
-                }
-                if(limit !== undefined) {
-                    params.limit = limit;
-                }
-            }
+        execute : function(query, params) {
             return $q(function(resolve) {
                 var type = query._TYPE;
                 Server.post("api/query/"+type, query, {

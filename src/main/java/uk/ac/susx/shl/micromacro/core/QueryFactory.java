@@ -25,9 +25,7 @@ public class QueryFactory {
 
     public DatumQuery query(Map rep) {
 
-        String type = (String)rep.get(TYPE);
-
-        rep.remove(TYPE);
+        String type = (String)rep.remove(TYPE);
 
         String json = gson.toJson(rep);
 

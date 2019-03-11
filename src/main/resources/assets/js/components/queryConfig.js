@@ -36,12 +36,9 @@ MicroMacroApp.component('queryConfig', {
             }
 
             $ctrl.query.limit = $ctrl.query.limit || 0;
-        };
+            $ctrl.sampleSize = $ctrl.sampleSize || 100;
 
-        $scope.execute = () => {
-            Queries.execute($scope.$ctrl.query).then(function(data){
-                $scope.results = data;
-            });
+
         };
 
         $scope.addProxy = () => {
@@ -82,20 +79,12 @@ MicroMacroApp.component('queryConfig', {
             }
         };
 
-        $ctrl.execute = () => {
-            if($state.$current.name == "workspace.query.execute") {
-                $state.transitionTo(".",
-                    {queryId:$ctrl.queryId, page:$stateParams.page || 1},
-                    {reload: true, inherit:true, relative: $state.$current}
-                );
-            } else {
-                $state.transitionTo(".execute",
-                    {queryId:$ctrl.queryId, page:$stateParams.page || 1},
-                    {reload: true, inherit:true, relative: $state.$current}
-                );
-            }
+        $ctrl.execute = (sampleSize) => {
+            $state.transitionTo("workspace.query.execute",
+                {queryId:$ctrl.queryId, page:$stateParams.page || 1, sampleSize:sampleSize},
+                {reload: true, inherit:true, relative: $state.$current}
+            );
         }
-
     }
 });
 

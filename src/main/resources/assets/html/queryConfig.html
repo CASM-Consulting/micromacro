@@ -135,8 +135,8 @@
 
                 <button type="button" class='btn btn-default col-sm-12' ng-click="addSelect()">Save</button>
             </div>
-
-            <button type="button" class='btn btn-default col-sm-12' ng-click="$ctrl.execute()" >Execute</button>
+            <input type="number" class="form-control" ng-model="$ctrl.sampleSize">
+            <button type="button" class='btn btn-default col-sm-12' ng-click="$ctrl.execute($ctrl.sampleSize)" >Sample</button>
 
         </div>
     </form>

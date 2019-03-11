@@ -27,12 +27,10 @@ import java.util.stream.StreamSupport;
 @Produces(MediaType.APPLICATION_JSON)
 public class QueryResources {
 
-    private final QueryFactory queryFactory;
     private final DatumDAO datumDAO;
     private final QueryResultCache cache;
 
-    public QueryResources(QueryFactory queryFactory, DatumDAO datumDAO, QueryResultCache cache) {
-        this.queryFactory = queryFactory;
+    public QueryResources(DatumDAO datumDAO, QueryResultCache cache) {
         this.datumDAO = datumDAO;
         this.cache = cache;
     }
@@ -78,7 +76,7 @@ public class QueryResources {
                            @QueryParam("cacheOnly") @DefaultValue("false") Boolean cacheOnly,
                            @QueryParam("skip") Integer skip,
                            @QueryParam("limit") Integer limit,
-                           final Select select) throws SQLException {
+                           final Select select) {
 
         Response response;
         QueryResultCache.CachedQueryResult<Select> cached = cache.cache(select, () -> datumDAO.execute2Rep(select) );
@@ -88,7 +86,6 @@ public class QueryResources {
         } else if(skip != null && limit != null) {
             response = Response.status(Response.Status.OK).entity( cached.get(skip, skip+limit) ).build();
         } else {
-//            response = Response.status(Response.Status.OK).entity( StreamSupport.stream(cached.stream().spliterator(), false) ).build();
             response = Response.status(Response.Status.OK).entity( StreamSupport.stream(cached.stream().spliterator(), false) ).build();
         }
         CompletableFuture<Response> promise = new CompletableFuture<>();

@@ -70,7 +70,7 @@ MicroMacroApp.component('queryResult', {
                 $scope.$watchCollection("$ctrl.selectedKeys", function(selected, old){
                     var urlKeys = [];
 
-                    angular.forEach($ctrl.selectedKeys, (selected, key)=> {
+                    angular.forEach($ctrl.selectedKeys, (selected, key) => {
                         if(selected) {
                             urlKeys.push(key);
                         }
@@ -98,15 +98,22 @@ MicroMacroApp.component('queryResult', {
                 $ctrl.page = Rows.getRowsColumns($ctrl.pages[$ctrl.currentPage-1], $ctrl.keys, $ctrl.selectedKeys);
             }
 
-            $scope.$watch('$ctrl.currentPage + $ctrl.numPerPage', function() {
-                resolveDisplayKeys();
+            if($ctrl.query.isCached) {
+                $ctrl.cacheResults().then(updateData);
+            } else {
                 updateData();
+            }
+
+            $scope.$watch('$ctrl.currentPage', function(newVal, oldVal) {
+                if(newVal != oldVal) {
+                    updateData();
+                }
             });
 
         };
 
         $ctrl.cacheResults  = () => {
-            Queries.execute($ctrl.query, true).then( (count) => {
+            return Queries.execute($ctrl.query, {cacheOnly:true}).then( (count) => {
                 $ctrl.totalItems = count;
             });
         }
@@ -115,7 +122,7 @@ MicroMacroApp.component('queryResult', {
 //            spinnerService.show('booksSpinner');
         }
 
-        var isProxy = () => $ctrl.query.type == "proxy";
+        var isProxy = () => $ctrl.query._TYPE == "proxy";
 
         $ctrl.cols = function(max, num) {
             return Math.floor(max/num);
@@ -149,7 +156,7 @@ MicroMacroApp.component('queryResult', {
                 if($ctrl.pages[$ctrl.currentPage-1]) {
                     $ctrl.page = Rows.getRowsColumns($ctrl.pages[$ctrl.currentPage-1], $ctrl.keys, $ctrl.selectedKeys);
                 } else {
-                    Queries.execute($ctrl.query, false, page).then( (data)=> {
+                    Queries.execute($ctrl.query, {cacheOnly:false, page:page}).then( (data)=> {
                         $ctrl.page = Rows.getRowsColumns(data, $ctrl.keys, $ctrl.selectedKeys);
                     });
                 }
@@ -160,7 +167,7 @@ MicroMacroApp.component('queryResult', {
                 if($ctrl.result[skip] && $ctrl.result[skip+limit-1]) {
                     $ctrl.page = Rows.getRowsColumns($ctrl.result.slice(skip, skip+limit), $ctrl.keys, $ctrl.selectedKeys);
                 } else {
-                    Queries.execute($ctrl.query, false, $ctrl.currentPage - 1).then( (data)=> {
+                    Queries.execute($ctrl.query, {cacheOnly:false, skip:skip, limit:limit}).then( (data)=> {
                         $ctrl.page = Rows.getRowsColumns(data, $ctrl.keys, $ctrl.selectedKeys);
                     });
                 }
