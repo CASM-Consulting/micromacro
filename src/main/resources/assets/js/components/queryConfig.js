@@ -38,7 +38,9 @@ MicroMacroApp.component('queryConfig', {
             $ctrl.query.limit = $ctrl.query.limit || 0;
             $ctrl.sampleSize = $ctrl.sampleSize || 100;
 
-
+            if($ctrl.query.isCached && $state.$current.name == "workspace.query") {
+                $ctrl.execute($ctrl.sampleSize);
+            }
         };
 
         $scope.addProxy = () => {
