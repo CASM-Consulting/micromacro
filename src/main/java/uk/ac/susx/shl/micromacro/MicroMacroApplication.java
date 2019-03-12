@@ -47,6 +47,16 @@ public class MicroMacroApplication extends Application<MicroMacroConfiguration> 
         environment.jersey().register(new JsonProcessingExceptionMapper(true));
         environment.jersey().register(GsonMessageBodyHandler.class);
 
+        //old stuff
+//        final PubMatcher pubMatcher = new PubMatcher(false, false);
+//        final PlacesResource places = new PlacesResource(configuration.geoJsonPath, pubMatcher);
+//        environment.jersey().register(places);
+//        final OBResource ob = new OBResource(configuration.sessionsPath, configuration.geoJsonPath,
+//                configuration.obMapPath, configuration.obCacheTable, jdbi,
+//                configuration.placeNerPort, configuration.pubNerPort,
+//                pubMatcher);
+//        environment.jersey().register(ob);
+
         final JdbiFactory factory = new JdbiFactory();
         final Jdbi jdbi = factory.build(environment, configuration.getDataSourceFactory(), "postgresql");
 
@@ -58,17 +68,6 @@ public class MicroMacroApplication extends Application<MicroMacroConfiguration> 
         final QueryFactory queryFactory = new QueryFactory(gson);
         Files.createDirectories(Paths.get("data"));
 
-        final PubMatcher pubMatcher = new PubMatcher(false, false);
-
-        final PlacesResource places = new PlacesResource(configuration.geoJsonPath, pubMatcher);
-        environment.jersey().register(places);
-
-        final OBResource ob = new OBResource(configuration.sessionsPath, configuration.geoJsonPath,
-                configuration.obMapPath, configuration.obCacheTable, jdbi,
-                configuration.placeNerPort, configuration.pubNerPort,
-                pubMatcher);
-
-        environment.jersey().register(ob);
 
         final DefaultHealthCheck healthCheck = new DefaultHealthCheck();
         environment.healthChecks().register("default", healthCheck);

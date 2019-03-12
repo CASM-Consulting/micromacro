@@ -1,0 +1,83 @@
+<div>
+
+
+
+    <label class="col-sm-12 control-label" for="literal-type">Type</label>
+    <select class="form-control" id="literal-type"
+            ng-model="type"
+    >
+        <option ng-repeat="filter in $ctrl.filters">{{filter}}</option>
+    </select>
+
+    <label class="col-sm-12 control-label" for="literal-args">Arguments</label>
+    <input class="form-control" type="text" id="literal-args"
+           ng-model="args">
+
+    <div ng-switch on="matchFilter">
+        <!-- Text box for string matching -->
+        <div ng-switch-when="regex">
+            <div ng-hide="mappedKeyValues" tooltip2="'Enter a pattern to look for in text, or collections of text. Pattern can be a regular expression.'">
+                <input  type="text"  ng-model="$parent.matchValue" class="monospace" placeholder="pattern here">
+                <!--<span  class="glyphicon glyphicon-info-sign"></span>-->
+            </div>
+            <div ng-show="mappedKeyValues">
+                <select ng-model="$parent.matchValue">
+                    <option ng-repeat="mapping in mappedKeyValues">{{mapping}}</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Text box for collection containing string-->
+        <div ng-switch-when="contains">
+            <div ng-hide="mappedKeyValues" tooltip2="'Enter a value to be searched for in the collection. Must match exactly.'">
+                <input  type="text"  ng-model="$parent.matchValue" class="monospace" placeholder="enter search here">
+            </div>
+            <div ng-show="mappedKeyValues">
+                <select ng-model="$parent.matchValue">
+                    <option ng-repeat="mapping in mappedKeyValues">{{mapping}}</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Present / Absent dropdown for presence-->
+        <div ng-switch-when="present">
+            <select ng-model="$parent.matchValue">
+                <option value="true">present</option>
+                <option value="false">absent</option>
+            </select>
+        </div>
+
+        <!-- True / False dropdown for boolean-->
+        <div ng-switch-when="boolean">
+            <select ng-model="$parent.matchValue">
+                <option value="true">true</option>
+                <option value="false">false</option>
+            </select>
+        </div>
+
+        <!--  -->
+        <div ng-switch-when="argmax">
+            <span></span>
+            <input type="number" string-to-number ng-model="$parent.matchValue" min="0" step="1">
+        </div>
+
+        <div ng-switch-when="range|colsize|label-probability|stringlength" ng-switch-when-separator="|">
+            <div number-range-selector model="$parent.matchValue"></div>
+        </div>
+
+        <!-- Date/time picker-->
+        <div ng-switch-when="datetime">
+            <div class="btn-group" data-toggle="buttons-radio">
+                <!--<span ng-repeat="f in formats">-->
+                <button ng-repeat="m in ['before', 'after', 'range']" type="button" class="btn btn-tiny" ng-class="{active: $parent.dateMode===m, 'btn-info': $parent.dateMode===m}" ng-click="$parent.selectDateType(m)" >{{m}}</button>
+                <!--</span>-->
+            </div>
+
+            <div from-to-date-time-picker title="" modes="false" show-type="$parent.dateMode" from="$parent.sinceFilter" to="$parent.untilFilter" save="$parent.setMatchValueForDate()"></div>
+        </div>
+
+        <div ng-switch-default>
+            <span class="dim-info-text">No configuration required.</span>
+        </div>
+    </div>
+</div>
