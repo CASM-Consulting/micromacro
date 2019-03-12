@@ -52,5 +52,9 @@ public class Workspace {
         return queries;
     }
 
+    public <T extends DatumQuery> Query<T> getQuery(String id) {
+        return queries.get(id);
+    }
+
 
 }

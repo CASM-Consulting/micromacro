@@ -9,7 +9,7 @@
 
     <label class="col-sm-12 control-label" for="literal-key">Key</label>
     <select class="form-control" id="literal-key"
-            ng-options="key as id for (id, key) in $ctrl.keys track by (key.namespace + key.name)"
+            ng-options="key as id for (id, key) in $ctrl.keys track by ((key.namespace || '') + key.name)"
             ng-model="$ctrl.key"
     ></select>
 
@@ -22,6 +22,7 @@
         <option>equals</option>
         <option>present</option>
         <option>date</option>
+        <option>regex</option>
     </select>
 
     <label class="col-sm-12 control-label" for="literal-args">Arguments</label>

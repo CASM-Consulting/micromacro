@@ -44,6 +44,17 @@ public class QueryResultCache {
     }
 
 
+    public <T extends DatumQuery> void clearCache(T query) {
+        String id = getQueryId(query);
+        Map<Integer, int[]> pages = (Map<Integer,int[]>)db.hashMap(id +"-pages").createOrOpen();
+        List<Object> result = db.indexTreeList(id).createOrOpen();
+        Atomic.Boolean cached = db.atomicBoolean(id +"-cached").createOrOpen();
+        pages.clear();
+        result.clear();
+        cached.set(false);
+        db.commit();
+    }
+
     public <T extends DatumQuery> CachedQueryResult<T> cache(T query, Supplier<Stream<DatumRep>> dataSupplier) {
         return cache(query, dataSupplier, (q, c) -> d -> d);
     }

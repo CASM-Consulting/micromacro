@@ -2,6 +2,7 @@ package uk.ac.susx.shl.micromacro.resources;
 
 
 import uk.ac.susx.shl.micromacro.core.*;
+import uk.ac.susx.tag.method51.core.data.store2.query.DatumQuery;
 import uk.ac.susx.tag.method51.core.data.store2.query.Proxy;
 import uk.ac.susx.tag.method51.core.data.store2.query.Select;
 
@@ -37,7 +38,7 @@ public class WorkspaceResource {
 
         Query query = workspace.queries().get(queryId);
 
-        return Response.status(Response.Status.OK).entity(
+        return Response.ok().entity(
                 query.getMeta().get(metaId)
         ).build();
     }
@@ -57,7 +58,7 @@ public class WorkspaceResource {
 
         workspaces.save(workspace);
 
-        return Response.status(Response.Status.OK).entity(
+        return Response.ok().entity(
             query.getMeta().get(metaId)
         ).build();
     }
@@ -79,7 +80,7 @@ public class WorkspaceResource {
 
         rep.put("isCached", isCached);
 
-        return Response.status(Response.Status.OK).entity(
+        return Response.ok().entity(
             rep
         ).build();
     }
@@ -94,7 +95,7 @@ public class WorkspaceResource {
 
         Query query = workspace.queries().get(queryId);
 
-        return Response.status(Response.Status.OK).entity(
+        return Response.ok().entity(
                 queryFactory.keys(query.get(ver).whereKeys())
         ).build();
     }
@@ -111,7 +112,7 @@ public class WorkspaceResource {
 
         workspaces.save(workspace);
 
-        return Response.status(Response.Status.OK).entity(
+        return Response.ok().entity(
                 queryFactory.rep(workspaces.get(workspaceId).queries().get(queryId).get())
         ).build();
     }
@@ -128,9 +129,25 @@ public class WorkspaceResource {
 
         workspaces.save(workspace);
 
-        return Response.status(Response.Status.OK).entity(
+        return Response.ok().entity(
                 queryFactory.rep(workspaces.get(workspaceId).queries().get(queryId).get())
         ).build();
     }
 
+
+    @GET
+    @Path("clearCache")
+    public <T extends DatumQuery> Response clearCache(@QueryParam("workspaceId") String workspaceId,
+                                                     @QueryParam("queryId") String queryId) {
+
+        Workspace workspace = workspaces.get(workspaceId);
+
+        Query<T> query = workspace.getQuery(queryId);
+
+        for(T q : query.history()) {
+            cache.clearCache(q);
+        }
+
+        return Response.ok().build();
+    }
 }

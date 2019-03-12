@@ -4,7 +4,7 @@ MicroMacroApp.component('workspace', {
         workspace : '<',
         queryList : '<'
     },
-    controller: function($scope, $state, $stateParams, Queries, spinnerService) {
+    controller: function($scope, $state, $stateParams, Queries, spinnerService, Workspaces) {
         var $ctrl = this;
 
 
@@ -24,6 +24,10 @@ MicroMacroApp.component('workspace', {
                 Queries.optimise(query).then((resp)=>{
                     alert(resp);
                 });
+            }
+
+            $ctrl.clearCache = (queryId) => {
+                Workspaces.clearCache($stateParams.workspaceId, queryId)
             }
         }
     }

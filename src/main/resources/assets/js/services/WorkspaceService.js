@@ -22,6 +22,17 @@ MicroMacroApp.factory("Workspaces", function($q, Server) {
                     success : resolve
                 });
             });
+        },
+        clearCache : function(workspaceId, queryId) {
+            return $q(function(resolve) {
+                Server.get("api/workspace/clearCache", {
+                    params : {
+                        workspaceId : workspaceId,
+                        queryId : queryId
+                    },
+                    success : resolve
+                });
+            });
         }
     };
 
