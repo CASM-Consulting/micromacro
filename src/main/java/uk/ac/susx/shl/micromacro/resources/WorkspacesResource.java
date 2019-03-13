@@ -57,7 +57,7 @@ public class WorkspacesResource {
     @Path("load")
     public Response load(@QueryParam("name") String name) {
 
-        WorkspaceRep rep =  workspaceFactory.rep(workspaces.get(name));
+        Map rep =  workspaceFactory.rep(workspaces.get(name));
 
         return Response.status(Response.Status.OK).entity(
                rep

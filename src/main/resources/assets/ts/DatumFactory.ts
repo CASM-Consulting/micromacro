@@ -27,9 +27,12 @@ class DatumFactory {
             return new Key(null, bits[0], type);
         } else {
             throw "invalid key name: '"+name+"'";
-        }
+        }        
+    }
 
-        
+    public static keyFromObj<T>(key:Obj):Key<T> {
+            
+        return new Key(key.namespace, key.name, DatumFactory.type(key.type));        
     }
 
     public static type<T>(raw:Obj):Type<T> {

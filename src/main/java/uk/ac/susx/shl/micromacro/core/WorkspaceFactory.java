@@ -21,48 +21,59 @@ public class WorkspaceFactory {
     }
 
 
-    public Workspace workspace(WorkspaceRep rep) {
+    public Workspace workspace(Map rep) {
 
-        Workspace workspace = new Workspace(rep.name, rep.id);
+        Workspace workspace = new Workspace((String)rep.get("name"), (String)rep.get("id"));
 
-        for(Map.Entry<String, QueryRep> entry : rep.queries.entrySet()) {
-            QueryRep qrep = entry.getValue();
+        Map<String, Map> queries = (Map<String, Map>)rep.get("queries");
 
-            LinkedList<? extends DatumQuery> history = qrep .history
+        for(Map.Entry<String, Map> entry : queries.entrySet()) {
+            Map qrep = entry.getValue();
+
+            List<Map> h = (List<Map>)qrep.get("history");
+
+            LinkedList<? extends DatumQuery> history = h
                     .stream()
                     .map(queryFactory::query)
                     .collect(Collectors.toCollection(LinkedList::new));
 
-            workspace.setQuery(entry.getKey(), new Query<>(history, qrep.metadata));
+            workspace.setQuery(entry.getKey(), new Query<>(history, (Map<String,Object>)qrep.get("metadata")));
         }
 
         return workspace;
     }
 
 
-    public <T extends DatumQuery> WorkspaceRep rep(Workspace workspace) {
+    public Map rep(Workspace workspace) {
 
-        WorkspaceRep rep = new WorkspaceRep();
+//        WorkspaceRep rep = new WorkspaceRep();
+        Map rep = new HashMap();
 
-        rep.id = workspace.id();
-        rep.name = workspace.name();
-        rep.queries = new HashMap<>();
+        rep.put("id", workspace.id());
+        rep.put("name", workspace.name());
+
+        Map queries = new HashMap<>();
 
         for(Map.Entry<String, Query> entry : workspace.queries().entrySet()) {
 
             Query query = entry.getValue();
 
-            QueryRep queryRep = new QueryRep();
+            Map queryRep = new HashMap();
+
+            LinkedList history = new LinkedList();
 
             for(Object version : query.history()) {
-                queryRep.history.add(queryFactory.rep((DatumQuery)version));
+                history.add(queryFactory.rep((DatumQuery)version));
             }
 
-            queryRep.metadata = query.getMeta();
+            queryRep.put("history", history);
+            queryRep.put("metadata", query.getMeta());
 
-            rep.queries.put(entry.getKey(), queryRep);
+            queries.put(entry.getKey(), queryRep);
 
         }
+        rep.put("queries", queries);
+
         return rep;
     }
 

@@ -9,6 +9,8 @@ import uk.ac.susx.tag.method51.core.data.store2.query.DatumQuery;
 import uk.ac.susx.tag.method51.core.data.store2.query.Proxy;
 
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
@@ -40,15 +42,30 @@ public class QueryResultCache {
 //                .readOnly()
                 .make();
 
-        queryIds = db.hashMap("queryIds", Serializer.ELSA, Serializer.STRING).createOrOpen();
+        queryIds = db.hashMap("queryIds", Serializer.STRING, Serializer.STRING).createOrOpen();
     }
 
 
+    private Map<Integer, int[]> pageCache(String id) {
+        Map<Integer, int[]> pages = db.hashMap(id +"-pages", Serializer.INTEGER, Serializer.INT_ARRAY).createOrOpen();
+        return pages;
+    }
+
+    private List<Object> resultCache(String id) {
+        List<Object> result = db.indexTreeList(id).createOrOpen();
+        return result;
+    }
+
+    private Atomic.Boolean cachedCache(String id) {
+        Atomic.Boolean cached = db.atomicBoolean(id +"-cached").createOrOpen();
+        return cached;
+    }
+
     public <T extends DatumQuery> void clearCache(T query) {
         String id = getQueryId(query);
-        Map<Integer, int[]> pages = (Map<Integer,int[]>)db.hashMap(id +"-pages").createOrOpen();
-        List<Object> result = db.indexTreeList(id).createOrOpen();
-        Atomic.Boolean cached = db.atomicBoolean(id +"-cached").createOrOpen();
+        Map<Integer, int[]> pages = pageCache(id);
+        List<Object> result = resultCache(id);
+        Atomic.Boolean cached = cachedCache(id);
         pages.clear();
         result.clear();
         cached.set(false);
@@ -99,9 +116,9 @@ public class QueryResultCache {
         public CachedQueryResult(T query, Supplier<Stream<DatumRep>> resultSupplier,
                                  BiFunction<T, CachedQueryResult<T>, Function<DatumRep, DatumRep>> pager) {
             id = getQueryId(query);
-            result = db.indexTreeList(id).createOrOpen();
-            cached = db.atomicBoolean(id +"-cached").createOrOpen();
-            pages = (Map<Integer,int[]>)db.hashMap(id +"-pages").createOrOpen();
+            result = resultCache(id);
+            cached = cachedCache(id);
+            pages = pageCache(id);
 
             if(cached.get()) {
                 resultStream = (Stream)result.stream();

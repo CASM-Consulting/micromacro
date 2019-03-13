@@ -40,7 +40,7 @@ public class Workspace {
 
             queries.get(name).add(query);
 
-        } else if(!query.sql().equals(queries.get(name).get(0))) {
+        } else if(!query.sql().equals(queries.get(name).get(0).sql())) {
 
             queries.get(name).add(query);
         }

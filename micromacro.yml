@@ -15,10 +15,10 @@ assets:
     /: src/main/resources/assets/
 
 
-resultsCachePath: data/resultsCache
+resultsCachePath: data/queryCache
 sessionsPath: data/sessionsPapers
 obMapPath: data/cache2
-workspaceMapPath: data/workspaces
+workspaceMapPath: data/workspacesJson
 obCacheTable: obcache
 geoJsonPath: data/LL_PL_PA_WA_POINTS_FeaturesT.json
 

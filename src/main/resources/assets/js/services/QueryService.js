@@ -4,6 +4,8 @@ MicroMacroApp.factory("Queries", function($q, Server, $http) {
 
         binProxyResultByPartition : function (result, partitionKey) {
 
+
+            partitionKey = DatumFactory.keyFromObj(partitionKey).key();
             var curPartition = null;
             var idx = -1;
 
