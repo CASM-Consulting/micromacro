@@ -2,7 +2,7 @@
 
     <div class="row">
 
-        <div class="btn-group ">
+        <div class="btn-group col-md-12">
             <label class="btn btn-primary"
                    ng-repeat="key in $ctrl.keyList"
                    ng-model="$ctrl.selectedKeys[key]"
@@ -42,43 +42,46 @@
     </div>
 
     <div class="row">
-        <span class="col-md-12" uib-pagination
-              ng-change="$ctrl.pageChange()"
-              ng-model="$ctrl.currentPage"
-              total-items="$ctrl.totalItems"
-              items-per-page="$ctrl.numPerPage"
-              max-size="10"
-              boundary-link-numbers="true">
-        </span>
+        <div class="col-md-12">
+            <span uib-pagination
+                  ng-change="$ctrl.pageChange()"
+                  ng-model="$ctrl.currentPage"
+                  total-items="$ctrl.totalItems"
+                  items-per-page="$ctrl.numPerPage"
+                  max-size="10"
+                  boundary-link-numbers="true">
+            </span>
+        </div>
     </div>
 
 
-    <div class="table">
+    <div class="row">
+        <div class="table col-md-12">
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th ng-repeat="key in $ctrl.displayKeys" style="width:{{$ctrl.widths[key]}}%">{{key}}</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="row in $ctrl.page">
+                    <td ng-repeat="key in $ctrl.displayKeys" style="width:{{$ctrl.widths[key]}}%">
+                        <div>
+                            <div ng-if="row[key].type=='spans'">
+                                <div>
+                                    <span-text spanss="row[key]"> </span-text>
+                                </div>
+                            </div>
 
-        <table class="table table-striped">
-            <thead>
-            <tr>
-                <th ng-repeat="key in $ctrl.displayKeys" style="width:{{$ctrl.widths[key]}}%">{{key}}</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr ng-repeat="row in $ctrl.page">
-                <td ng-repeat="key in $ctrl.displayKeys" style="width:{{$ctrl.widths[key]}}%">
-                    <div>
-                        <div ng-if="row[key].type=='spans'">
-                            <div>
-                                <span-text spanss="row[key]"> </span-text>
+                            <div ng-if="row[key].type!='spans'" >
+                                {{row[key].text}}
                             </div>
                         </div>
-
-                        <div ng-if="row[key].type!='spans'" >
-                            {{row[key].text}}
-                        </div>
-                    </div>
-                </td>
-            </tr>
-            </tbody>
-        </table>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
 

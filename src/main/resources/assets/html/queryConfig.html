@@ -3,14 +3,11 @@
     <form class="form-horizontal col-sm-12">
 
         <div class="form-group form-group-sm">
-            <label class="col-sm-12 control-label" for="queryName">Query Name</label>
-            <div class="col-sm-12">
-                <input class="form-control input-sm" type="text" id="queryName"
-                        ng-model="$ctrl.queryId">
-            </div>
+            <label class="control-label" for="queryName">Query Name</label>
+            <input class="form-control input-sm" type="text" id="queryName" ng-model="$ctrl.queryId">
 
-            <label class="col-sm-12 control-label" for="queryVer">Version</label>
-            <div class="col-sm-12 input-group">
+            <label class="control-label" for="queryVer">Version</label>
+            <div class="input-group">
                 <div class="input-group-addon btn btn-default"
                      ng-click="undo()">Back</div>
                 <input class="form-control input-sm" type="number" step="1" max="0" id="queryVer"
@@ -21,132 +18,93 @@
                     ng-disabled="queryVer == 0">Fwd</div>
             </div>
 
-            <label class="col-sm-12 control-label" for="table" >Table</label>
-            <div class="col-sm-12">
-                <select class="form-control input-sm" id="table"
-                        ng-model="$ctrl.query.table"
-                        ng-options="table for table in $ctrl.tables"
-                        ng-change="reload()"
-                >
-                </select>
-            </div>
+            <label class="control-label" for="table" >Table</label>
+            <select class="form-control input-sm" id="table"
+                    ng-model="$ctrl.query.table"
+                    ng-options="table for table in $ctrl.tables"
+                    ng-change="reload()">
+            </select>
 
 
-            <label class="col-sm-12 control-label" >Literals</label>
+            <label class="control-label" >Literals</label>
 
-            <div class="col-sm-12">
-                <literals literals="$ctrl.query.literals" keys="$ctrl.keys"></literals>
-            </div>
+            <literals literals="$ctrl.query.literals" keys="$ctrl.keys"></literals>
 
 
             <div ng-if="$ctrl.query._TYPE=='proxy'">
-                <label class="col-sm-12 control-label" >Table Where</label>
-                <div class="col-sm-12">
-                    <input class="form-control" type="text"
-                           ng-model="$ctrl.query.tableWhere">
+                <div class="section">
+                    <label class="control-label" >Table Where</label>
+                    <div>
+                        <input class="form-control" type="text"
+                               ng-model="$ctrl.query.tableWhere">
+                    </div>
                 </div>
 
-                <label class="col-sm-12 control-label" >Target</label>
-                <div class="col-sm-12">
-                    <input class="form-control" type="text"
-                           ng-model="$ctrl.query.target">
-                </div>
+                <div class="section">
 
-                <label class="col-sm-12 control-label">Proxy</label>
-                <div class="col-sm-12">
-                    <input class="form-control" type="text"
-                           ng-model="$ctrl.query.proxy">
-                </div>
+                    <label class="control-label" >Target</label>
+                    <input class="form-control" type="text" ng-model="$ctrl.query.target">
 
-                <label class="col-sm-12 control-label">Partition Key</label>
-                <div class="col-sm-12">
+                    <label class=" control-label">Proxy</label>
+                    <input class="form-control" type="text" ng-model="$ctrl.query.proxy">
+
+                    <label class=" control-label">Partition Key</label>
                     <key keys="$ctrl.keys" ng-model="$ctrl.query.partitionKey"></key>
 
-                    <!--<select class="form-control"-->
-                            <!--ng-model="$ctrl.query.partitionKey"-->
-                            <!--ng-options="key as id for (id, key) in $ctrl.keys track by ((key.namespace || '') + key.name)"></select>-->
-                </div>
-
-                <label class="col-sm-12 control-label">Order By</label>
-                <div class="col-sm-12">
+                    <label class=" control-label">Order By</label>
                     <key keys="$ctrl.keys" ng-model="$ctrl.query.orderBy.key"></key>
 
-                    <!--<select class="form-control"-->
-                            <!--ng-model="$ctrl.query.orderBy.key"-->
-                            <!--ng-options="key as id for (id, key) in $ctrl.keys track by ((key.namespace || '') + key.name)"></select>-->
+                    <label class=" control-label">Proximity</label>
+                    <input type="number" step="1" min="1" class="form-control" ng-model="$ctrl.query.proximity">
                 </div>
 
-                <label class="col-sm-12 control-label">Proximity</label>
-                <div class="col-sm-12">
-                    <input type="number" step="1" min="1" class="form-control"
-                           ng-model="$ctrl.query.proximity">
-                </div>
-
-                <button type="button" class='btn btn-default col-sm-12' ng-click="addProxy()">Save</button>
+                <button type="button" class='btn btn-default ' ng-click="addProxy()">Save</button>
             </div>
 
 
             <div ng-if="$ctrl.query._TYPE=='select'">
+                <div class="section">
 
-                <label class="col-sm-12 control-label">Order By</label>
-                <div ng-repeat="ob in $ctrl.query.orderBy" class="col-sm-12">
-                    <key keys="$ctrl.keys" ng-model="ob.key"></key>
-
-                    <!--<select class="form-control"-->
-                            <!--ng-model="ob.key"-->
-                            <!--ng-options="key as id for (id, key) in $ctrl.keys track by ((key.namespace || '') + key.name)"></select>-->
-                    <span><a href ng-click="$ctrl.query.orderBy.splice($index,1)">-</a></span>
-                </div>
-
-                <div class="col-sm-12"><a href ng-click="$ctrl.query.orderBy.push({})">+</a></div>
-
-                <div class="col-sm-12">
-                    <div class="checkbox">
-                        <label>
-                            <input type="checkbox" ng-checked="!!$ctrl.query.partition" ng-click="$ctrl.partitionSelect()">
-                            Partition
-                        </label>
-                    </div>
-                </div>
-
-                <div ng-if="$ctrl.query.partition">
-
-                    <label class="col-sm-12 control-label">Partition Key</label>
-                    <div class="col-sm-12">
-                        <key keys="$ctrl.keys" ng-model="$ctrl.query.partition.partitionKey"></key>
-
-                        <!--<select class="form-control"-->
-                                <!--ng-model="$ctrl.query.partition.partitionKey"-->
-                                <!--ng-options="key as id for (id, key) in $ctrl.keys track by ((key.namespace || '') + key.name)"></select>-->
+                    <label class="control-label">Order By</label>
+                    <div ng-repeat="ob in $ctrl.query.orderBy" >
+                        <key keys="$ctrl.keys" ng-model="ob.key"></key>
+                        <span><a href ng-click="$ctrl.query.orderBy.splice($index,1)">-</a></span>
                     </div>
 
+                    <div><a href ng-click="$ctrl.query.orderBy.push({})">+</a></div>
+                </div>
 
-                    <label class="col-sm-12 control-label">Function</label>
-                    <div class="col-sm-12">
-                        <select class="form-control"
-                                ng-model="$ctrl.query.partition.function">
-                            <option value="ROW_NUMBER">Row Number</option>
-                        </select>
-                    </div>
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" ng-checked="!!$ctrl.query.partition" ng-click="$ctrl.partitionSelect()">
+                        Partition
+                    </label>
+                </div>
+
+                <div ng-if="$ctrl.query.partition" class="section">
+
+                    <label class="control-label">Partition Key</label>
+                    <key keys="$ctrl.keys" ng-model="$ctrl.query.partition.partitionKey"></key>
+
+
+                    <label class="control-label">Function</label>
+                    <select class="form-control"
+                            ng-model="$ctrl.query.partition.function">
+                        <option value="ROW_NUMBER">Row Number</option>
+                    </select>
 
                 </div>
 
-                <label class="col-sm-12 control-label">Filter</label>
-                <div class="col-sm-12">
-                    <input type="text" class="form-control"
-                           ng-model="$ctrl.query.filter">
+                <div class="section">
+
+                    <label class="control-label">Filter</label>
+                    <input type="text" class="form-control" ng-model="$ctrl.query.filter">
                 </div>
 
-                <!--<label class="col-sm-12 control-label">Limit</label>-->
-                <!--<div class="col-sm-12">-->
-                    <!--<input type="number" min="0" class="form-control"-->
-                           <!--ng-model="$ctrl.query.limit">-->
-                <!--</div>-->
-
-                <button type="button" class='btn btn-default col-sm-12' ng-click="addSelect()">Save</button>
+                <button type="button" class='btn btn-default ' ng-click="addSelect()">Save</button>
             </div>
             <input type="number" class="form-control" ng-model="$ctrl.sampleSize">
-            <button type="button" class='btn btn-default col-sm-12' ng-click="$ctrl.execute($ctrl.sampleSize)" >Sample</button>
+            <button type="button" class='btn btn-default ' ng-click="$ctrl.execute($ctrl.sampleSize)" >Sample</button>
 
         </div>
     </form>

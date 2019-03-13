@@ -31,3 +31,9 @@
     margin: 0;
     margin-bottom: 15px;
 }
+
+.section {
+    border:1px dashed;
+    padding:2px;
+    margin-bottom: 2px;
+}

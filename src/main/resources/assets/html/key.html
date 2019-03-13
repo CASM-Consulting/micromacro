@@ -1,0 +1,6 @@
+<div>
+    <select class="form-control" id="{{forId}}"
+            ng-options="key as key.id for key in keyList | orderBy : 'id' track by ((key.namespace || '') + key.name)"
+            ng-model="ngModel"
+    ></select>
+</div>
