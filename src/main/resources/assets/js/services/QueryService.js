@@ -48,9 +48,16 @@ MicroMacroApp.factory("Queries", function($q, Server, $http) {
             });
         },
 
-        addProxy : function(workspaceId, queryId, query) {
+        saveQuery : function(workspaceId, queryId, query) {
             return $q(function(resolve) {
-                Server.post("api/workspace/addProxy", query,  {
+                var path;
+                if(query._TYPE == "select") {
+                    path = "addSelect";
+                } else {
+                    path = "addProxy";
+                }
+
+                Server.post("api/workspace/"+path, query,  {
                     params : {
                         workspaceId : workspaceId,
                         queryId : queryId
@@ -60,17 +67,6 @@ MicroMacroApp.factory("Queries", function($q, Server, $http) {
             });
         },
 
-        addSelect : function(workspaceId, queryId, query) {
-            return $q(function(resolve) {
-                Server.post("api/workspace/addSelect", query,  {
-                    params : {
-                        workspaceId : workspaceId,
-                        queryId : queryId
-                    },
-                    success : resolve
-                });
-            });
-        },
         setMeta : function(workspaceId, queryId, metaKey, data, type) {
             return $q(function(resolve) {
                 if(type == "json") {

@@ -3,15 +3,13 @@
         <b>Literal:</b><b class="pull-right">{{letter}}</b>
         <literal ng-click="$ctrl.setLiteral(letter, literal)" literal="literal" keys="$ctrl.keys"></literal>
     </div>
-    <div>
-        <em>New Literal</em>
-    </div>
     <div class="section">
+        <div><em>New Literal</em></div>
 
-        <label class="col-sm-12 control-label" for="literal-letter">Letter</label>
+        <label class="control-label" for="literal-letter">Letter</label>
         <input class="form-control" type="text" id="literal-letter" ng-model="$ctrl.letter">
 
-        <label class="col-sm-12 control-label" for="literal-key">Key</label>
+        <label class="control-label" for="literal-key">Key</label>
         <!--<select class="form-control" id="literal-key"-->
         <!--ng-options="key as id for (id, key) in $ctrl.keys track by ((key.namespace || '') + key.name)"-->
         <!--ng-model="$ctrl.key"-->
@@ -19,7 +17,7 @@
         <key keys="$ctrl.keys" ng-model="$ctrl.key" for-id="'literal-key'"></key>
 
         <!--<filter key="$ctrl.key"></filter>-->
-        <label class="col-sm-12 control-label" for="literal-type">Type</label>
+        <label class="control-label" for="literal-type">Type</label>
         <select class="form-control" id="literal-type"
                 ng-model="$ctrl.type"
         >
@@ -29,7 +27,7 @@
             <option>regex</option>
         </select>
 
-        <label class="col-sm-12 control-label" for="literal-args">Arguments</label>
+        <label class="control-label" for="literal-args">Arguments</label>
         <input class="form-control" type="text" id="literal-args" ng-model="$ctrl.args">
 
         <button class="btn btn-default" ng-click="$ctrl.addLiteral()">Set Literal</button>

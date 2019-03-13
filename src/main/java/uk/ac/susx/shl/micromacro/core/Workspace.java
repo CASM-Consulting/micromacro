@@ -35,10 +35,16 @@ public class Workspace {
 
     public <T extends DatumQuery> Workspace add(String name, T query) {
         if(!queries.containsKey(name)) {
+
             queries.put(name, new Query<T>());
+
+            queries.get(name).add(query);
+
+        } else if(!query.sql().equals(queries.get(name).get(0))) {
+
+            queries.get(name).add(query);
         }
 
-        queries.get(name).add(query);
         return this;
     }
 

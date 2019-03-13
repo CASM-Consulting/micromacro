@@ -28,7 +28,7 @@
                 <tbody>
                 <tr ng-repeat="name in $ctrl.queryList">
                     <td> <a href ng-click="$ctrl.active = $index">{{name}}</a> </td>
-                    <td> {{$ctrl.workspace.queries[name].history[0].type}} </td>
+                    <td> {{$ctrl.workspace.queries[name].history[0]._TYPE}} </td>
                     <td> {{$ctrl.workspace.queries[name].history[0].table}} </td>
                     <td> {{$ctrl.workspace.queries[name].history.length}} </td>
                     <td> ### </td>

@@ -43,22 +43,6 @@ MicroMacroApp.component('queryConfig', {
             }
         };
 
-        $scope.addProxy = () => {
-            Queries.addProxy($stateParams.workspaceId, $ctrl.queryId, $ctrl.query).then(function(query){
-                alert("saved");
-                $state.go("^.query", {workspaceId:$stateParams.workspaceId, queryId:$ctrl.queryId, ver:0});
-                $scope.queryVer = 0;
-            });
-        };
-
-        $scope.addSelect = () => {
-            Queries.addSelect($stateParams.workspaceId, $ctrl.queryId, $ctrl.query).then(function(query){
-                alert("saved");
-                $state.go("^.query", {workspaceId:$stateParams.workspaceId, queryId:$ctrl.queryId, ver:0});
-                $scope.queryVer = 0;
-            });
-        };
-
         $ctrl.partitionSelect = () => {
             if($ctrl.query.partition) {
                 delete $ctrl.query.partition;
@@ -81,11 +65,18 @@ MicroMacroApp.component('queryConfig', {
             }
         };
 
+
         $ctrl.execute = (sampleSize) => {
-            $state.transitionTo("workspace.query.execute",
-                {queryId:$ctrl.queryId, page:$stateParams.page || 1, sampleSize:sampleSize},
-                {reload: true, inherit:true, relative: $state.$current}
-            );
+            Queries.saveQuery($stateParams.workspaceId, $ctrl.queryId, $ctrl.query).then(function(query){
+//                alert("saved");
+                $state.go("^.query", {workspaceId:$stateParams.workspaceId, queryId:$ctrl.queryId, ver:0});
+                $scope.queryVer = 0;
+            }).then(()=>{
+                $state.transitionTo("workspace.query.execute",
+                    {queryId:$ctrl.queryId, page:$stateParams.page || 1, sampleSize:sampleSize},
+                    {reload: true, inherit:true, relative: $state.$current}
+                );
+            });
         }
     }
 });

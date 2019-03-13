@@ -3,32 +3,41 @@
     <form class="form-horizontal col-sm-12">
 
         <div class="form-group form-group-sm">
-            <label class="control-label" for="queryName">Query Name</label>
-            <input class="form-control input-sm" type="text" id="queryName" ng-model="$ctrl.queryId">
-
-            <label class="control-label" for="queryVer">Version</label>
-            <div class="input-group">
-                <div class="input-group-addon btn btn-default"
-                     ng-click="undo()">Back</div>
-                <input class="form-control input-sm" type="number" step="1" max="0" id="queryVer"
-                        ng-model="queryVer"
-                        ng-change="changeVer()">
-                <div class="input-group-addon btn btn-default"
-                    ng-click="redo()"
-                    ng-disabled="queryVer == 0">Fwd</div>
+            <div class="section">
+                <label class="control-label" for="queryName">Query Name</label>
+                <input class="form-control input-sm" type="text" id="queryName" ng-model="$ctrl.queryId">
             </div>
 
-            <label class="control-label" for="table" >Table</label>
-            <select class="form-control input-sm" id="table"
-                    ng-model="$ctrl.query.table"
-                    ng-options="table for table in $ctrl.tables"
-                    ng-change="reload()">
-            </select>
+            <div class="section">
 
+                <label class="control-label" for="queryVer">Version</label>
+                <div class="input-group">
+                    <div class="input-group-addon btn btn-default"
+                         ng-click="undo()">Back</div>
+                    <input class="form-control input-sm" type="number" step="1" max="0" id="queryVer"
+                           ng-model="queryVer"
+                           ng-change="changeVer()">
+                    <div class="input-group-addon btn btn-default"
+                         ng-click="redo()"
+                         ng-disabled="queryVer == 0">Fwd</div>
+                </div>
+            </div>
 
-            <label class="control-label" >Literals</label>
+            <div class="section">
+                <label class="control-label" for="table" >Table</label>
+                <select class="form-control input-sm" id="table"
+                        ng-model="$ctrl.query.table"
+                        ng-options="table for table in $ctrl.tables"
+                        ng-change="reload()">
+                </select>
+            </div>
 
-            <literals literals="$ctrl.query.literals" keys="$ctrl.keys"></literals>
+            <div class="section">
+
+                <label class="control-label" >Literals</label>
+
+                <literals literals="$ctrl.query.literals" keys="$ctrl.keys"></literals>
+            </div>
 
 
             <div ng-if="$ctrl.query._TYPE=='proxy'">
@@ -58,7 +67,6 @@
                     <input type="number" step="1" min="1" class="form-control" ng-model="$ctrl.query.proximity">
                 </div>
 
-                <button type="button" class='btn btn-default ' ng-click="addProxy()">Save</button>
             </div>
 
 
@@ -100,11 +108,12 @@
                     <label class="control-label">Filter</label>
                     <input type="text" class="form-control" ng-model="$ctrl.query.filter">
                 </div>
-
-                <button type="button" class='btn btn-default ' ng-click="addSelect()">Save</button>
             </div>
-            <input type="number" class="form-control" ng-model="$ctrl.sampleSize">
-            <button type="button" class='btn btn-default ' ng-click="$ctrl.execute($ctrl.sampleSize)" >Sample</button>
+            <div class="section">
+                <label class="control-label">Initial Sample Size</label>
+                <input type="number" class="form-control" ng-model="$ctrl.sampleSize">
+                <button type="button" class='btn btn-default ' ng-click="$ctrl.execute($ctrl.sampleSize)" >Execute</button>
+            </div>
 
         </div>
     </form>
