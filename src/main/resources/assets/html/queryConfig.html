@@ -21,7 +21,7 @@
                     ng-disabled="queryVer == 0">Fwd</div>
             </div>
 
-            <label class="col-sm-12 control-label" for="table" style="width:40px">Table</label>
+            <label class="col-sm-12 control-label" for="table" >Table</label>
             <div class="col-sm-12">
                 <select class="form-control input-sm" id="table"
                         ng-model="$ctrl.query.table"
@@ -60,16 +60,20 @@
 
                 <label class="col-sm-12 control-label">Partition Key</label>
                 <div class="col-sm-12">
-                    <select class="form-control"
-                            ng-model="$ctrl.query.partitionKey"
-                            ng-options="key as id for (id, key) in $ctrl.keys track by ((key.namespace || '') + key.name)"></select>
+                    <key keys="$ctrl.keys" ng-model="$ctrl.query.partitionKey"></key>
+
+                    <!--<select class="form-control"-->
+                            <!--ng-model="$ctrl.query.partitionKey"-->
+                            <!--ng-options="key as id for (id, key) in $ctrl.keys track by ((key.namespace || '') + key.name)"></select>-->
                 </div>
 
                 <label class="col-sm-12 control-label">Order By</label>
                 <div class="col-sm-12">
-                    <select class="form-control"
-                            ng-model="$ctrl.query.orderBy.key"
-                            ng-options="key as id for (id, key) in $ctrl.keys track by ((key.namespace || '') + key.name)"></select>
+                    <key keys="$ctrl.keys" ng-model="$ctrl.query.orderBy.key"></key>
+
+                    <!--<select class="form-control"-->
+                            <!--ng-model="$ctrl.query.orderBy.key"-->
+                            <!--ng-options="key as id for (id, key) in $ctrl.keys track by ((key.namespace || '') + key.name)"></select>-->
                 </div>
 
                 <label class="col-sm-12 control-label">Proximity</label>
@@ -86,28 +90,34 @@
 
                 <label class="col-sm-12 control-label">Order By</label>
                 <div ng-repeat="ob in $ctrl.query.orderBy" class="col-sm-12">
-                    <select class="form-control"
-                            ng-model="ob.key"
-                            ng-options="key as id for (id, key) in $ctrl.keys track by ((key.namespace || '') + key.name)"></select>
+                    <key keys="$ctrl.keys" ng-model="ob.key"></key>
+
+                    <!--<select class="form-control"-->
+                            <!--ng-model="ob.key"-->
+                            <!--ng-options="key as id for (id, key) in $ctrl.keys track by ((key.namespace || '') + key.name)"></select>-->
                     <span><a href ng-click="$ctrl.query.orderBy.splice($index,1)">-</a></span>
                 </div>
 
                 <div class="col-sm-12"><a href ng-click="$ctrl.query.orderBy.push({})">+</a></div>
 
-
-                <label class="col-sm-12 control-label">Partition</label>
                 <div class="col-sm-12">
-                    <input type="checkbox" class="form-control"
-                           ng-click="$ctrl.partitionSelect()">
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox" ng-checked="!!$ctrl.query.partition" ng-click="$ctrl.partitionSelect()">
+                            Partition
+                        </label>
+                    </div>
                 </div>
 
                 <div ng-if="$ctrl.query.partition">
 
                     <label class="col-sm-12 control-label">Partition Key</label>
                     <div class="col-sm-12">
-                        <select class="form-control"
-                                ng-model="$ctrl.query.partition.partitionKey"
-                                ng-options="key as id for (id, key) in $ctrl.keys track by ((key.namespace || '') + key.name)"></select>
+                        <key keys="$ctrl.keys" ng-model="$ctrl.query.partition.partitionKey"></key>
+
+                        <!--<select class="form-control"-->
+                                <!--ng-model="$ctrl.query.partition.partitionKey"-->
+                                <!--ng-options="key as id for (id, key) in $ctrl.keys track by ((key.namespace || '') + key.name)"></select>-->
                     </div>
 
 
