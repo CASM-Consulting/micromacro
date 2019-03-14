@@ -14,7 +14,7 @@ MicroMacroApp.factory("Queries", function($q, Server, $http) {
                 if (row instanceof Datum) {
                     partition = row.get(partitionKey);
                 } else {
-                    partition = row.data[partitionKey];
+                    partition = row[partitionKey];
                 }
                 if(partition != curPartition) {
                     binned.push([row]);

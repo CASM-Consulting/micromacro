@@ -63,7 +63,7 @@ public class MicroMacroApplication extends Application<MicroMacroConfiguration> 
         final Method52DAO method52DAO = new Method52DAO(jdbi);
 
         final Gson gson = GsonBuilderFactory.get()/*.registerTypeAdapterFactory(StreamTypeAdapter.get())*/.create();
-        final DatumDAO datumDAO = new DatumDAO(jdbi, method52DAO, gson);
+        final DatumDAO datumDAO = new DatumDAO(jdbi, method52DAO);
 
         final QueryFactory queryFactory = new QueryFactory(gson);
         Files.createDirectories(Paths.get("data"));

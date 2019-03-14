@@ -2,12 +2,14 @@ package uk.ac.susx.shl.micromacro.core;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.mapdb.*;
 import uk.ac.susx.shl.micromacro.api.*;
 import uk.ac.susx.tag.method51.core.data.store2.query.DatumQuery;
 import uk.ac.susx.tag.method51.core.data.store2.query.Partitioner;
 import uk.ac.susx.tag.method51.core.data.store2.query.Proxy;
+import uk.ac.susx.tag.method51.core.meta.Datum;
 
 
 import java.io.IOException;
@@ -52,8 +54,8 @@ public class QueryResultCache {
         return pages;
     }
 
-    private List<Object> resultCache(String id) {
-        List<Object> result = db.indexTreeList(id).createOrOpen();
+    private List<String> resultCache(String id) {
+        List<String> result = db.indexTreeList(id, Serializer.STRING).createOrOpen();
         return result;
     }
 
@@ -75,7 +77,7 @@ public class QueryResultCache {
 
     public void clearCache(String id) {
         Map<Integer, int[]> pages = pageCache(id);
-        List<Object> result = resultCache(id);
+        List<String> result = resultCache(id);
         Atomic.Boolean cached = cachedCache(id);
         pages.clear();
         result.clear();
@@ -83,12 +85,12 @@ public class QueryResultCache {
         db.commit();
     }
 
-    public <T extends DatumQuery> CachedQueryResult<T> cache(T query, Supplier<Stream<DatumRep>> dataSupplier) {
+    public <T extends DatumQuery> CachedQueryResult<T> cache(T query, Supplier<Stream<String>> dataSupplier) {
         return cache(query, dataSupplier, (q, c) -> d -> d);
     }
 
-    public <T extends DatumQuery> CachedQueryResult<T> cache(T query, Supplier<Stream<DatumRep>> resultSupplier,
-                                                             BiFunction<T, CachedQueryResult<T>, Function<DatumRep, DatumRep>> pager) {
+    public <T extends DatumQuery> CachedQueryResult<T> cache(T query, Supplier<Stream<String>> resultSupplier,
+                                                             BiFunction<T, CachedQueryResult<T>, Function<String, String>> pager) {
 
         CachedQueryResult cached = new CachedQueryResult<>(query, resultSupplier, pager);
 
@@ -119,20 +121,20 @@ public class QueryResultCache {
 
         public final String id;
         public final Map<Integer, int[]> pages;
-        public final List<Object> result;
-        public final Stream<DatumRep> resultStream;
+        public final List<String> result;
+        public final Stream<String> resultStream;
         private final Atomic.Boolean cached;
 
 
-        public CachedQueryResult(T query, Supplier<Stream<DatumRep>> resultSupplier,
-                                 BiFunction<T, CachedQueryResult<T>, Function<DatumRep, DatumRep>> pager) {
+        public CachedQueryResult(T query, Supplier<Stream<String>> resultSupplier,
+                                 BiFunction<T, CachedQueryResult<T>, Function<String, String>> pager) {
             id = getQueryId(query);
             result = resultCache(id);
             cached = cachedCache(id);
             pages = pageCache(id);
 
             if(cached.get()) {
-                resultStream = (Stream)result.stream();
+                resultStream = result.stream();
             } else {
                 resultStream = resultSupplier.get().sequential().map(datumRep -> {
                     result.add(datumRep);
@@ -152,7 +154,7 @@ public class QueryResultCache {
             }
         }
 
-        public Stream<DatumRep> stream() {
+        public Stream<String> stream() {
             return resultStream;
         }
 
@@ -160,8 +162,8 @@ public class QueryResultCache {
             return pages.get(page);
         }
 
-        public List<DatumRep> get(int from, int to) {
-            return (List)result.subList(Math.min(result.size(),from), Math.min(result.size(),to));
+        public List<String> get(int from, int to) {
+            return result.subList(Math.min(result.size(),from), Math.min(result.size(),to));
         }
 
         @Override
@@ -171,16 +173,24 @@ public class QueryResultCache {
         }
     }
 
-    public static class PartitionPager<T extends DatumQuery & Partitioner> implements BiFunction<T, CachedQueryResult<T>, Function<DatumRep, DatumRep>> {
+    public static class PartitionPager<T extends DatumQuery & Partitioner> implements BiFunction<T, CachedQueryResult<T>, Function<String, String>> {
+
+        private final Function<String, Map> mapper;
+        public PartitionPager(Function<String, Map> mapper) {
+            this.mapper = mapper;
+        }
 
         @Override
-        public Function<DatumRep, DatumRep> apply(T query, CachedQueryResult<T> cachedQueryResult) {
+        public Function<String, String> apply(T query, CachedQueryResult<T> cachedQueryResult) {
             AtomicReference<String> partitionId = new AtomicReference<>("");
             AtomicInteger page = new AtomicInteger(0);
             AtomicInteger i = new AtomicInteger(0);
             AtomicReference<int[]> pageIndices = new AtomicReference<>(null);
-            return (DatumRep d) -> {
-                String partition = d.data.get(query.partition().key().toString()).toString();
+            return (String d) -> {
+
+                Map datum = mapper.apply(d);
+
+                String partition = datum.get(query.partition().key().toString()).toString();
                 if(!partition.equals(partitionId.get())) {
                     if(pageIndices.get() == null) {
                         pageIndices.getAndSet(new int[]{0,0});

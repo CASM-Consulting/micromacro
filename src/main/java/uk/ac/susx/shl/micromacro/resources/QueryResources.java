@@ -4,6 +4,7 @@ package uk.ac.susx.shl.micromacro.resources;
 import uk.ac.susx.shl.micromacro.core.QueryResultCache;
 import uk.ac.susx.shl.micromacro.jdbi.DatumDAO;
 import uk.ac.susx.tag.method51.core.data.store2.query.*;
+import uk.ac.susx.tag.method51.core.meta.Datum;
 
 import javax.ws.rs.*;
 import javax.ws.rs.container.AsyncResponse;
@@ -12,7 +13,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 import java.util.stream.StreamSupport;
 
 @Path("query")
@@ -70,10 +73,13 @@ public class QueryResources {
                            @QueryParam("limit") Integer limit,
                            final Select select) {
         QueryResultCache.CachedQueryResult<Select> cached;
+
+        Function<String, Map> mapper = datumDAO.datumMapper();
+
         if(select.partition() == null) {
-            cached = cache.cache(select, () -> datumDAO.execute2Rep(select));
+            cached = cache.cache(select, () -> datumDAO.execute2String(select));
         } else {
-            cached = cache.cache(select, () -> datumDAO.execute2Rep(select), new QueryResultCache.PartitionPager<>() );
+            cached = cache.cache(select, () -> datumDAO.execute2String(select), new QueryResultCache.PartitionPager<>(mapper) );
         }
 
         Response response;
@@ -81,9 +87,9 @@ public class QueryResources {
         if(cacheOnly) {
             response = Response.status(Response.Status.OK).entity( cached.count() ).build();
         } else if(skip != null && limit != null) {
-            response = Response.status(Response.Status.OK).entity( cached.get(skip, skip+limit) ).build();
+            response = Response.status(Response.Status.OK).entity( StreamSupport.stream(cached.get(skip, skip+limit).stream().map(mapper).spliterator(), false) ).build();
         } else {
-            response = Response.status(Response.Status.OK).entity( StreamSupport.stream(cached.stream().spliterator(), false) ).build();
+            response = Response.status(Response.Status.OK).entity( StreamSupport.stream(cached.stream().map(mapper).spliterator(), false) ).build();
         }
         CompletableFuture<Response> promise = new CompletableFuture<>();
         promise.complete(response);
@@ -100,16 +106,18 @@ public class QueryResources {
 
         Response response;
 
-        QueryResultCache.CachedQueryResult<Proxy> cached = cache.cache(proxy, () -> datumDAO.execute2Rep(proxy) , new QueryResultCache.PartitionPager<>());
+        Function<String, Map> mapper = datumDAO.datumMapper();
+
+        QueryResultCache.CachedQueryResult<Proxy> cached = cache.cache(proxy, () -> datumDAO.execute2String(proxy) , new QueryResultCache.PartitionPager<>(mapper));
 
         if(cacheOnly) {
             response = Response.status(Response.Status.OK).entity( cached.count() ).build();
         } else if(page != null) {
             int[] indices = cached.indices(page);
 
-            response = Response.status(Response.Status.OK).entity( cached.get(indices[0], indices[1]) ).build();
+            response = Response.status(Response.Status.OK).entity( StreamSupport.stream(cached.get(indices[0], indices[1]).stream().map(mapper).spliterator(), false) ).build();
         } else {
-            response = Response.status(Response.Status.OK).entity( StreamSupport.stream(cached.stream().spliterator(), false) ).build();
+            response = Response.status(Response.Status.OK).entity( StreamSupport.stream(cached.stream().map(mapper).spliterator(), false) ).build();
         }
 
         CompletableFuture<Response> promise = new CompletableFuture<>();

@@ -7,9 +7,9 @@ class DatumFactory {
       
         const data:Map<string,any> = new Map();
 
-        for(let i in rawData.data) {
+        for(let i in rawData) {
             
-            const value:any = DatumFactory.get(keys.get(i), rawData.data[i], keys);
+            const value:any = DatumFactory.get(keys.get(i), rawData[i], keys);
 
             data.set(i, value);
         }
