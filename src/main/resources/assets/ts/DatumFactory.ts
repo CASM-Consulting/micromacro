@@ -31,8 +31,12 @@ class DatumFactory {
     }
 
     public static keyFromObj<T>(key:Obj):Key<T> {
-            
-        return new Key(key.namespace, key.name, DatumFactory.type(key.type));        
+        if(key.namespace) {
+            return new Key(key.namespace, key.name, DatumFactory.type(key.type));            
+        } else {
+            return new Key(null, key.name, DatumFactory.type(key.type));        
+        }
+        
     }
 
     public static type<T>(raw:Obj):Type<T> {

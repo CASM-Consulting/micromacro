@@ -99,7 +99,7 @@ MicroMacroApp.component('queryResult', {
             });
 
             if(isProxy()) {
-                $ctrl.pages = Queries.binProxyResultByPartition($ctrl.result, $ctrl.query.partitionKey);
+                $ctrl.pages = Queries.binProxyResultByPartition($ctrl.result, $ctrl.query.partition.key);
                 $ctrl.page = Rows.getRowsColumns($ctrl.pages[$ctrl.currentPage-1], $ctrl.keys, $ctrl.selectedKeys);
             }
 

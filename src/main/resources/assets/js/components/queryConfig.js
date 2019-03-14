@@ -12,27 +12,44 @@ MicroMacroApp.component('queryConfig', {
 
         $ctrl.queryId = $stateParams.queryId;
 
+        var keyList = (keys) => {
+            $ctrl.keyList = [];
+            angular.forEach(keys, (item, key) => {
+                var listItem = angular.copy(item);
+                listItem.id = listItem.key();
+                $ctrl.keyList.push(listItem);
+            });
+        }
+
         $scope.reload = () => {
 //            $state.reload("workspace.query");
             Tables.schema($ctrl.query.table).then(function(keys) {
                 $ctrl.keys = keys;
+                keyList(keys);
             })
         };
+
 
         $ctrl.$onInit = () => {
             if(!$ctrl.keys && $ctrl.query.table) {
                 Tables.schema($ctrl.query.table).then(function(keys) {
-                    $scope.keys = keys;
+                    $ctrl.keys = keys;
+                    keyList(keys);
                 });
+            } else if($ctrl.keys) {
+                keyList($ctrl.keys);
             }
+
             $ctrl.query.literals = $ctrl.query.literals || {};
             $scope.queryVer = $stateParams.ver;
 //            $ctrl.notes = JSON.parse($ctrl.notes || "[]");
 
-            if($ctrl.query._TYPE=='select' && !$ctrl.query.orderBy) {
-                $ctrl.query.orderBy = [];
-            } else if($ctrl.query._TYPE=='proxy' && !$ctrl.query.orderBy) {
+            if(!$ctrl.query.orderBy) {
                 $ctrl.query.orderBy = {};
+            }
+
+            if($ctrl.query._TYPE == "proxy" && !$ctrl.query.partition) {
+                $ctrl.query.partition = {};
             }
 
             $ctrl.query.limit = $ctrl.query.limit || 0;

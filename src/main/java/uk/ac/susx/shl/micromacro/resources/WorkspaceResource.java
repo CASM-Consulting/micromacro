@@ -150,4 +150,19 @@ public class WorkspaceResource {
 
         return Response.ok().build();
     }
+
+    @GET
+    @Path("clearCacheAll")
+    public <T extends DatumQuery> Response clearCacheAll(@QueryParam("workspaceId") String workspaceId) {
+
+        Workspace workspace = workspaces.get(workspaceId);
+
+        for(Query<T> query : workspace.queries().values() ) {
+            for(T q : query.history()) {
+                cache.clearCache(q);
+            }
+        }
+
+        return Response.ok().build();
+    }
 }

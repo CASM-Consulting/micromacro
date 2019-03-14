@@ -69,9 +69,14 @@ public class QueryResources {
                            @QueryParam("skip") Integer skip,
                            @QueryParam("limit") Integer limit,
                            final Select select) {
+        QueryResultCache.CachedQueryResult<Select> cached;
+        if(select.partition() == null) {
+            cached = cache.cache(select, () -> datumDAO.execute2Rep(select));
+        } else {
+            cached = cache.cache(select, () -> datumDAO.execute2Rep(select), new QueryResultCache.PartitionPager<>() );
+        }
 
         Response response;
-        QueryResultCache.CachedQueryResult<Select> cached = cache.cache(select, () -> datumDAO.execute2Rep(select) );
 
         if(cacheOnly) {
             response = Response.status(Response.Status.OK).entity( cached.count() ).build();
@@ -95,7 +100,7 @@ public class QueryResources {
 
         Response response;
 
-        QueryResultCache.CachedQueryResult<Proxy> cached = cache.cache(proxy, () -> datumDAO.execute2Rep(proxy) , new QueryResultCache.ProxyPager());
+        QueryResultCache.CachedQueryResult<Proxy> cached = cache.cache(proxy, () -> datumDAO.execute2Rep(proxy) , new QueryResultCache.PartitionPager<>());
 
         if(cacheOnly) {
             response = Response.status(Response.Status.OK).entity( cached.count() ).build();

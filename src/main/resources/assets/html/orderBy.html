@@ -1,0 +1,20 @@
+<div>
+
+    <div ng-repeat="clause in orderBy.clauses">
+
+        <label class="control-label">Key</label>
+        <key keys="keys" ng-model="clause.key"></key>
+
+        <label class="control-label">Desc</label>
+        <input type="checkbox" ng-model="clause.desc">
+
+        <label class="control-label">Numeric</label>
+        <input type="checkbox" ng-model="clause.numeric">
+
+        <span><a href ng-click="orderBy.clauses.splice($index,1)">-</a></span>
+    </div>
+
+
+    <div><a href ng-click="orderBy.clauses.push({})">+</a></div>
+
+</div>

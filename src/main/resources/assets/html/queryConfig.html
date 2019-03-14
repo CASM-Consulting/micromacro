@@ -36,7 +36,7 @@
 
                 <label class="control-label" >Literals</label>
 
-                <literals literals="$ctrl.query.literals" keys="$ctrl.keys"></literals>
+                <literals literals="$ctrl.query.literals" keys="$ctrl.keyList"></literals>
             </div>
 
 
@@ -57,11 +57,8 @@
                     <label class=" control-label">Proxy</label>
                     <input class="form-control" type="text" ng-model="$ctrl.query.proxy">
 
-                    <label class=" control-label">Partition Key</label>
-                    <key keys="$ctrl.keys" ng-model="$ctrl.query.partitionKey"></key>
-
-                    <label class=" control-label">Order By</label>
-                    <key keys="$ctrl.keys" ng-model="$ctrl.query.orderBy.key"></key>
+                    <label class=" control-label">Partition</label>
+                    <partition keys="$ctrl.keyList" ng-model="$ctrl.query.partition"></partition>
 
                     <label class=" control-label">Proximity</label>
                     <input type="number" step="1" min="1" class="form-control" ng-model="$ctrl.query.proximity">
@@ -74,12 +71,7 @@
                 <div class="section">
 
                     <label class="control-label">Order By</label>
-                    <div ng-repeat="ob in $ctrl.query.orderBy" >
-                        <key keys="$ctrl.keys" ng-model="ob.key"></key>
-                        <span><a href ng-click="$ctrl.query.orderBy.splice($index,1)">-</a></span>
-                    </div>
-
-                    <div><a href ng-click="$ctrl.query.orderBy.push({})">+</a></div>
+                    <order-by keys="$ctrl.keyList" ng-model="$ctrl.query.orderBy" ></order-by>
                 </div>
 
                 <div class="checkbox">
@@ -91,15 +83,8 @@
 
                 <div ng-if="$ctrl.query.partition" class="section">
 
-                    <label class="control-label">Partition Key</label>
-                    <key keys="$ctrl.keys" ng-model="$ctrl.query.partition.partitionKey"></key>
-
-
-                    <label class="control-label">Function</label>
-                    <select class="form-control"
-                            ng-model="$ctrl.query.partition.function">
-                        <option value="ROW_NUMBER">Row Number</option>
-                    </select>
+                    <label class="control-label">Partition</label>
+                    <partition keys="$ctrl.keyList" ng-model="$ctrl.query.partition"></partition>
 
                 </div>
 

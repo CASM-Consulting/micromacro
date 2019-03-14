@@ -1,13 +1,15 @@
-MicroMacroApp.directive("key", function () {
+MicroMacroApp.directive("partition", function () {
     return {
         restrict: 'E',
-        templateUrl : 'html/key.html',
+        templateUrl : 'html/partition.html',
         scope : {
-            ngModel : '=',
+            partition : '=ngModel',
             keys : '<',
             forId : '<?'
         },
         link : function(scope, element, attrs) {
+
+            scope.partition.orderBy = scope.partition.orderBy || {};
 
 //            scope.$watchCollection("keys", function(newVal, oldVal) {
 //

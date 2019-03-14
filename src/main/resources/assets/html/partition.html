@@ -1,0 +1,18 @@
+<div>
+
+    <label class="control-label">Key</label>
+    <key keys="keys" ng-model="partition.key"></key>
+
+    <label class="control-label">Order By</label>
+    <order-by keys="keys" ng-model="partition.orderBy"></order-by>
+
+    <label class="control-label">Function</label>
+    <select class="form-control"
+            ng-model="partition.function">
+        <option value="ROW_NUMBER">Row Number</option>
+    </select>
+
+    <label class="control-label">Arg</label>
+    <key keys="keys" ng-model="partition.arg"></key>
+
+</div>

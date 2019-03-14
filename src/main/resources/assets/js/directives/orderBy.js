@@ -1,13 +1,15 @@
-MicroMacroApp.directive("key", function () {
+MicroMacroApp.directive("orderBy", function () {
     return {
         restrict: 'E',
-        templateUrl : 'html/key.html',
+        templateUrl : 'html/orderBy.html',
         scope : {
-            ngModel : '=',
+            orderBy : '=ngModel',
             keys : '<',
             forId : '<?'
         },
         link : function(scope, element, attrs) {
+
+            scope.orderBy.clauses = scope.orderBy.clauses || [];
 
 //            scope.$watchCollection("keys", function(newVal, oldVal) {
 //

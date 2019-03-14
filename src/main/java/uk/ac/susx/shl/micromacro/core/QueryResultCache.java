@@ -6,6 +6,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.mapdb.*;
 import uk.ac.susx.shl.micromacro.api.*;
 import uk.ac.susx.tag.method51.core.data.store2.query.DatumQuery;
+import uk.ac.susx.tag.method51.core.data.store2.query.Partitioner;
 import uk.ac.susx.tag.method51.core.data.store2.query.Proxy;
 
 
@@ -61,8 +62,18 @@ public class QueryResultCache {
         return cached;
     }
 
+    public void clearCacheAll() {
+        for(String id : queryIds.values()) {
+            clearCache(id);
+        }
+    }
+
     public <T extends DatumQuery> void clearCache(T query) {
         String id = getQueryId(query);
+        clearCache(id);
+    }
+
+    public void clearCache(String id) {
         Map<Integer, int[]> pages = pageCache(id);
         List<Object> result = resultCache(id);
         Atomic.Boolean cached = cachedCache(id);
@@ -160,16 +171,16 @@ public class QueryResultCache {
         }
     }
 
-    public static class ProxyPager implements BiFunction<Proxy, CachedQueryResult<Proxy>, Function<DatumRep, DatumRep>> {
+    public static class PartitionPager<T extends DatumQuery & Partitioner> implements BiFunction<T, CachedQueryResult<T>, Function<DatumRep, DatumRep>> {
 
         @Override
-        public Function<DatumRep, DatumRep> apply(Proxy proxyRep, CachedQueryResult cachedQueryResult) {
+        public Function<DatumRep, DatumRep> apply(T query, CachedQueryResult<T> cachedQueryResult) {
             AtomicReference<String> partitionId = new AtomicReference<>("");
             AtomicInteger page = new AtomicInteger(0);
             AtomicInteger i = new AtomicInteger(0);
             AtomicReference<int[]> pageIndices = new AtomicReference<>(null);
             return (DatumRep d) -> {
-                String partition = d.data.get(proxyRep.partitionKey().toString()).toString();
+                String partition = d.data.get(query.partition().key().toString()).toString();
                 if(!partition.equals(partitionId.get())) {
                     if(pageIndices.get() == null) {
                         pageIndices.getAndSet(new int[]{0,0});
