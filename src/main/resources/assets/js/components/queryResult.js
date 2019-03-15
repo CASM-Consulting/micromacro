@@ -61,15 +61,21 @@ MicroMacroApp.component('queryResult', {
                     return keys;
                 }, {});
 
-                $scope.$watchCollection(angular.bind(this, function() {
-                    return $state.params.selected;
-                }), function(selected) {
+                var syncKeys = (selected) => {
                     if($ctrl.selectedKeys != selected && selected) {
                         $ctrl.selectedKeys = selected.reduce((keys, key)=> {
                             keys[key] = true;
                             return keys;
                         }, {});
                     }
+                };
+
+                syncKeys($state.params.selected);
+
+                $scope.$watchCollection(angular.bind(this, function() {
+                    return $state.params.selected;
+                }), function(selected) {
+                    syncKeys(selected);
                 });
 
                 $scope.$watchCollection("$ctrl.selectedKeys", function(selected, old){

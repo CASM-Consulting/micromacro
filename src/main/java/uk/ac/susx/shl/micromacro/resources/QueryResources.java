@@ -91,6 +91,7 @@ public class QueryResources {
         } else {
             response = Response.status(Response.Status.OK).entity( StreamSupport.stream(cached.stream().map(mapper).spliterator(), false) ).build();
         }
+
         CompletableFuture<Response> promise = new CompletableFuture<>();
         promise.complete(response);
         promise.thenAccept(asyncResponse::resume).thenRun(cached::close);
