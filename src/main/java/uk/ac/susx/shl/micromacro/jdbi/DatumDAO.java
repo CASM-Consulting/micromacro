@@ -67,7 +67,7 @@ public class DatumDAO {
         );
     }
 
-    public <T extends DatumQuery> Function<String, Datum> datumMapper(T query) {
+    public <T extends DatumQuery> Function<String, Datum> string2Datum(T query) {
         KeySet keys = method52DAO.schema(query.table());
         Gson gson = GsonBuilderFactory.get(keys).create();
 
@@ -75,7 +75,7 @@ public class DatumDAO {
     }
 
 
-    public Function<String, Map> datumMapper() {
+    public Function<String, Map> string2Map() {
         Gson gson = GsonBuilderFactory.get().create();
         return (str) -> gson.fromJson(str, Map.class);
     }

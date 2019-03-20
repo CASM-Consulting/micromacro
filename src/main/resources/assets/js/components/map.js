@@ -1,5 +1,8 @@
 MicroMacroApp.component('map', {
     templateUrl : 'html/map.html',
+    bindings : {
+        layers : '<'
+    },
     controller : function($scope, $http, $compile, leafletData, debounce, $window) {
 
         var DATE_FORMAT = 'YYYY-MM-DD';
@@ -687,43 +690,7 @@ MicroMacroApp.component('map', {
             });
         };
 
-        $scope.saveSents2Table = function()  {
-            $scope.loading = true;
-            var from = $scope.config.from.toISOString().split('T')[0];
-            var to = $scope.config.to.toISOString().split('T')[0]
-            $http.get("api/ob/saveSents2Table", {
-                params : {
-                    from : from,
-                    to : to,
-                    table : $scope.config.newTable
-                }
-            }).then(function(response) {
-                alert("saved");
-                $scope.loading = false;
-            }, function(response){
-                alert("failed " + response.data);
-                $scope.loading = false;
-            });
-        };
 
-        $scope.saveStatements2Table = function()  {
-            $scope.loadingData = true;
-            var from = $scope.config.from.toISOString().split('T')[0];
-            var to = $scope.config.to.toISOString().split('T')[0]
-            $http.get("api/ob/saveStatements2Table", {
-                params : {
-                    from : from,
-                    to : to,
-                    table : $scope.config.newTable
-                }
-            }).then(function(response) {
-                alert("saved");
-                $scope.loadingData = false;
-            }, function(response){
-                alert("failed " + response.data);
-                $scope.loadingData = false;
-            });
-        }
 
         var getAnnotations = function(ids) {
             $scope.loadingAnnotations = true;

@@ -54,6 +54,11 @@ public class QueryResultCache {
         return pages;
     }
 
+    private Map<String, Integer> partitionCache(String id) {
+        Map<String, Integer> partitions = db.hashMap(id +"-partitions", Serializer.STRING, Serializer.INTEGER).createOrOpen();
+        return partitions;
+    }
+
     private List<String> resultCache(String id) {
         List<String> result = db.indexTreeList(id, Serializer.STRING).createOrOpen();
         return result;
@@ -121,6 +126,7 @@ public class QueryResultCache {
 
         public final String id;
         public final Map<Integer, int[]> pages;
+        public final Map<String, Integer> partitions;
         public final List<String> result;
         public final Stream<String> resultStream;
         private final Atomic.Boolean cached;
@@ -132,17 +138,21 @@ public class QueryResultCache {
             result = resultCache(id);
             cached = cachedCache(id);
             pages = pageCache(id);
+            partitions = partitionCache(id);
 
             if(cached.get()) {
                 resultStream = result.stream();
             } else {
-                resultStream = resultSupplier.get().sequential().map(datumRep -> {
-                    result.add(datumRep);
-                    return datumRep;
-                }).map(pager.apply(query, this)).onClose(()-> {
-                    cached.set(true);
-                    db.commit();
-                });
+                resultStream = resultSupplier.get().sequential()
+                        .map(datumRep -> {
+                            result.add(datumRep);
+                            return datumRep;
+                        })
+                        .map(pager.apply(query, this))
+                        .onClose(()-> {
+                            cached.set(true);
+                            db.commit();
+                        });
             }
         }
 
@@ -181,7 +191,7 @@ public class QueryResultCache {
         }
 
         @Override
-        public Function<String, String> apply(T query, CachedQueryResult<T> cachedQueryResult) {
+        public Function<String, String> apply(T query, CachedQueryResult<T> cache) {
             AtomicReference<String> partitionId = new AtomicReference<>("");
             AtomicInteger page = new AtomicInteger(0);
             AtomicInteger i = new AtomicInteger(0);
@@ -191,18 +201,22 @@ public class QueryResultCache {
                 Map datum = mapper.apply(d);
 
                 String partition = datum.get(query.partition().key().toString()).toString();
+
                 if(!partition.equals(partitionId.get())) {
                     if(pageIndices.get() == null) {
                         pageIndices.getAndSet(new int[]{0,0});
                     } else {
-                        pageIndices.get()[1] = i.get();
-                        cachedQueryResult.pages.put(page.get(), pageIndices.get());
+
+                        cache.pages.put(page.get(), pageIndices.get());
                         pageIndices.getAndSet(new int[]{i.get(),0});
                         page.incrementAndGet();
                     }
+
+                    int pageNo = cache.pages.size();
+                    cache.partitions.put(partition, pageNo);
                 }
                 partitionId.set(partition);
-                i.incrementAndGet();
+                pageIndices.get()[1] = i.incrementAndGet();
                 return d;
             };
         }

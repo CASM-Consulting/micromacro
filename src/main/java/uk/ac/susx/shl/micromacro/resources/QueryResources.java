@@ -4,7 +4,6 @@ package uk.ac.susx.shl.micromacro.resources;
 import uk.ac.susx.shl.micromacro.core.QueryResultCache;
 import uk.ac.susx.shl.micromacro.jdbi.DatumDAO;
 import uk.ac.susx.tag.method51.core.data.store2.query.*;
-import uk.ac.susx.tag.method51.core.meta.Datum;
 
 import javax.ws.rs.*;
 import javax.ws.rs.container.AsyncResponse;
@@ -74,7 +73,7 @@ public class QueryResources {
                            final Select select) {
         QueryResultCache.CachedQueryResult<Select> cached;
 
-        Function<String, Map> mapper = datumDAO.datumMapper();
+        Function<String, Map> mapper = datumDAO.string2Map();
 
         if(select.partition() == null) {
             cached = cache.cache(select, () -> datumDAO.execute2String(select));
@@ -107,7 +106,7 @@ public class QueryResources {
 
         Response response;
 
-        Function<String, Map> mapper = datumDAO.datumMapper();
+        Function<String, Map> mapper = datumDAO.string2Map();
 
         QueryResultCache.CachedQueryResult<Proxy> cached = cache.cache(proxy, () -> datumDAO.execute2String(proxy) , new QueryResultCache.PartitionPager<>(mapper));
 
