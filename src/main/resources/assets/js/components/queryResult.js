@@ -126,8 +126,12 @@ MicroMacroApp.component('queryResult', {
         };
 
         $ctrl.cacheResults  = () => {
+            $ctrl.loading = true;
             return Queries.execute($ctrl.query, {cacheOnly:true}).then( (count) => {
                 $ctrl.totalItems = count;
+            }).then(() => {
+
+                $ctrl.loading = false;
             });
         }
 

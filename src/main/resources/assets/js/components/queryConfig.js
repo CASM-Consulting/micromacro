@@ -86,10 +86,14 @@ MicroMacroApp.component('queryConfig', {
         $ctrl.execute = (sampleSize) => {
             Queries.saveQuery($stateParams.workspaceId, $ctrl.queryId, $ctrl.query).then(function(query){
 //                alert("saved");
-                $state.go("^.query", {workspaceId:$stateParams.workspaceId, queryId:$ctrl.queryId, ver:0});
+                //$state.go("^.query", {workspaceId:$stateParams.workspaceId, queryId:$ctrl.queryId, ver:0});
                 $scope.queryVer = 0;
             }).then(()=>{
-                $state.transitionTo("workspace.query.execute",
+                var target = ".";
+                if($state.$current == "workspace.query") {
+                    target += "execute";
+                }
+                $state.transitionTo(target,
                     {queryId:$ctrl.queryId, page:$stateParams.page || 1, sampleSize:sampleSize},
                     {reload: true, inherit:true, relative: $state.$current}
                 );
