@@ -1,19 +1,10 @@
 package uk.ac.susx.shl.micromacro.core;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.mapdb.*;
-import uk.ac.susx.shl.micromacro.api.*;
 import uk.ac.susx.tag.method51.core.data.store2.query.DatumQuery;
 import uk.ac.susx.tag.method51.core.data.store2.query.Partitioner;
-import uk.ac.susx.tag.method51.core.data.store2.query.Proxy;
-import uk.ac.susx.tag.method51.core.meta.Datum;
 
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
@@ -156,9 +147,9 @@ public class QueryResultCache {
             }
         }
 
-        public long count() {
+        public Long count() {
             if(cached.get()) {
-                return result.size();
+                return (long)result.size();
             } else {
                 return resultStream.count();
             }
@@ -174,6 +165,13 @@ public class QueryResultCache {
 
         public List<String> get(int from, int to) {
             return result.subList(Math.min(result.size(),from), Math.min(result.size(),to));
+        }
+
+        public void clear() {
+            pages.clear();
+            result.clear();
+            cached.set(false);
+            db.commit();
         }
 
         @Override

@@ -1,6 +1,7 @@
 package uk.ac.susx.shl.micromacro.core;
 
 import uk.ac.susx.tag.method51.core.data.store2.query.DatumQuery;
+import uk.ac.susx.tag.method51.core.meta.filters.KeyFilter;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,17 +12,20 @@ public class Workspace {
     private final String id;
     private final String name;
     private final Map<String, Query> queries;
+    private final Map<String, Map<String, KeyFilter>> tableLiterals;
 
     public Workspace(String name) {
         id = UUID.randomUUID().toString();
         this.name = name;
         queries = new HashMap<>();
+        tableLiterals = new HashMap<>();
     }
 
-    public Workspace(String name,String id) {
+    public Workspace(String name, String id) {
         this.id = id;
         this.name = name;
         queries = new HashMap<>();
+        tableLiterals = new HashMap<>();
     }
 
 
@@ -37,7 +41,6 @@ public class Workspace {
         if(!queries.containsKey(name)) {
 
             queries.put(name, new Query<T>());
-
             queries.get(name).add(query);
 
         } else if(!query.sql().equals(queries.get(name).get(0).sql())) {
@@ -62,5 +65,16 @@ public class Workspace {
         return queries.get(id);
     }
 
+    public Workspace tableLiterals(String table, Map<String, KeyFilter> literals) {
+        tableLiterals.put(table, literals);
+        return this;
+    }
 
+    public Map<String, KeyFilter> tableLiterals(String table) {
+        return tableLiterals.get(table);
+    }
+
+    public Map<String, Map<String, KeyFilter>> tableLiterals() {
+        return tableLiterals;
+    }
 }

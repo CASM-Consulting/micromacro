@@ -6,7 +6,6 @@ import uk.ac.susx.shl.micromacro.api.DatumRep;
 import uk.ac.susx.tag.method51.core.data.store2.query.CreateIndex;
 import uk.ac.susx.tag.method51.core.data.store2.query.DatumQuery;
 import uk.ac.susx.tag.method51.core.data.store2.query.Index;
-import uk.ac.susx.tag.method51.core.data.store2.query.Proxy;
 import uk.ac.susx.tag.method51.core.gson.GsonBuilderFactory;
 import uk.ac.susx.tag.method51.core.meta.Datum;
 import uk.ac.susx.tag.method51.core.meta.Key;

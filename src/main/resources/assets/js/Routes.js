@@ -12,6 +12,9 @@ MicroMacroApp.config(function($stateProvider){
                 var queryList = Object.keys(workspace.queries);
                 queryList.sort();
                 return queryList;
+            },
+            tables: function(Tables) {
+                return Tables.list();
             }
         }
     });
@@ -21,9 +24,6 @@ MicroMacroApp.config(function($stateProvider){
         resolve: {
             query: function($stateParams) {
                 return {_TYPE:$stateParams.type};
-            },
-            tables: function(Tables) {
-                return Tables.list();
             }
         },
         views : {
@@ -86,7 +86,8 @@ MicroMacroApp.config(function($stateProvider){
             }
         },
         resolve: {
-            result: function(query, Queries, $stateParams) {
+            result: function(query, workspace, Queries, $stateParams) {
+                query.literals = workspace.tableLiterals[query.table] || query.literals;
                 return Queries.execute(Queries.limitOffset(query, $stateParams.sampleSize));
             },
             defaultKeys : function(Queries, $stateParams) {

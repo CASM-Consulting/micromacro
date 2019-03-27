@@ -2,9 +2,11 @@ MicroMacroApp.component("literals", {
     templateUrl : 'html/literals.html',
     bindings : {
         literals : '<',
-        keys : '<'
+        keys : '<',
+        table : '<?',
+        workspace : '<?'
     },
-    controller : function(Tables) {
+    controller : function(Queries) {
         var $ctrl = this;
 
         $ctrl.addLiteral = function() {
@@ -13,6 +15,9 @@ MicroMacroApp.component("literals", {
                 type: $ctrl.type,
                 args: $ctrl.args
             };
+            if($ctrl.workspace && $ctrl.table) {
+                Queries.setTableLiterals($ctrl.workspace, $ctrl.table, $ctrl.literals);
+            }
         };
 
         $ctrl.setLiteral = function(letter, literal) {
@@ -20,8 +25,12 @@ MicroMacroApp.component("literals", {
             $ctrl.key = literal.key;
             $ctrl.type = literal.type;
             $ctrl.args = literal.args;
+            $ctrl.isUncollapsed = true;
         };
 
+        $ctrl.$onInit = () => {
+            console.log($ctrl.literals);
+        };
     }
 });
 

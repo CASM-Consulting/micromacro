@@ -130,7 +130,7 @@ MicroMacroApp.factory("Queries", function($q, Server, $http) {
             if(query._TYPE == "select") {
                 query.limit = limit;
                 query.offset = offset;
-            } else if(query._TYPE == "proxy") {
+            } else if(query._TYPE == "proximity") {
                 query.innerLimit = limit;
                 query.innerOffset = offset;
 //                query.outerLimit = block;
@@ -146,6 +146,18 @@ MicroMacroApp.factory("Queries", function($q, Server, $http) {
                     Server.post("api/query/optimise/"+type, query, {
                         success : resolve
                     });
+                });
+            });
+        },
+
+        setTableLiterals : (workspaceId, table, literals) => {
+            return $q(function(resolve) {
+                Server.post("api/workspace/setTableLiterals", literals, {
+                    params : {
+                        workspaceId : workspaceId,
+                        table : table
+                    },
+                    success : resolve
                 });
             });
         }

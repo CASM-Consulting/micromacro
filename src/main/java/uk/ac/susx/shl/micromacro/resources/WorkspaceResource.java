@@ -3,8 +3,9 @@ package uk.ac.susx.shl.micromacro.resources;
 
 import uk.ac.susx.shl.micromacro.core.*;
 import uk.ac.susx.tag.method51.core.data.store2.query.DatumQuery;
-import uk.ac.susx.tag.method51.core.data.store2.query.Proxy;
+import uk.ac.susx.tag.method51.core.data.store2.query.Proximity;
 import uk.ac.susx.tag.method51.core.data.store2.query.Select;
+import uk.ac.susx.tag.method51.core.meta.filters.KeyFilter;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -104,11 +105,11 @@ public class WorkspaceResource {
     @Path("addProxy")
     public Response addProxy(@QueryParam("workspaceId") String workspaceId,
                              @QueryParam("queryId") String queryId,
-                             Proxy proxy) throws SQLException {
+                             Proximity proximity) throws SQLException {
 
         Workspace workspace = workspaces.get(workspaceId);
 
-        workspace.add(queryId, proxy);
+        workspace.add(queryId, proximity);
 
         workspaces.save(workspace);
 
@@ -130,7 +131,7 @@ public class WorkspaceResource {
         workspaces.save(workspace);
 
         return Response.ok().entity(
-                queryFactory.rep(workspaces.get(workspaceId).queries().get(queryId).get())
+                queryFactory.rep(select)
         ).build();
     }
 
@@ -164,5 +165,22 @@ public class WorkspaceResource {
         }
 
         return Response.ok().build();
+    }
+
+    @POST
+    @Path("setTableLiterals")
+    public Response setTableLiterals(@QueryParam("workspaceId") String workspaceId,
+                              @QueryParam("table") String table,
+                              Map<String, KeyFilter> literals) throws SQLException {
+
+        Workspace workspace = workspaces.get(workspaceId);
+
+        workspace.tableLiterals(table, literals);
+
+        workspaces.save(workspace);
+
+        return Response.ok().entity(
+                workspaces.get(workspaceId).tableLiterals(table)
+        ).build();
     }
 }

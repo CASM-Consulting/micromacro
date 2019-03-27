@@ -35,6 +35,5 @@
 .section {
     border:1px dashed;
     padding:2px;
-    margin-bottom: 2px;
-    margin-top: 2px;
+    margin: 2px;
 }

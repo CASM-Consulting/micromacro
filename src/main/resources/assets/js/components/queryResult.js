@@ -4,7 +4,8 @@ MicroMacroApp.component('queryResult', {
         query: '<',
         keys: '<',
         result: '<',
-        defaultKeys: '<'
+        defaultKeys: '<',
+        literals : '<'
     },
     controller : function($scope, $state, $stateParams, Queries, Datums, Rows, Types) {
         var $ctrl = this;
@@ -135,7 +136,7 @@ MicroMacroApp.component('queryResult', {
 //            spinnerService.show('booksSpinner');
         }
 
-        var isProxy = () => $ctrl.query._TYPE == "proxy";
+        var isProxy = () => $ctrl.query._TYPE == "proximity";
 
         $ctrl.cols = function(max, num) {
             return Math.floor(max/num);
