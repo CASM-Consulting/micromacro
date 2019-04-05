@@ -45,7 +45,15 @@ MicroMacroApp.factory("Queries", function($q, Server, $http) {
                 var type = query._TYPE;
                 Server.post("api/query/"+type, query, {
                     params : params,
-                    success : resolve
+                    success : function(data) {
+                        if(data instanceof Array){
+                            resolve(data.map( (raw) => {
+                                return JSON.parse(raw)
+                            }));
+                        } else {
+                            resolve(data);
+                        }
+                    }
                 });
             });
         },

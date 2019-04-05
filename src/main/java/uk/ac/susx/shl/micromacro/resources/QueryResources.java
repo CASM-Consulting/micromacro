@@ -37,44 +37,13 @@ public class QueryResources {
     private final QueryResultCache cache;
     private final ExecutorService executorService;
 
-    private final Cache<String, Lock> running;
 
-    private static class LockCondition {
-        private final ReentrantLock lock;
-        private final Condition condition;
-        private boolean running;
-
-        public LockCondition() {
-            lock = new ReentrantLock();
-            condition = lock.newCondition();
-            running = false;
-        }
-
-        public Lock lock() {
-            return lock;
-        }
-
-        public Condition condition() {
-            return condition;
-        }
-
-        public boolean running() {
-            return running;
-        }
-
-        public void complete() {
-            running = false;
-        }
-    }
 
     public QueryResources(DatumDAO datumDAO, QueryResultCache cache) {
         this.datumDAO = datumDAO;
         this.cache = cache;
         executorService = Executors.newFixedThreadPool(100);
 
-        running = CacheBuilder.newBuilder()
-                .expireAfterAccess(10, TimeUnit.MINUTES)
-                .build();
     }
 
     @POST
@@ -112,6 +81,9 @@ public class QueryResources {
         ).build();
     }
 
+
+
+
     @POST
     @Path("select")
     public void select(@Suspended final AsyncResponse asyncResponse,
@@ -120,49 +92,38 @@ public class QueryResources {
                            @QueryParam("limit") Integer limit,
                            final Select select) throws Exception {
 
-//        final Lock lock = running.get(select.sql(), ReentrantLock::new);
 
-//        lock.lock();
+        QueryResultCache.CachedQueryResult<Select> cached;
 
-        try {
+        Function<String, Map> mapper = datumDAO.string2Map();
 
-            QueryResultCache.CachedQueryResult<Select> cached;
-
-            Function<String, Map> mapper = datumDAO.string2Map();
-
-            if (select.partition() == null) {
-                cached = cache.cache(select, () -> datumDAO.execute2String(select));
-            } else {
-                cached = cache.cache(select, () -> datumDAO.execute2String(select), new QueryResultCache.PartitionPager<>(mapper));
-            }
-
-            Supplier<Object> task;
-
-            if (cacheOnly) {
-                task = () -> cached.count();
-            } else if (skip != null && limit != null) {
-                task = () -> StreamSupport.stream(cached.get(skip, skip + limit).stream().map(mapper).spliterator(), false);
-            } else {
-                task = () -> StreamSupport.stream(cached.stream().map(mapper).spliterator(), false);
-            }
-
-            CompletableFuture
-                    .supplyAsync(task, executorService)
-                    .thenApply(result -> Response.status(Response.Status.OK).entity(result).build())
-                    .thenAccept(asyncResponse::resume)
-                    .exceptionally(exception -> {
-                        LOG.warning(exception.getMessage());
-                        cached.clear();
-//                        lock.unlock();
-                        return null;
-                    })
-                    .thenRun(cached::close)
-//                    .thenRun(() -> lock.unlock())
-            ;
-
-        } catch (Exception e) {
-//            lock.unlock();
+        if (select.partition() == null) {
+            cached = cache.cache(select, () -> datumDAO.execute2String(select));
+        } else {
+            cached = cache.cache(select, () -> datumDAO.execute2String(select), new QueryResultCache.PartitionPager<>(mapper));
         }
+
+        Supplier<Object> task;
+
+        if (cacheOnly) {
+            task = () -> cached.count();
+        } else if (skip != null && limit != null) {
+            task = () -> StreamSupport.stream(cached.get(skip, skip + limit).stream().map(mapper).spliterator(), false);
+        } else {
+            task = () -> StreamSupport.stream(cached.stream().map(mapper).spliterator(), false);
+        }
+
+        CompletableFuture
+                .supplyAsync(task, executorService)
+                .thenApply(result -> Response.status(Response.Status.OK).entity(result).build())
+                .thenAccept(asyncResponse::resume)
+                .thenRun(cached::close)
+                .exceptionally(exception -> {
+                    LOG.warning(exception.getMessage());
+                    cached.clear();
+                    return null;
+                })
+        ;
     }
 
 
@@ -171,7 +132,7 @@ public class QueryResources {
     public void proxy(@Suspended final AsyncResponse asyncResponse,
                           @QueryParam("cacheOnly") @DefaultValue("false") Boolean cacheOnly,
                           @QueryParam("page") Integer page,
-                          final Proximity proximity) throws SQLException {
+                          final Proximity proximity) throws Exception {
 
         Function<String, Map> mapper = datumDAO.string2Map();
 
@@ -180,8 +141,7 @@ public class QueryResources {
         Supplier<Object> task;
 
         if(cacheOnly) {
-
-            task = () -> cached.count();
+            task =() -> cached.count();
         } else if(page != null) {
             int[] indices = cached.indices(page);
 

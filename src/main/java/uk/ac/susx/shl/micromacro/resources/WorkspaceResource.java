@@ -20,12 +20,12 @@ public class WorkspaceResource {
 
     private final Workspaces workspaces;
     private final QueryFactory queryFactory;
-    private final QueryResultCache cache;
+//    private final QueryResultCache cache;
 
-    public WorkspaceResource(Workspaces workspaces, QueryFactory queryFactory, QueryResultCache cache) {
+    public WorkspaceResource(Workspaces workspaces, QueryFactory queryFactory/*, QueryResultCache cache*/) {
         this.workspaces = workspaces;
         this.queryFactory = queryFactory;
-        this.cache = cache;
+//        this.cache = cache;
     }
 
 
@@ -76,10 +76,6 @@ public class WorkspaceResource {
         Query query = workspace.queries().get(queryId);
 
         Map rep = queryFactory.rep(query.get(ver));
-
-        boolean isCached = cache.isCached(query.get(ver));
-
-        rep.put("isCached", isCached);
 
         return Response.ok().entity(
             rep
@@ -136,36 +132,36 @@ public class WorkspaceResource {
     }
 
 
-    @GET
-    @Path("clearCache")
-    public <T extends DatumQuery> Response clearCache(@QueryParam("workspaceId") String workspaceId,
-                                                     @QueryParam("queryId") String queryId) {
-
-        Workspace workspace = workspaces.get(workspaceId);
-
-        Query<T> query = workspace.getQuery(queryId);
-
-        for(T q : query.history()) {
-            cache.clearCache(q);
-        }
-
-        return Response.ok().build();
-    }
-
-    @GET
-    @Path("clearCacheAll")
-    public <T extends DatumQuery> Response clearCacheAll(@QueryParam("workspaceId") String workspaceId) {
-
-        Workspace workspace = workspaces.get(workspaceId);
-
-        for(Query<T> query : workspace.queries().values() ) {
-            for(T q : query.history()) {
-                cache.clearCache(q);
-            }
-        }
-
-        return Response.ok().build();
-    }
+//    @GET
+//    @Path("clearCache")
+//    public <T extends DatumQuery> Response clearCache(@QueryParam("workspaceId") String workspaceId,
+//                                                     @QueryParam("queryId") String queryId) {
+//
+//        Workspace workspace = workspaces.get(workspaceId);
+//
+//        Query<T> query = workspace.getQuery(queryId);
+//
+//        for(T q : query.history()) {
+//            cache.clearCache(q);
+//        }
+//
+//        return Response.ok().build();
+//    }
+//
+//    @GET
+//    @Path("clearCacheAll")
+//    public <T extends DatumQuery> Response clearCacheAll(@QueryParam("workspaceId") String workspaceId) {
+//
+//        Workspace workspace = workspaces.get(workspaceId);
+//
+//        for(Query<T> query : workspace.queries().values() ) {
+//            for(T q : query.history()) {
+//                cache.clearCache(q);
+//            }
+//        }
+//
+//        return Response.ok().build();
+//    }
 
     @POST
     @Path("setTableLiterals")
