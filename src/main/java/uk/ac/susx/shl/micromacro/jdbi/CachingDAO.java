@@ -71,6 +71,16 @@ public class CachingDAO<T, Q extends SqlQuery> implements DAO<T,Q> {
         return pages;
     }
 
+    public void clearCache(Q query) {
+        String id = getQueryId(query);
+        Map<Integer, int[]> pages = pageCache(id);
+        List<String> result = resultCache(id);
+        Atomic.Boolean cached = cachedCache(id);
+        pages.clear();
+        result.clear();
+        cached.set(false);
+        cache.commit();
+    }
 
     private <R> R cache(Q query, Supplier<R> dao, Supplier<R> cache) {
         String id = getQueryId(query);

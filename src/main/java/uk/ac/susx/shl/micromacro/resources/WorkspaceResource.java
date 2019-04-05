@@ -2,9 +2,11 @@ package uk.ac.susx.shl.micromacro.resources;
 
 
 import uk.ac.susx.shl.micromacro.core.*;
+import uk.ac.susx.shl.micromacro.jdbi.CachingDAO;
 import uk.ac.susx.tag.method51.core.data.store2.query.DatumQuery;
 import uk.ac.susx.tag.method51.core.data.store2.query.Proximity;
 import uk.ac.susx.tag.method51.core.data.store2.query.Select;
+import uk.ac.susx.tag.method51.core.data.store2.query.SqlQuery;
 import uk.ac.susx.tag.method51.core.meta.filters.KeyFilter;
 
 import javax.ws.rs.*;
@@ -20,12 +22,12 @@ public class WorkspaceResource {
 
     private final Workspaces workspaces;
     private final QueryFactory queryFactory;
-//    private final QueryResultCache cache;
+    private final CachingDAO<String, SqlQuery> cachingDAO;
 
-    public WorkspaceResource(Workspaces workspaces, QueryFactory queryFactory/*, QueryResultCache cache*/) {
+    public WorkspaceResource(Workspaces workspaces, QueryFactory queryFactory, CachingDAO<String, SqlQuery> cachingDAO) {
         this.workspaces = workspaces;
         this.queryFactory = queryFactory;
-//        this.cache = cache;
+        this.cachingDAO = cachingDAO;
     }
 
 
@@ -132,36 +134,36 @@ public class WorkspaceResource {
     }
 
 
-//    @GET
-//    @Path("clearCache")
-//    public <T extends DatumQuery> Response clearCache(@QueryParam("workspaceId") String workspaceId,
-//                                                     @QueryParam("queryId") String queryId) {
-//
-//        Workspace workspace = workspaces.get(workspaceId);
-//
-//        Query<T> query = workspace.getQuery(queryId);
-//
-//        for(T q : query.history()) {
-//            cache.clearCache(q);
-//        }
-//
-//        return Response.ok().build();
-//    }
-//
-//    @GET
-//    @Path("clearCacheAll")
-//    public <T extends DatumQuery> Response clearCacheAll(@QueryParam("workspaceId") String workspaceId) {
-//
-//        Workspace workspace = workspaces.get(workspaceId);
-//
-//        for(Query<T> query : workspace.queries().values() ) {
-//            for(T q : query.history()) {
-//                cache.clearCache(q);
-//            }
-//        }
-//
-//        return Response.ok().build();
-//    }
+    @GET
+    @Path("clearCache")
+    public <T extends DatumQuery> Response clearCache(@QueryParam("workspaceId") String workspaceId,
+                                                     @QueryParam("queryId") String queryId) {
+
+        Workspace workspace = workspaces.get(workspaceId);
+
+        Query<T> query = workspace.getQuery(queryId);
+
+        for(T q : query.history()) {
+            cachingDAO.clearCache(q);
+        }
+
+        return Response.ok().build();
+    }
+
+    @GET
+    @Path("clearCacheAll")
+    public <T extends DatumQuery> Response clearCacheAll(@QueryParam("workspaceId") String workspaceId) {
+
+        Workspace workspace = workspaces.get(workspaceId);
+
+        for(Query<T> query : workspace.queries().values() ) {
+            for(T q : query.history()) {
+                cachingDAO.clearCache(q);
+            }
+        }
+
+        return Response.ok().build();
+    }
 
     @POST
     @Path("setTableLiterals")

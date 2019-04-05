@@ -14,10 +14,8 @@ import org.jdbi.v3.core.statement.SqlLogger;
 import org.jdbi.v3.core.statement.StatementContext;
 import uk.ac.susx.shl.micromacro.core.*;
 import uk.ac.susx.shl.micromacro.jdbi.*;
-import uk.ac.susx.shl.micromacro.core.data.text.PubMatcher;
 import uk.ac.susx.shl.micromacro.health.DefaultHealthCheck;
 import uk.ac.susx.shl.micromacro.resources.*;
-import uk.ac.susx.tag.method51.core.data.store2.query.DatumQuery;
 import uk.ac.susx.tag.method51.core.data.store2.query.SqlQuery;
 import uk.ac.susx.tag.method51.core.gson.GsonBuilderFactory;
 
@@ -91,15 +89,17 @@ public class MicroMacroApplication extends Application<MicroMacroConfiguration> 
 
 //        final Client client = new JerseyClientBuilder(environment).using(configuration.getJerseyClientConfiguration()).build(getName());
 
-        environment.jersey().register(new Method52Resouce(method52DAO));
+        environment.jersey().register(new Method52Resource(method52DAO));
 
 //        QueryResultCache cache = new QueryResultCache(configuration.resultsCachePath);
 
 //        environment.jersey().register(new QueryResources(datumDAO, cache));
 
-        DAO<String, SqlQuery> lockingCachingDatumDAO = new LockingDAO<>(new CachingDAO<>(new BaseDAO<>(jdbi, new DatumStringMapper()), configuration.resultsCachePath));
+        CachingDAO<String, SqlQuery> cachingDAO = new CachingDAO<>(new BaseDAO<>(jdbi, new DatumStringMapper()), configuration.resultsCachePath);
 
-        environment.jersey().register(new QueryResources2(lockingCachingDatumDAO));
+        DAO<String, SqlQuery> lockingCachingDatumDAO = new LockingDAO<>(cachingDAO);
+
+        environment.jersey().register(new QueryResources2(lockingCachingDatumDAO, method52DAO));
 
         environment.jersey().register(new TableResource(method52DAO));
 
@@ -109,7 +109,7 @@ public class MicroMacroApplication extends Application<MicroMacroConfiguration> 
 
         environment.jersey().register(new WorkspacesResource(workspaces, workspaceFactory));
 
-        environment.jersey().register(new WorkspaceResource(workspaces, queryFactory/*, cache*/));
+        environment.jersey().register(new WorkspaceResource(workspaces, queryFactory, cachingDAO));
     }
 
 }

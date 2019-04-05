@@ -18,11 +18,11 @@ import java.util.List;
  */
 @Path("m52")
 @Produces(MediaType.APPLICATION_JSON)
-public class Method52Resouce {
+public class Method52Resource {
 
     private final Method52DAO data;
 
-    public Method52Resouce(Method52DAO data) {
+    public Method52Resource(Method52DAO data) {
 
         this.data = data;
     }

@@ -9,6 +9,9 @@ import uk.ac.susx.tag.method51.core.data.PostgreSQLConnection;
 import uk.ac.susx.tag.method51.core.data.PostgresUtils;
 import uk.ac.susx.tag.method51.core.data.StoreException;
 import uk.ac.susx.tag.method51.core.data.impl.PostgreSQLDatumStore;
+import uk.ac.susx.tag.method51.core.data.store2.query.CreateIndex;
+import uk.ac.susx.tag.method51.core.data.store2.query.DatumQuery;
+import uk.ac.susx.tag.method51.core.data.store2.query.Index;
 import uk.ac.susx.tag.method51.core.gson.GsonBuilderFactory;
 import uk.ac.susx.tag.method51.core.meta.Datum;
 import uk.ac.susx.tag.method51.core.meta.Key;
@@ -86,6 +89,20 @@ public class Method52DAO {
     }
 
 
+
+    public <T extends DatumQuery> void optimiseTable(T query) {
+
+        String table = query.table();
+
+        for(Index index : query.indexHints()) {
+
+            CreateIndex createIndex =  new CreateIndex(table, index);
+
+            jdbi.withHandle(handle -> handle.execute(createIndex.sql()));
+        }
+    }
+
+    
     public List<Datum>  getScores(String table,
                                   String trialIdKey,
                                   String sentenceIdKey,

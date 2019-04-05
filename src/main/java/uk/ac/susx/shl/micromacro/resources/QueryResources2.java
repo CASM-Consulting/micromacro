@@ -4,12 +4,15 @@ package uk.ac.susx.shl.micromacro.resources;
 import uk.ac.susx.shl.micromacro.core.QueryResultCache;
 import uk.ac.susx.shl.micromacro.jdbi.CachingDAO;
 import uk.ac.susx.shl.micromacro.jdbi.DAO;
+import uk.ac.susx.shl.micromacro.jdbi.Method52DAO;
 import uk.ac.susx.tag.method51.core.data.store2.query.*;
 
 import javax.ws.rs.*;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.StreamSupport;
@@ -21,8 +24,11 @@ public class QueryResources2  extends BaseDAOResource<String, SqlQuery> {
 
     private static final Logger LOG = Logger.getLogger(QueryResultCache.class.getName());
 
-    public QueryResources2(DAO<String, SqlQuery> datumDAO) {
+    private final Method52DAO method52DAO;
+
+    public QueryResources2(DAO<String, SqlQuery> datumDAO, Method52DAO method52DAO) {
         super(datumDAO);
+        this.method52DAO = method52DAO;
     }
 
     @POST
@@ -69,58 +75,62 @@ public class QueryResources2  extends BaseDAOResource<String, SqlQuery> {
         }));
 
     }
-//
+
+    @POST
+    @Path("selectUpdate")
+    public Response update(final Update update) {
+
+        int n = datumDAO.update(update);
+
+        method52DAO.addKey(update.table(), update.key());
+
+        return Response.status(Response.Status.OK).entity( n ).build();
+    }
+
+    @POST
+    @Path("proxyUpdate")
+    public Response proxyUpdate(final ProxyUpdate update) {
+        int n = datumDAO.update(update);
+
+        method52DAO.addKey(update.table(), update.key());
+
+        return Response.status(Response.Status.OK).entity( n ).build();
+    }
+
+
+    @POST
+    @Path("optimise/proximity")
+    public Response optimiseProxy(Proximity proxy) throws SQLException {
+
+        method52DAO.optimiseTable(proxy);
+
+        return Response.status(Response.Status.OK).entity(
+                "OK"
+        ).build();
+    }
+
+    @POST
+    @Path("optimise/select")
+    public Response optimiseSelect(Select select) throws SQLException {
+
+        method52DAO.optimiseTable(select);
+
+        return Response.status(Response.Status.OK).entity(
+                "OK"
+        ).build();
+    }
+
 //    @POST
-//    @Path("selectUpdate")
-//    public void update(@Suspended final AsyncResponse asyncResponse,
-//            final Update update) throws SQLException {
+//    @Path("select-distinct")
+//    public Response selectDistinct(SelectDistinct selectDistinct) throws SQLException {
 //
-//        CompletableFuture<Object> promise = new CompletableFuture<>();
+//        String sql = selectDistinct.sql();
 //
-//        executorService.submit( (Runnable&CompletableFuture.AsynchronousCompletionTask)()-> {
-//            try {
-//                promise.complete(datumDAO.executeUpdate(update));
-//            } catch (Exception ex) {
-//                promise.completeExceptionally(ex);
-//            }
-//        });
+//        List<String> data = datumDAO.selectString(sql);
 //
-//        promise.thenApply(result -> Response.status(Response.Status.OK).entity( result ).build())
-//                .thenAccept(asyncResponse::resume)
-//                .thenRun(() -> {
-//                    datumDAO.addKey(update.table(), update.key());
-//                })
-//                .exceptionally(exception -> {
-//                    LOG.warning(exception.getMessage());
-//                    return null;
-//                });
-//
-//    }
-//
-//    @POST
-//    @Path("proxyUpdate")
-//    public void proxyUpdate(@Suspended final AsyncResponse asyncResponse,
-//                            final ProxyUpdate update) throws SQLException {
-//
-//        CompletableFuture<Object> promise = new CompletableFuture<>();
-//
-//        executorService.submit( (Runnable&CompletableFuture.AsynchronousCompletionTask)()-> {
-//            try {
-//                promise.complete(datumDAO.executeUpdate(update));
-//            } catch (Exception ex) {
-//                promise.completeExceptionally(ex);
-//            }
-//        });
-//
-//        promise.thenApply(result -> Response.status(Response.Status.OK).entity( result ).build())
-//                .thenAccept(asyncResponse::resume)
-//                .thenRun(() -> {
-//                    datumDAO.addKey(update.table(), update.key());
-//                })
-//                .exceptionally(exception -> {
-//                    LOG.warning(exception.getMessage());
-//                    return null;
-//                });
+//        return Response.status(Response.Status.OK).entity(
+//                data
+//        ).build();
 //    }
 
 

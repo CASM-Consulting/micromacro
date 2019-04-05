@@ -79,7 +79,35 @@ public class BaseDAOResource<T, Q extends SqlQuery> {
                 streamRef.get().close();
             }
         }
+    }
 
+    public void daoUpdate(final AsyncResponse asyncResponse, Supplier<Integer> task) throws Exception {
+
+        AtomicReference<Stream<T>> streamRef = new AtomicReference<>();
+        AtomicBoolean complete = new AtomicBoolean(false);
+        try {
+
+            CompletableFuture
+                    .supplyAsync(task, executorService)
+                    .thenApply(result -> Response.status(Response.Status.OK).entity(result).build())
+                    .whenComplete( (r,e) -> {
+                        if(e != null) {
+                            LOG.warning(e.getMessage());
+                            asyncResponse.resume(e);
+                        } else {
+                            asyncResponse.resume(r);
+                        }
+                        if(streamRef.get()!=null) {
+                            streamRef.get().close();
+                        }
+                        complete.set(true);
+                    }).get(); //must block
+
+        } finally {
+            if(streamRef.get()!=null && !complete.get()) {
+                streamRef.get().close();
+            }
+        }
     }
 
 
