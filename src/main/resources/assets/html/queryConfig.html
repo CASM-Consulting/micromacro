@@ -55,13 +55,13 @@
                     <input class="form-control" type="text" ng-model="$ctrl.query.target">
 
                     <label class=" control-label">Proximity</label>
-                    <input class="form-control" type="text" ng-model="$ctrl.query.proxy">
+                    <input class="form-control" type="text" ng-model="$ctrl.query.proximity">
 
                     <label class=" control-label">Partition</label>
                     <partition keys="$ctrl.keyList" ng-model="$ctrl.query.partition"></partition>
 
                     <label class=" control-label">Distance</label>
-                    <input type="number" step="1" min="1" class="form-control" ng-model="$ctrl.query.proximity">
+                    <input type="number" step="1" min="1" class="form-control" ng-model="$ctrl.query.distance">
                 </div>
 
             </div>

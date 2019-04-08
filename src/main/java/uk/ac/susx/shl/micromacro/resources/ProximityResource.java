@@ -4,8 +4,7 @@ package uk.ac.susx.shl.micromacro.resources;
 import uk.ac.susx.shl.micromacro.jdbi.DAO;
 import uk.ac.susx.shl.micromacro.jdbi.Method52DAO;
 import uk.ac.susx.tag.method51.core.data.store2.query.Proximity;
-import uk.ac.susx.tag.method51.core.data.store2.query.ProxyUpdate;
-import uk.ac.susx.tag.method51.core.data.store2.query.Select;
+import uk.ac.susx.tag.method51.core.data.store2.query.ProximityUpdate;
 import uk.ac.susx.tag.method51.core.data.store2.query.Update;
 
 import javax.ws.rs.POST;
@@ -25,11 +24,11 @@ public class ProximityResource {
 
     private static final Logger LOG = Logger.getLogger(ProximityResource.class.getName());
 
-    private final QueryResource<Proximity, ProxyUpdate> proximityResource;
+    private final QueryResource<Proximity, ProximityUpdate> resource;
     private final Method52DAO method52DAO;
 
     public ProximityResource(DAO<String, Proximity> datumDAO, Method52DAO method52DAO) {
-        proximityResource = new QueryResource<>(datumDAO, method52DAO);
+        resource = new QueryResource<>(datumDAO, method52DAO);
         this.method52DAO = method52DAO;
     }
 
@@ -37,14 +36,14 @@ public class ProximityResource {
     @Path("query")
     public void select(@Suspended final AsyncResponse asyncResponse,
                            final Proximity proximity) throws Exception {
-        proximityResource.query(asyncResponse, proximity);
+        resource.query(asyncResponse, proximity);
     }
 
     @POST
     @Path("cacheOnly")
     public void cacheOnly(@Suspended final AsyncResponse asyncResponse,
                        final Proximity proximity) throws Exception {
-        proximityResource.cacheOnly(asyncResponse, proximity);
+        resource.cacheOnly(asyncResponse, proximity);
     }
 
     @POST
@@ -53,15 +52,15 @@ public class ProximityResource {
                           @QueryParam("skip") Integer skip,
                           @QueryParam("limit") Integer limit,
                           final Proximity proximity) throws Exception {
-        proximityResource.skipLimit(asyncResponse, skip, limit, proximity);
+        resource.skipLimit(asyncResponse, skip, limit, proximity);
     }
 
     @POST
     @Path("page")
-    public void proxy(@Suspended final AsyncResponse asyncResponse,
+    public void page(@Suspended final AsyncResponse asyncResponse,
                           @QueryParam("page") Integer page,
                           final Proximity proximity) throws Exception {
-        proximityResource.page(asyncResponse, page, proximity);
+        resource.page(asyncResponse, page, proximity);
     }
 
     @POST
@@ -69,24 +68,21 @@ public class ProximityResource {
     public void partition(@Suspended final AsyncResponse asyncResponse,
                           @QueryParam("partition") String partition,
                           final Proximity proximity) throws Exception {
-        proximityResource.partition(asyncResponse, partition, proximity);
+        resource.partition(asyncResponse, partition, proximity);
     }
 
     @POST
     @Path("proximityUpdate")
     public Response update(final Update update) {
-        return proximityResource.update(update);
+        return resource.update(update);
     }
+
 
     @POST
     @Path("optimise")
-    public Response optimist(Proximity proximity) {
+    public Response optimise(Proximity proximity) {
 
-        method52DAO.optimiseTable(proximity);
-
-        return Response.status(Response.Status.OK).entity(
-                "OK"
-        ).build();
+        return resource.optimise(proximity);
     }
 
 //    @POST

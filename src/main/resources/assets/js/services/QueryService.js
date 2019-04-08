@@ -2,7 +2,7 @@ MicroMacroApp.factory("Queries", function($q, Server, $http) {
 
     return {
 
-        binProxyResultByPartition : function (result, partitionKey) {
+        binProximityResultByPartition : function (result, partitionKey) {
 
 
             partitionKey = DatumFactory.keyFromObj(partitionKey).key();
@@ -128,7 +128,7 @@ MicroMacroApp.factory("Queries", function($q, Server, $http) {
                 if(query._TYPE == "select") {
                     path = "addSelect";
                 } else {
-                    path = "addProxy";
+                    path = "addProximity";
                 }
 
                 Server.post("api/workspace/"+path, query,  {

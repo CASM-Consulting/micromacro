@@ -13,7 +13,9 @@ import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -41,7 +43,7 @@ public class QueryResource<Q extends SqlQuery, U extends SqlUpdate> extends Base
     public void skipLimit(AsyncResponse asyncResponse, int skip, int limit, Q query) throws Exception {
 
         daoStreamResponse(asyncResponse, query, (stream-> {
-            List<?> list = datumDAO.list(query);
+            List<String> list = datumDAO.list(query);
             return list.subList(Math.min(list.size(), skip), Math.min(list.size(), skip + limit)).stream();
         }));
     }
@@ -52,7 +54,7 @@ public class QueryResource<Q extends SqlQuery, U extends SqlUpdate> extends Base
 
                 int[] indices = cache.int2IntArr(cache.getQueryId(query), PartitionPager.ID2INTARR).get(page);
 
-                List<?> list = datumDAO.list(query);
+                List<String> list = datumDAO.list(query);
 
                 return list.subList(Math.min(list.size(), indices[0]), Math.min(list.size(), indices[1])).stream();
         }));
@@ -64,13 +66,23 @@ public class QueryResource<Q extends SqlQuery, U extends SqlUpdate> extends Base
         daoStreamResponse(asyncResponse, query, (stream-> {
             CachingDAO<String, SqlQuery> cache = (CachingDAO<String, SqlQuery>)datumDAO.getDAO();
 
-            int page = cache.str2Int(partition, PartitionPager.ID2PAGE).get(partition);
+            String id = cache.getQueryId(query);
 
-            int[] indices = cache.int2IntArr(cache.getQueryId(query), PartitionPager.ID2INTARR).get(page);
+            Map<String, Integer> partitions = cache.str2Int(id, PartitionPager.ID2PAGE);
 
-            List<?> list = datumDAO.list(query);
+            if(partitions.containsKey(partition)) {
 
-            return list.subList(Math.min(list.size(), indices[0]), Math.min(list.size(), indices[1])).stream();
+                int page = partitions.get(partition);
+
+                int[] indices = cache.int2IntArr(id, PartitionPager.ID2INTARR).get(page);
+
+                List<String> list = datumDAO.list(query);
+
+                return list.subList(Math.min(list.size(), indices[0]), Math.min(list.size(), indices[1])).stream();
+            } else {
+                return new ArrayList<>();
+            }
+
         }));
     }
 
@@ -83,7 +95,7 @@ public class QueryResource<Q extends SqlQuery, U extends SqlUpdate> extends Base
         return Response.status(Response.Status.OK).entity( n ).build();
     }
 
-    public Response optimiseProxy(Q query) {
+    public Response optimise(Q query) {
 
         method52DAO.optimiseTable((DatumQuery)query);
 

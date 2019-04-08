@@ -100,8 +100,8 @@ public class WorkspaceResource {
     }
 
     @POST
-    @Path("addProxy")
-    public Response addProxy(@QueryParam("workspaceId") String workspaceId,
+    @Path("addProximity")
+    public Response addProximity(@QueryParam("workspaceId") String workspaceId,
                              @QueryParam("queryId") String queryId,
                              Proximity proximity) throws SQLException {
 

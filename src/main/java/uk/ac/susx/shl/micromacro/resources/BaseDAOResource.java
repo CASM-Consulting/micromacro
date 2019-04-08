@@ -58,7 +58,7 @@ public class BaseDAOResource<T, Q extends SqlQuery> {
         try {
 
             List<BiFunction> functions = new ArrayList<>();
-            if(query instanceof Partitioner) {
+            if(query instanceof Partitioner && ((Partitioner) query).partition() != null) {
 
                 Partitioner partitioner = (Partitioner)query;
 
