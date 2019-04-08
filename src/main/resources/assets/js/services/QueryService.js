@@ -28,6 +28,7 @@ MicroMacroApp.factory("Queries", function($q, Server, $http) {
         },
 
         load : function(workspaceId, queryId, ver) {
+            ver || (ver = 0);
             return $q(function(resolve) {
                 Server.get("api/workspace/loadQuery", {
                     params : {
@@ -214,7 +215,7 @@ MicroMacroApp.factory("Queries", function($q, Server, $http) {
         optimise : (query) => {
             return $q(function(resolve) {
                 return $q(function(resolve) {
-                    var type = query.type;
+                    var type = query._TYPE;
                     Server.post("api/query/"+type+"/optimise/", query, {
                         success : resolve
                     });

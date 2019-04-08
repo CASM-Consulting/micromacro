@@ -1,13 +1,19 @@
 MicroMacroApp.config(function($stateProvider){
 
     $stateProvider.state('workspace',{
-        name: 'workspace',
-        url: '/workspace/{workspaceId}',
+        url: '/{workspaceId}',
         component:'workspace',
         resolve: {
             workspace: function(Workspaces, $stateParams) {
                 return Workspaces.load($stateParams.workspaceId);
-            },
+            }
+        }
+    });
+
+    $stateProvider.state('workspace.queries',{
+        url: '/queries',
+        component:'queries',
+        resolve: {
             queryList: function(workspace) {
                 var queryList = Object.keys(workspace.queries);
                 queryList.sort();
@@ -19,7 +25,37 @@ MicroMacroApp.config(function($stateProvider){
         }
     });
 
-    $stateProvider.state('workspace.newQuery', {
+    $stateProvider.state('workspace.maps',{
+        url: '/maps',
+        component:'maps',
+        resolve: {
+            queryList: function(workspace) {
+                var queryList = Object.keys(workspace.queries);
+                queryList.sort();
+                return queryList;
+            }
+        }
+    });
+
+    $stateProvider.state('workspace.maps.newMap', {
+        url: '/new-map',
+        views : {
+            config : {
+                component:'mapConfig'
+            }
+        }
+    });
+
+    $stateProvider.state('workspace.maps.map', {
+        url: '/{mapId}',
+        views : {
+            config : {
+                component:'mapConfig'
+            }
+        }
+    });
+
+    $stateProvider.state('workspace.queries.newQuery', {
         url: '/new-query/{type}',
         resolve: {
             query: function($stateParams) {
@@ -33,8 +69,8 @@ MicroMacroApp.config(function($stateProvider){
         }
     });
 
-    $stateProvider.state('workspace.query', {
-        url: '/query/{queryId}?{ver:int}',
+    $stateProvider.state('workspace.queries.query', {
+        url: '/{queryId}?{ver:int}',
         params : {
             ver : 0
         },
@@ -58,14 +94,11 @@ MicroMacroApp.config(function($stateProvider){
             },
             queryNotes : {
                 component:'queryNotes'
-            },
-            summary: {
-                component:'summary'
             }
         }
     });
 
-    $stateProvider.state('workspace.query.execute', {
+    $stateProvider.state('workspace.queries.query.execute', {
         url: '/execute/{page:int}?{selected:string}&{sampleSize:int}',
         params : {
             page : {
@@ -81,7 +114,7 @@ MicroMacroApp.config(function($stateProvider){
             }
         },
         views: {
-            'result@workspace' : {
+            'result@workspace.queries' : {
                 component:'queryResult'
             }
         },

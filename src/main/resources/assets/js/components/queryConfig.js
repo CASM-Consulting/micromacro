@@ -93,7 +93,7 @@ MicroMacroApp.component('queryConfig', {
                 $scope.queryVer = 0;
             }).then(()=>{
                 var target = ".";
-                if($state.$current.name == "workspace.query") {
+                if($state.$current.name == "workspace.queries.query") {
                     target += "execute";
                 }
                 $state.transitionTo(target,

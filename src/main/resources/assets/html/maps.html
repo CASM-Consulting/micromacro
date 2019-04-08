@@ -1,0 +1,44 @@
+<div>
+    <div class="col-md-2">
+        <h4>Maps</h4>
+        <button class='btn btn-default' ui-sref=".newMap()">New Map</button>
+        <div ui-view="config"></div>
+    </div>
+
+    <div class="col-md-10">
+        <div>
+
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Table</th>
+<!--                    <th>Versions</th>-->
+                    <th># Returned</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="name in $ctrl.queryList">
+                    <td> {{name}} </td>
+                    <td> {{$ctrl.workspace.queries[name].history[0]._TYPE}} </td>
+                    <td> {{$ctrl.workspace.queries[name].history[0].table}} </td>
+<!--                    <td> {{$ctrl.workspace.queries[name].history.length}} </td>-->
+                    <td> ### </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <uib-tabset active="$ctrl.active">
+            <uib-tab ng-repeat="name in $ctrl.mapList"
+                     index="$index"
+                     heading="{{name}}"
+                     select="$ctrl.loadMap(name)">
+            </uib-tab>
+        </uib-tabset>
+        <div ui-view="map"></div>
+    </div>
+
+    <div ui-view="mapNotes"></div>
+
+</div>

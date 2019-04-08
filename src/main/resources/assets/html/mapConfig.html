@@ -1,0 +1,47 @@
+<div class="row">
+
+    <form class="form-horizontal col-sm-12">
+
+        <div class="form-group form-group-sm">
+            <div class="section">
+                <label class="control-label" for="mapName">Map Name</label>
+                <input class="form-control input-sm" type="text" id="mapName" ng-model="$ctrl.mapId">
+            </div>
+
+
+            <div class="section">
+                <div><label class="control-label" >Queries</label></div>
+                <label uib-btn-checkbox
+                       class="btn btn-primary"
+                       ng-repeat="query in $ctrl.queryList"
+                       ng-model="$ctrl.map.selectedQueries[query]"
+                       >
+                    {{query}}
+                </label>
+<!--                <label class="control-label" for="table" >Queries</label>-->
+<!--                <select multiple-->
+<!--                        class="form-control input-sm"-->
+<!--                        id="table"-->
+<!--                        ng-model="$ctrl.query.table"-->
+<!--                        ng-options="query for query in $ctrl.queryList"-->
+<!--                        ng-change="$ctrl.reload()">-->
+<!--                </select>-->
+
+            </div>
+
+            <div class="section">
+                <label class="control-label" for="dateKey" >Date Key</label>
+
+                <key keys="$ctrl.keyList" ng-model="$ctrl.map.dateKey" for-id="'dateKey'"></key>
+            </div>
+
+            <div class="section">
+                <button type="button" class='btn btn-default ' ng-click="$ctrl.show()" >Show</button>
+            </div>
+
+        </div>
+    </form>
+
+
+
+</div>
