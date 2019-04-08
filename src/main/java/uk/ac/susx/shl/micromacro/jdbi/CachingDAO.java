@@ -7,10 +7,7 @@ import org.mapdb.Serializer;
 import uk.ac.susx.tag.method51.core.data.store2.query.SqlQuery;
 
 import java.nio.file.Path;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -18,6 +15,7 @@ import java.util.stream.Stream;
 
 public class CachingDAO<T, Q extends SqlQuery> implements DAO<T,Q> {
 
+    public static final String RESULT = "-results";
 
     private final DB cache;
     private final DAO<T,Q> dao;
@@ -62,23 +60,68 @@ public class CachingDAO<T, Q extends SqlQuery> implements DAO<T,Q> {
         Atomic.Boolean cached = cache.atomicBoolean(id +"-cached").createOrOpen();
         return cached;
     }
-    private List<String> resultCache(String id) {
-        List<String> result = cache.indexTreeList(id, Serializer.STRING).createOrOpen();
+
+    public List<String> strListCache(String id, String suffix) {
+        register(id, suffix);
+        List<String> result = cache.indexTreeList(id + suffix, Serializer.STRING).createOrOpen();
         return result;
     }
-    public Map<Integer, int[]> pageCache(String id) {
-        Map<Integer, int[]> pages = cache.hashMap(id +"-pages", Serializer.INTEGER, Serializer.INT_ARRAY).createOrOpen();
+
+    public Map<String, Integer> str2Int(String id, String suffix) {
+        register(id, suffix);
+        Map<String, Integer> pages = cache.hashMap(id + suffix, Serializer.STRING, Serializer.INTEGER).createOrOpen();
         return pages;
+    }
+
+    public Map<Integer, int[]> int2IntArr(String id, String suffix) {
+        register(id, suffix);
+        Map<Integer, int[]> pages = cache.hashMap(id + suffix, Serializer.INTEGER, Serializer.INT_ARRAY).createOrOpen();
+        return pages;
+    }
+
+    private Map<String, Set<String>> registry(String id) {
+        Map<String, Set<String>> reg = cache.hashMap(id+"-reg", Serializer.STRING, Serializer.ELSA).createOrOpen();
+        return reg;
+    }
+    private Set<String> caches(String id) {
+        Map<String, Set<String>> reg = registry(id);
+        if(!reg.containsKey(id)) {
+            reg.put(id, new HashSet<>());
+            cache.commit();
+        }
+        return reg.get(id);
+    }
+
+    private void register(String id, String suffix) {
+        Map<String, Set<String>> reg = registry(id);
+        if(!reg.containsKey(id)) {
+            reg.put(id, new HashSet<>());
+            cache.commit();
+        }
+        Set<String> caches = reg.get(id);
+        caches.add(id+suffix);
+        reg.put(id, caches);
     }
 
     public void clearCache(Q query) {
         String id = getQueryId(query);
-        Map<Integer, int[]> pages = pageCache(id);
-        List<String> result = resultCache(id);
+        Set<String> caches = caches(id);
+
+        for(String cacheName : caches) {
+            Object c = cache.get(cacheName);
+            if(Map.class.isAssignableFrom(c.getClass())) {
+                ((Map)c).clear();
+            } else if(List.class.isAssignableFrom(c.getClass())) {
+                ((List)c).clear();
+            }
+        }
         Atomic.Boolean cached = cachedCache(id);
-        pages.clear();
-        result.clear();
         cached.set(false);
+
+//        Map<Integer, int[]> pages = pageCache(id);
+//        List<String> result = strListCache(id);
+//        pages.clear();
+//        result.clear();
         cache.commit();
     }
 
@@ -103,7 +146,7 @@ public class CachingDAO<T, Q extends SqlQuery> implements DAO<T,Q> {
         Supplier<Stream<T>> daoSupplier = () -> {
 
             String id = getQueryId(query);
-            final List<String> resultCache = resultCache(id);
+            final List<String> resultCache = strListCache(id, RESULT);
 
             Stream<T> stream = dao.stream(query).map(result -> {
                 resultCache.add(result.toString());
@@ -117,6 +160,9 @@ public class CachingDAO<T, Q extends SqlQuery> implements DAO<T,Q> {
             stream = stream.onClose(()-> {
                 cachedCache(id).set(true);
                 cache.commit();
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {}
             });
 
             return stream;
@@ -124,7 +170,7 @@ public class CachingDAO<T, Q extends SqlQuery> implements DAO<T,Q> {
 
         Supplier<Stream<T>> cacheSupplier = () -> {
             String id = getQueryId(query);
-            List resultCache = resultCache(id);
+            List resultCache = strListCache(id, RESULT);
             return resultCache.stream();
         };
 
@@ -141,7 +187,7 @@ public class CachingDAO<T, Q extends SqlQuery> implements DAO<T,Q> {
 
         Supplier<List<T>> cacheSupplier = () -> {
             String id = getQueryId(query);
-            final List resultCache = resultCache(id);
+            final List resultCache = strListCache(id, RESULT);
             return resultCache;
         };
 

@@ -5,6 +5,7 @@ import uk.ac.susx.shl.micromacro.core.QueryResultCache;
 import uk.ac.susx.shl.micromacro.jdbi.CachingDAO;
 import uk.ac.susx.shl.micromacro.jdbi.DAO;
 import uk.ac.susx.shl.micromacro.jdbi.Method52DAO;
+import uk.ac.susx.shl.micromacro.jdbi.PartitionPager;
 import uk.ac.susx.tag.method51.core.data.store2.query.*;
 
 import javax.ws.rs.*;
@@ -64,7 +65,7 @@ public class QueryResources2  extends BaseDAOResource<String, SqlQuery> {
 
                 CachingDAO<String, SqlQuery> cache = (CachingDAO<String, SqlQuery>)datumDAO.getDAO();
 
-                int[] indices = cache.pageCache(cache.getQueryId(proximity)).get(page);
+                int[] indices = cache.int2IntArr(cache.getQueryId(proximity), PartitionPager.ID2INTARR).get(page);
 
                 List<?> list = datumDAO.list(proximity);
 
@@ -100,7 +101,7 @@ public class QueryResources2  extends BaseDAOResource<String, SqlQuery> {
 
     @POST
     @Path("optimise/proximity")
-    public Response optimiseProxy(Proximity proxy) throws SQLException {
+    public Response optimiseProxy(Proximity proxy) {
 
         method52DAO.optimiseTable(proxy);
 
@@ -111,7 +112,7 @@ public class QueryResources2  extends BaseDAOResource<String, SqlQuery> {
 
     @POST
     @Path("optimise/select")
-    public Response optimiseSelect(Select select) throws SQLException {
+    public Response optimiseSelect(Select select) {
 
         method52DAO.optimiseTable(select);
 

@@ -2,15 +2,20 @@ package uk.ac.susx.shl.micromacro.resources;
 
 import uk.ac.susx.shl.micromacro.core.QueryResultCache;
 import uk.ac.susx.shl.micromacro.jdbi.DAO;
+import uk.ac.susx.shl.micromacro.jdbi.PartitionPager;
+import uk.ac.susx.tag.method51.core.data.store2.query.Partitioner;
 import uk.ac.susx.tag.method51.core.data.store2.query.SqlQuery;
 
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.core.Response;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
@@ -52,8 +57,16 @@ public class BaseDAOResource<T, Q extends SqlQuery> {
         AtomicBoolean complete = new AtomicBoolean(false);
         try {
 
+            List<BiFunction> functions = new ArrayList<>();
+            if(query instanceof Partitioner) {
+
+                Partitioner partitioner = (Partitioner)query;
+
+                functions.add(new PartitionPager(partitioner.partition().key().toString()));
+            }
+
             Supplier<Object> task = ()-> {
-                Stream<T> stream = datumDAO.stream(query);
+                Stream<T> stream = datumDAO.stream(query, functions.toArray(new BiFunction[]{}));
                 streamRef.set(stream);
                 return handler.apply(stream);
             };
