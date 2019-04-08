@@ -127,7 +127,7 @@ MicroMacroApp.component('queryResult', {
         };
 
         $ctrl.cacheResults  = () => {
-            return Queries.execute($ctrl.query, {cacheOnly:true}).then( (count) => {
+            return Queries.cacheOnly($ctrl.query).then( (count) => {
                 $ctrl.totalItems = count;
             });
         }
@@ -170,7 +170,7 @@ MicroMacroApp.component('queryResult', {
                 if($ctrl.pages[$ctrl.currentPage-1]) {
                     $ctrl.page = Rows.getRowsColumns($ctrl.pages[$ctrl.currentPage-1], $ctrl.keys, $ctrl.selectedKeys);
                 } else {
-                    Queries.execute($ctrl.query, {cacheOnly:false, page:page}).then( (data)=> {
+                    Queries.page($ctrl.query, page).then( (data)=> {
                         $ctrl.page = Rows.getRowsColumns(data, $ctrl.keys, $ctrl.selectedKeys);
                     });
                 }
@@ -181,7 +181,7 @@ MicroMacroApp.component('queryResult', {
                 if($ctrl.result[skip] && $ctrl.result[skip+limit-1]) {
                     $ctrl.page = Rows.getRowsColumns($ctrl.result.slice(skip, skip+limit), $ctrl.keys, $ctrl.selectedKeys);
                 } else {
-                    Queries.execute($ctrl.query, {cacheOnly:false, skip:skip, limit:limit}).then( (data)=> {
+                    Queries.skipLimit($ctrl.query, skip, limit).then( (data)=> {
                         $ctrl.page = Rows.getRowsColumns(data, $ctrl.keys, $ctrl.selectedKeys);
                     });
                 }
@@ -198,7 +198,7 @@ MicroMacroApp.component('queryResult', {
 
             updateQuery._TYPE += "Update";
 
-            Queries.execute(updateQuery);
+            Queries.update(updateQuery);
         };
 
     }

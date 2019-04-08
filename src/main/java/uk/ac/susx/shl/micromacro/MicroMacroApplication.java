@@ -16,6 +16,7 @@ import uk.ac.susx.shl.micromacro.core.*;
 import uk.ac.susx.shl.micromacro.jdbi.*;
 import uk.ac.susx.shl.micromacro.health.DefaultHealthCheck;
 import uk.ac.susx.shl.micromacro.resources.*;
+import uk.ac.susx.tag.method51.core.data.store2.query.Select;
 import uk.ac.susx.tag.method51.core.data.store2.query.SqlQuery;
 import uk.ac.susx.tag.method51.core.gson.GsonBuilderFactory;
 
@@ -93,13 +94,14 @@ public class MicroMacroApplication extends Application<MicroMacroConfiguration> 
 
 //        QueryResultCache cache = new QueryResultCache(configuration.resultsCachePath);
 
-//        environment.jersey().register(new QueryResources(datumDAO, cache));
+//        environment.jersey().register(new SelectResource(datumDAO, cache));
 
         CachingDAO<String, SqlQuery> cachingDAO = new CachingDAO<>(new BaseDAO<>(jdbi, new DatumStringMapper()), configuration.resultsCachePath);
 
         DAO<String, SqlQuery> lockingCachingDatumDAO = new LockingDAO<>(cachingDAO);
 
-        environment.jersey().register(new QueryResources2(lockingCachingDatumDAO, method52DAO));
+        environment.jersey().register(new SelectResource((DAO)lockingCachingDatumDAO, method52DAO));
+        environment.jersey().register(new ProximityResource((DAO)lockingCachingDatumDAO, method52DAO));
 
         environment.jersey().register(new TableResource(method52DAO));
 
