@@ -1,6 +1,5 @@
 package uk.ac.susx.shl.micromacro.resources;
 
-import uk.ac.susx.shl.micromacro.core.QueryResultCache;
 import uk.ac.susx.shl.micromacro.jdbi.DAO;
 import uk.ac.susx.shl.micromacro.jdbi.PartitionPager;
 import uk.ac.susx.tag.method51.core.data.store2.query.Partitioner;
@@ -30,14 +29,14 @@ import java.util.stream.Stream;
  * the required functionality for a given request.
  *
  */
-public class BaseDAOResource<T, Q extends SqlQuery> {
+public class DAOStreamResource<T, Q extends SqlQuery> {
 
-    private static final Logger LOG = Logger.getLogger(QueryResultCache.class.getName());
+    private static final Logger LOG = Logger.getLogger(DAOStreamResource.class.getName());
 
     protected final DAO<T, Q> datumDAO;
     private final ExecutorService executorService;
 
-    protected BaseDAOResource(DAO<T, Q> datumDAO) {
+    protected DAOStreamResource(DAO<T, Q> datumDAO) {
         this.datumDAO = datumDAO;
         executorService = Executors.newFixedThreadPool(100);
     }
@@ -58,6 +57,7 @@ public class BaseDAOResource<T, Q extends SqlQuery> {
         try {
 
             List<BiFunction> functions = new ArrayList<>();
+
             if(query instanceof Partitioner && ((Partitioner) query).partition() != null) {
 
                 Partitioner partitioner = (Partitioner)query;

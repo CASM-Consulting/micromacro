@@ -36,6 +36,12 @@
             </div>
 
             <div class="section">
+                <label class="control-label" for="idKey" >ID Key</label>
+
+                <key keys="$ctrl.keyList" ng-model="$ctrl.map.idKey" for-id="'idKey'"></key>
+            </div>
+
+            <div class="section">
                 <button type="button" class='btn btn-default ' ng-click="$ctrl.show()" >Show</button>
             </div>
 

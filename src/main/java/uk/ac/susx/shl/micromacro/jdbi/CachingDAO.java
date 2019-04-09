@@ -126,15 +126,21 @@ public class CachingDAO<T, Q extends SqlQuery> implements DAO<T,Q> {
     }
 
     private <R> R cache(Q query, Supplier<R> dao, Supplier<R> cache) {
-        String id = getQueryId(query);
-        Atomic.Boolean cached = cachedCache(id);
-        if(cached.get()) {
+        if(isCached(query)) {
             return cache.get();
         } else {
             return dao.get();
         }
     }
 
+    public boolean isCached(Q query) {
+        String id = getQueryId(query);
+        return cachedCache(id).get();
+    }
+
+    public boolean isCached(String id) {
+        return cachedCache(id).get();
+    }
 
     @Override
     public Stream<T> stream(Q query) {

@@ -1,9 +1,9 @@
 MicroMacroApp.component('map', {
     templateUrl : 'html/map.html',
     bindings : {
-        layers : '<'
+        mapConfig : '<'
     },
-    controller : function($scope, $http, $compile, leafletData, debounce, $window) {
+    controller : function($scope, $http, $compile, leafletData, debounce, $window, Queries) {
 
         var DATE_FORMAT = 'YYYY-MM-DD';
         var TRIAL_ID_KEY = 'trial_id';

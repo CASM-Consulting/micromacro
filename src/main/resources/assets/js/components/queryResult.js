@@ -105,7 +105,7 @@ MicroMacroApp.component('queryResult', {
                 }
             });
 
-            if(isProximity()) {
+            if(isPartitioned()) {
                 $ctrl.pages = Queries.binProximityResultByPartition($ctrl.result, $ctrl.query.partition.key);
                 $ctrl.page = Rows.getRowsColumns($ctrl.pages[$ctrl.currentPage-1], $ctrl.keys, $ctrl.selectedKeys);
             }
@@ -128,7 +128,11 @@ MicroMacroApp.component('queryResult', {
 
         $ctrl.cacheResults  = () => {
             return Queries.cacheOnly($ctrl.query).then( (count) => {
-                $ctrl.totalItems = count;
+                if(isPartitioned()) {
+                    $ctrl.totalItems = count * $ctrl.numPerPage;
+                } else {
+                    $ctrl.totalItems = count;
+                }
             });
         }
 
@@ -136,7 +140,7 @@ MicroMacroApp.component('queryResult', {
 //            spinnerService.show('booksSpinner');
         }
 
-        var isProximity = () => $ctrl.query._TYPE == "proximity";
+        var isPartitioned = () => $ctrl.query.partition &&  $ctrl.query.partition.key;
 
         $ctrl.cols = function(max, num) {
             return Math.floor(max/num);
@@ -165,7 +169,7 @@ MicroMacroApp.component('queryResult', {
 
         var updateData = function() {
             resolveDisplayKeys();
-            if(isProximity()) {
+            if(isPartitioned()) {
                 var page = $ctrl.currentPage - 1;
                 if($ctrl.pages[$ctrl.currentPage-1]) {
                     $ctrl.page = Rows.getRowsColumns($ctrl.pages[$ctrl.currentPage-1], $ctrl.keys, $ctrl.selectedKeys);

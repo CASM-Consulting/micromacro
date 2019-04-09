@@ -35,13 +35,11 @@ MicroMacroApp.component('mapConfig', {
                     r($ctrl.queryTableCache[query]);
                 });
             } else {
-                return $q( (r) => {
-                    Queries.load($stateParams.workspaceId, query)
+                return Queries.load($stateParams.workspaceId, query)
                     .then((data)=>{
                         $ctrl.queryTableCache[query] = data.table;
-                        r(data.table);
+                        return data.table;
                     });
-                });
             }
         };
 
@@ -51,13 +49,11 @@ MicroMacroApp.component('mapConfig', {
                     r($ctrl.tableKeyCache[table]);
                 });
             } else {
-                return $q( (r) => {
-                    Tables.schema(table)
+                return Tables.schema(table)
                     .then((keys)=> {
                         $ctrl.tableKeyCache[table] = keys;
-                        r(keys);
+                        return keys;
                     });
-                });
             }
         };
 

@@ -2,7 +2,6 @@ package uk.ac.susx.shl.micromacro.jdbi;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import uk.ac.susx.shl.micromacro.core.QueryResultCache;
 import uk.ac.susx.tag.method51.core.data.store2.query.SqlQuery;
 
 import java.sql.SQLException;

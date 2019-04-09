@@ -2,7 +2,6 @@ package uk.ac.susx.shl.micromacro.jdbi;
 
 import com.google.gson.Gson;
 import org.mapdb.DB;
-import uk.ac.susx.shl.micromacro.core.QueryResultCache;
 import uk.ac.susx.tag.method51.core.data.store2.query.Partitioner;
 import uk.ac.susx.tag.method51.core.data.store2.query.SqlQuery;
 import uk.ac.susx.tag.method51.core.gson.GsonBuilderFactory;

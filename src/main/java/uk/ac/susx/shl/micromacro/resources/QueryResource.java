@@ -1,17 +1,13 @@
 package uk.ac.susx.shl.micromacro.resources;
 
 
-import uk.ac.susx.shl.micromacro.core.QueryResultCache;
 import uk.ac.susx.shl.micromacro.jdbi.CachingDAO;
 import uk.ac.susx.shl.micromacro.jdbi.DAO;
 import uk.ac.susx.shl.micromacro.jdbi.Method52DAO;
 import uk.ac.susx.shl.micromacro.jdbi.PartitionPager;
 import uk.ac.susx.tag.method51.core.data.store2.query.*;
 
-import javax.ws.rs.*;
 import javax.ws.rs.container.AsyncResponse;
-import javax.ws.rs.container.Suspended;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,9 +17,9 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 
-public class QueryResource<Q extends SqlQuery, U extends SqlUpdate> extends BaseDAOResource<String, Q> {
+public class QueryResource<Q extends SqlQuery, U extends SqlUpdate> extends DAOStreamResource<String, Q> {
 
-    private static final Logger LOG = Logger.getLogger(QueryResultCache.class.getName());
+    private static final Logger LOG = Logger.getLogger(QueryResource.class.getName());
 
     private final Method52DAO method52DAO;
 
@@ -37,7 +33,27 @@ public class QueryResource<Q extends SqlQuery, U extends SqlUpdate> extends Base
     }
 
     public void cacheOnly(AsyncResponse asyncResponse, Q query) throws Exception {
-        daoStreamResponse(asyncResponse, query, Stream::count);
+        daoStreamResponse(asyncResponse, query, (stream) -> {
+            long total;
+            if(datumDAO.getDAO() instanceof CachingDAO) {
+                CachingDAO<String,Q> cache = (CachingDAO<String,Q>)datumDAO.getDAO();
+                String id = cache.getQueryId(query);
+                if(cache.isCached(id)) {
+                    if(query instanceof Partitioner && ((Partitioner) query).partition() != null) {
+                        total = cache.int2IntArr(id, PartitionPager.ID2INTARR).size();
+                    } else {
+                        total = datumDAO.list(query).size();
+                    }
+                } else {
+                    total = stream.count();
+                }
+            } else {
+                total = stream.count();
+            }
+
+
+            return total;
+        });
     }
 
     public void skipLimit(AsyncResponse asyncResponse, int skip, int limit, Q query) throws Exception {
@@ -64,21 +80,26 @@ public class QueryResource<Q extends SqlQuery, U extends SqlUpdate> extends Base
     public void partition(AsyncResponse asyncResponse, String partition, Q query) throws Exception {
 
         daoStreamResponse(asyncResponse, query, (stream-> {
-            CachingDAO<String, SqlQuery> cache = (CachingDAO<String, SqlQuery>)datumDAO.getDAO();
+            if(query instanceof Partitioner && ((Partitioner) query).partition() != null) {
 
-            String id = cache.getQueryId(query);
+                CachingDAO<String, SqlQuery> cache = (CachingDAO<String, SqlQuery>)datumDAO.getDAO();
 
-            Map<String, Integer> partitions = cache.str2Int(id, PartitionPager.ID2PAGE);
+                String id = cache.getQueryId(query);
 
-            if(partitions.containsKey(partition)) {
+                Map<String, Integer> partitions = cache.str2Int(id, PartitionPager.ID2PAGE);
 
-                int page = partitions.get(partition);
+                if(partitions.containsKey(partition)) {
 
-                int[] indices = cache.int2IntArr(id, PartitionPager.ID2INTARR).get(page);
+                    int page = partitions.get(partition);
 
-                List<String> list = datumDAO.list(query);
+                    int[] indices = cache.int2IntArr(id, PartitionPager.ID2INTARR).get(page);
 
-                return list.subList(Math.min(list.size(), indices[0]), Math.min(list.size(), indices[1])).stream();
+                    List<String> list = datumDAO.list(query);
+
+                    return list.subList(Math.min(list.size(), indices[0]), Math.min(list.size(), indices[1])).stream();
+                } else {
+                    return new ArrayList<>();
+                }
             } else {
                 return new ArrayList<>();
             }
