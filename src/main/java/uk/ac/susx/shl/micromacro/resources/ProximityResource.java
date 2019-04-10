@@ -25,11 +25,9 @@ public class ProximityResource {
     private static final Logger LOG = Logger.getLogger(ProximityResource.class.getName());
 
     private final QueryResource<Proximity, ProximityUpdate> resource;
-    private final Method52DAO method52DAO;
 
     public ProximityResource(DAO<String, Proximity> datumDAO, Method52DAO method52DAO) {
         resource = new QueryResource<>(datumDAO, method52DAO);
-        this.method52DAO = method52DAO;
     }
 
     @POST
@@ -73,7 +71,7 @@ public class ProximityResource {
 
     @POST
     @Path("proximityUpdate")
-    public Response update(final Update update) {
+    public Response update(final ProximityUpdate update) {
         return resource.update(update);
     }
 

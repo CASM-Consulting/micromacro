@@ -73,7 +73,7 @@ MicroMacroApp.factory("Queries", function($q, Server, $http) {
         },
 
 
-        cacheOnly : function(query) {
+        count : function(query) {
             return $q(function(resolve) {
                 var type = query._TYPE;
                 Server.post("api/query/"+type+"/cacheOnly", query, {
@@ -101,7 +101,7 @@ MicroMacroApp.factory("Queries", function($q, Server, $http) {
         partition : function(query, partition) {
             return $q(function(resolve) {
                 var type = query._TYPE;
-                Server.post("api/query/"+partition+"/page", query, {
+                Server.post("api/query/"+type+"/partition", query, {
                     params : {partition:partition},
                     success : function(data) {
                         resolve(data.map( (raw) => {

@@ -18,12 +18,14 @@ MicroMacroApp.component('mapConfig', {
 
         $ctrl.$onInit = () => {
             $ctrl.map || ($ctrl.map = {
-                selectedQueries : {}
+                queries : []
             });
+
+            $ctrl.selectedQueries = {};
 
             $ctrl.keyList = [];
 
-            $scope.$watchCollection("$ctrl.map.selectedQueries", function(selected, old){
+            $scope.$watchCollection("$ctrl.selectedQueries", function(selected, old){
                 $ctrl.getKeys();
             });
         };
@@ -65,7 +67,7 @@ MicroMacroApp.component('mapConfig', {
 
             $ctrl.keyList = [];
 
-            angular.forEach($ctrl.map.selectedQueries, (on, query) => {
+            angular.forEach($ctrl.selectedQueries, (on, query) => {
                 on && tablePromises.push(promiseTable(query));
             });
 
@@ -105,6 +107,40 @@ MicroMacroApp.component('mapConfig', {
             keyList.sort((a,b)=>{return a.id.localeCompare(b.id)});
             return keyList;
         }
+
+        $ctrl.show = () => {
+
+            $ctrl.map.queries = [];
+
+            angular.forEach($ctrl.selectedQueries, (on, query) => {
+                on && $ctrl.map.queries.push(query);
+            });
+
+            var target = "workspace.maps.map.show";
+            $state.transitionTo(target,
+                {mapId: $ctrl.mapId, map:$ctrl.map},
+                {reload: true, inherit:true, relative: $state.$current}
+            );
+
+
+
+//            $ctrl.query.literals = $ctrl.workspace.tableLiterals[$ctrl.query.table];
+//            Maps.saveMap($stateParams.workspaceId, $ctrl.queryId, $ctrl.query).then(function(query){
+////                alert("saved");
+//                $state.go("^.query", {workspaceId:$stateParams.workspaceId, queryId:$ctrl.queryId, ver:0});
+//                $scope.queryVer = 0;
+//            }).then(()=>{
+//                var target = ".";
+//                if($state.$current.name == "workspace.queries.query") {
+//                    target += "execute";
+//                }
+//                $state.transitionTo(target,
+//                    {queryId:$ctrl.queryId, page:$stateParams.page || 1, sampleSize:sampleSize},
+//                    {reload: true, inherit:true, relative: $state.$current}
+//                );
+//            });
+        }
+
     }
 });
 

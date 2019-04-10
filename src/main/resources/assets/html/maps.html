@@ -8,26 +8,26 @@
     <div class="col-md-10">
         <div>
 
-            <table class="table">
-                <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Type</th>
-                    <th>Table</th>
-<!--                    <th>Versions</th>-->
-                    <th># Returned</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr ng-repeat="name in $ctrl.queryList">
-                    <td> {{name}} </td>
-                    <td> {{$ctrl.workspace.queries[name].history[0]._TYPE}} </td>
-                    <td> {{$ctrl.workspace.queries[name].history[0].table}} </td>
-<!--                    <td> {{$ctrl.workspace.queries[name].history.length}} </td>-->
-                    <td> ### </td>
-                </tr>
-                </tbody>
-            </table>
+<!--            <table class="table">-->
+<!--                <thead>-->
+<!--                <tr>-->
+<!--                    <th>Name</th>-->
+<!--                    <th>Type</th>-->
+<!--                    <th>Table</th>-->
+<!--&lt;!&ndash;                    <th>Versions</th>&ndash;&gt;-->
+<!--                    <th># Returned</th>-->
+<!--                </tr>-->
+<!--                </thead>-->
+<!--                <tbody>-->
+<!--                <tr ng-repeat="name in $ctrl.queryList">-->
+<!--                    <td> {{name}} </td>-->
+<!--                    <td> {{$ctrl.workspace.queries[name].history[0]._TYPE}} </td>-->
+<!--                    <td> {{$ctrl.workspace.queries[name].history[0].table}} </td>-->
+<!--&lt;!&ndash;                    <td> {{$ctrl.workspace.queries[name].history.length}} </td>&ndash;&gt;-->
+<!--                    <td> ### </td>-->
+<!--                </tr>-->
+<!--                </tbody>-->
+<!--            </table>-->
         </div>
         <uib-tabset active="$ctrl.active">
             <uib-tab ng-repeat="name in $ctrl.mapList"

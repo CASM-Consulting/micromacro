@@ -14,7 +14,7 @@
                 <label uib-btn-checkbox
                        class="btn btn-primary"
                        ng-repeat="query in $ctrl.queryList"
-                       ng-model="$ctrl.map.selectedQueries[query]"
+                       ng-model="$ctrl.selectedQueries[query]"
                        >
                     {{query}}
                 </label>
@@ -39,6 +39,12 @@
                 <label class="control-label" for="idKey" >ID Key</label>
 
                 <key keys="$ctrl.keyList" ng-model="$ctrl.map.idKey" for-id="'idKey'"></key>
+            </div>
+
+            <div class="section">
+                <label class="control-label" for="placeKey" >Place Key</label>
+
+                <key keys="$ctrl.keyList" ng-model="$ctrl.map.placeKey" for-id="'placeKey'"></key>
             </div>
 
             <div class="section">

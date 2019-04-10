@@ -48,9 +48,26 @@ MicroMacroApp.config(function($stateProvider){
 
     $stateProvider.state('workspace.maps.map', {
         url: '/{mapId}',
+        params : {
+            map : null
+        },
+        resolve: {
+            map : function($stateParams){
+                return $stateParams.map;
+            }
+        },
         views : {
             config : {
                 component:'mapConfig'
+            }
+        }
+    });
+
+    $stateProvider.state('workspace.maps.map.show', {
+        url: '/show',
+        views : {
+            'map@workspace.maps' : {
+                component:'map'
             }
         }
     });

@@ -20,8 +20,13 @@ MicroMacroApp.factory("Datums", function() {
         return DatumFactory.datum(rawDatum, rawKeys);
     }
 
+    var key = function(rawKey) {
+        return DatumFactory.keyFromObj(rawKey);
+    }
+
     return {
         data : data,
-        datum : datum
+        datum : datum,
+        key : key
     };
 });

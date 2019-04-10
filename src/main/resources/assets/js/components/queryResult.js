@@ -127,7 +127,7 @@ MicroMacroApp.component('queryResult', {
         };
 
         $ctrl.cacheResults  = () => {
-            return Queries.cacheOnly($ctrl.query).then( (count) => {
+            return Queries.count($ctrl.query).then( (count) => {
                 if(isPartitioned()) {
                     $ctrl.totalItems = count * $ctrl.numPerPage;
                 } else {
