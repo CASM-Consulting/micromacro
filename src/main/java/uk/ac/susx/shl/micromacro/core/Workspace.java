@@ -13,11 +13,13 @@ public class Workspace {
     private final String name;
     private final Map<String, Query> queries;
     private final Map<String, Map<String, KeyFilter>> tableLiterals;
+    private final Map<String, GeoMap> maps;
 
     public Workspace(String name) {
         id = UUID.randomUUID().toString();
         this.name = name;
         queries = new HashMap<>();
+        maps = new HashMap<>();
         tableLiterals = new HashMap<>();
     }
 
@@ -25,6 +27,7 @@ public class Workspace {
         this.id = id;
         this.name = name;
         queries = new HashMap<>();
+        maps = new HashMap<>();
         tableLiterals = new HashMap<>();
     }
 
@@ -37,7 +40,7 @@ public class Workspace {
         return name;
     }
 
-    public <T extends DatumQuery> Workspace add(String name, T query) {
+    public <T extends DatumQuery> Workspace addQuery(String name, T query) {
         if(!queries.containsKey(name)) {
 
             queries.put(name, new Query<T>());
@@ -63,6 +66,19 @@ public class Workspace {
 
     public <T extends DatumQuery> Query<T> getQuery(String id) {
         return queries.get(id);
+    }
+
+    public GeoMap getMap(String id) {
+        return maps.get(id);
+    }
+
+    public Workspace addMap(String id, GeoMap map) {
+        maps.put(id, map);
+        return this;
+    }
+
+    public Map<String,GeoMap> maps() {
+        return maps;
     }
 
     public Workspace tableLiterals(String table, Map<String, KeyFilter> literals) {

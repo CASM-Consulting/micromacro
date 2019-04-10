@@ -52,8 +52,8 @@ MicroMacroApp.config(function($stateProvider){
             map : null
         },
         resolve: {
-            map : function($stateParams){
-                return $stateParams.map;
+            map : function(Maps, $stateParams){
+                return Maps.load($stateParams.workspaceId, $stateParams.mapId);
             }
         },
         views : {

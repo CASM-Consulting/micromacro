@@ -120,15 +120,14 @@ MicroMacroApp.component('map', {
                         pointToLayer: function(data, latlng) {
                             var colour = colours[idx];
 
-                            return L.circleMarker(latlng,{radius:5, color:colour}).bindPopup(function(l) {
-                                $ctrl.selectedTrialId = data.metadata.trialId;
+                            return L.circleMarker(latlng, {radius:5, color:colour}).bindPopup(function(l) {
                                 return "<ul>" +
-                                "<li>Match: " + data.metadata.text + "</li>"+
-                                "<li>Original: " + data.metadata.spanned + "</li>"+
-                                "<li>Lat: " + data.metadata.lat + "</li>"+
-                                "<li>Lng: " + data.metadata.lng + "</li>"+
-                                "<li>Date: " + data.metadata.date + "</li>"+
-                                "<li>Trial: " + data.metadata.trialId + "</li>"+
+                                "<li>Match: " + data.with[0].match + "</li>"+
+                                // "<li>Original: " + data.metadata.spanned + "</li>"+
+                                "<li>Lat: " + latlng[0] + "</li>"+
+                                "<li>Lng: " + latlng[1] + "</li>"+
+                                // "<li>Date: " + data.metadata.date + "</li>"+
+                                // "<li>Trial: " + data.metadata.trialId + "</li>"+
                                 "</ul>";
                             });
                         }

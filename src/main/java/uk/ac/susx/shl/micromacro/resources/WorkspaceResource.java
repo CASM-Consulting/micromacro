@@ -67,6 +67,36 @@ public class WorkspaceResource {
     }
 
     @GET
+    @Path("loadMap")
+    public Response loadMap(@QueryParam("workspaceId") String workspaceId,
+                              @QueryParam("mapId") String mapId
+    ) {
+        Workspace workspace = workspaces.get(workspaceId);
+
+        GeoMap map = workspace.getMap(mapId);
+
+        return Response.ok().entity(
+                map
+        ).build();
+    }
+
+    @POST
+    @Path("saveMap")
+    public Response addMap(@QueryParam("workspaceId") String workspaceId,
+                                 @QueryParam("mapId") String mapId,
+                                 GeoMap map) {
+        Workspace workspace = workspaces.get(workspaceId);
+
+        workspace.addMap(mapId, map);
+
+        workspaces.save(workspace);
+
+        return Response.ok().entity(
+                workspaces.get(workspaceId).getMap(mapId)
+        ).build();
+    }
+
+    @GET
     @Path("loadQuery")
     public Response loadQuery(@QueryParam("workspaceId") String workspaceId,
                              @QueryParam("queryId") String queryId,
@@ -107,7 +137,7 @@ public class WorkspaceResource {
 
         Workspace workspace = workspaces.get(workspaceId);
 
-        workspace.add(queryId, proximity);
+        workspace.addQuery(queryId, proximity);
 
         workspaces.save(workspace);
 
@@ -124,7 +154,7 @@ public class WorkspaceResource {
 
         Workspace workspace = workspaces.get(workspaceId);
 
-        workspace.add(queryId, select);
+        workspace.addQuery(queryId, select);
 
         workspaces.save(workspace);
 

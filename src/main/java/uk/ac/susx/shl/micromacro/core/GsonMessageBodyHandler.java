@@ -33,7 +33,9 @@ public final class GsonMessageBodyHandler implements MessageBodyWriter<Object>,
     private Gson gson;
     private Gson getGson() {
         if (gson == null) {
-            final GsonBuilder gsonBuilder = GsonBuilderFactory.get().registerTypeAdapterFactory(StreamTypeAdapterFactory.get());
+            final GsonBuilder gsonBuilder = GsonBuilderFactory.get()
+                    .registerTypeAdapterFactory(StreamTypeAdapterFactory.get())
+                    .registerTypeAdapter(GeoMap.class, new GeoMapTypeAdapter());
             gson = gsonBuilder.create();
         }
         return gson;

@@ -1,10 +1,35 @@
-MicroMacroApp.factory("Maps", function($q, Queries, Datums) {
+MicroMacroApp.factory("Maps", function($q, Queries, Datums, Server) {
 
 
     var MAX_DATE = new Date( 8640000000000000);
     var MIN_DATE = new Date(-8640000000000000);
 
     return {
+
+        load : function(workspaceId, mapId) {
+            return $q(function(resolve) {
+                Server.get("api/workspace/loadMap", {
+                    params : {
+                        workspaceId : workspaceId,
+                        mapId : mapId
+                    },
+                    success : resolve
+                });
+            });
+        },
+
+        save : function(workspaceId, mapId, map) {
+            return $q(function(resolve) {
+                
+                Server.post("api/workspace/saveMap", map,  {
+                    params : {
+                        workspaceId : workspaceId,
+                        mapId : mapId
+                    },
+                    success : resolve
+                });
+            });
+        },
 
         getQueries : (workspaceId, config) => {
 

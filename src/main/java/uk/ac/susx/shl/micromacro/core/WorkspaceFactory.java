@@ -17,9 +17,10 @@ public class WorkspaceFactory {
 
     private final QueryFactory queryFactory;
     private final boolean historical;
+    private final GeoMapFactory mapFactory;
 
-    public WorkspaceFactory(QueryFactory queryFactory, boolean historical){
-
+    public WorkspaceFactory(QueryFactory queryFactory, GeoMapFactory mapFactory, boolean historical){
+        this.mapFactory = mapFactory;
         this.queryFactory = queryFactory;
         this.historical = historical;
     }
@@ -57,6 +58,17 @@ public class WorkspaceFactory {
         for(Map.Entry<String,Map> entry : tableLiterals.entrySet()) {
 
             workspace.tableLiterals(entry.getKey(), queryFactory.literals(entry.getValue()));
+        }
+
+        Map<String, Map> maps = (Map<String, Map>)rep.get("maps");
+
+        if(maps == null) {
+            maps = new HashMap<>();
+        }
+
+        for(Map.Entry<String,Map> entry : maps.entrySet()) {
+
+            workspace.addMap(entry.getKey(), mapFactory.map(entry.getValue()));
         }
 
         return workspace;
@@ -105,6 +117,15 @@ public class WorkspaceFactory {
         }
 
         rep.put("tableLiterals", tableLiterals);
+
+        Map maps = new HashMap<>();
+
+        for(Map.Entry<String, GeoMap> entry : workspace.maps().entrySet()) {
+
+            maps.put(entry.getKey(), mapFactory.rep(entry.getValue()));
+        }
+
+        rep.put("maps", maps);
 
         return rep;
     }

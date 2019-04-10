@@ -5,14 +5,13 @@ MicroMacroApp.component('mapConfig', {
         queryList: '<',
         workspace: '<'
     },
-    controller : function($scope, $state, $q, Tables, Queries, $stateParams) {
+    controller : function($scope, $state, $q, Tables, Queries, Maps, $stateParams) {
 
         var $ctrl = this;
 
         $scope.showNotes = true;
 
-        $ctrl.mapId = $stateParams.mapId;
-
+        
         $ctrl.tableKeyCache = {};
         $ctrl.queryTableCache = {};
 
@@ -21,7 +20,13 @@ MicroMacroApp.component('mapConfig', {
                 queries : []
             });
 
+            $ctrl.map.id = $stateParams.mapId;
+
             $ctrl.selectedQueries = {};
+
+            $ctrl.map.queries.forEach(query=> {
+                $ctrl.selectedQueries[query] = true;
+            });
 
             $ctrl.keyList = [];
 
@@ -116,31 +121,14 @@ MicroMacroApp.component('mapConfig', {
                 on && $ctrl.map.queries.push(query);
             });
 
-            var target = "workspace.maps.map.show";
-            $state.transitionTo(target,
-                {mapId: $ctrl.mapId, map:$ctrl.map},
-                {reload: true, inherit:true, relative: $state.$current}
-            );
-
-
-
-//            $ctrl.query.literals = $ctrl.workspace.tableLiterals[$ctrl.query.table];
-//            Maps.saveMap($stateParams.workspaceId, $ctrl.queryId, $ctrl.query).then(function(query){
-////                alert("saved");
-//                $state.go("^.query", {workspaceId:$stateParams.workspaceId, queryId:$ctrl.queryId, ver:0});
-//                $scope.queryVer = 0;
-//            }).then(()=>{
-//                var target = ".";
-//                if($state.$current.name == "workspace.queries.query") {
-//                    target += "execute";
-//                }
-//                $state.transitionTo(target,
-//                    {queryId:$ctrl.queryId, page:$stateParams.page || 1, sampleSize:sampleSize},
-//                    {reload: true, inherit:true, relative: $state.$current}
-//                );
-//            });
+            Maps.save($stateParams.workspaceId, $ctrl.map.id, $ctrl.map).then(function(map){
+                var target = "workspace.maps.map.show";
+                $state.transitionTo(target,
+                    {mapId: $ctrl.map.id, map:$ctrl.map},
+                    {reload: true, inherit:true, relative: $state.$current}
+                );
+            });
         }
-
     }
 });
 

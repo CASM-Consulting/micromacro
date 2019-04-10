@@ -87,7 +87,7 @@ MicroMacroApp.component('queryConfig', {
 
         $ctrl.execute = (sampleSize) => {
             $ctrl.query.literals = $ctrl.workspace.tableLiterals[$ctrl.query.table];
-            Queries.saveQuery($stateParams.workspaceId, $ctrl.queryId, $ctrl.query).then(function(query){
+            Queries.save($stateParams.workspaceId, $ctrl.queryId, $ctrl.query).then(function(query){
 //                alert("saved");
                 //$state.go("^.query", {workspaceId:$stateParams.workspaceId, queryId:$ctrl.queryId, ver:0});
                 $scope.queryVer = 0;

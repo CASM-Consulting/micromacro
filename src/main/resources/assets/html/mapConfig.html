@@ -5,7 +5,7 @@
         <div class="form-group form-group-sm">
             <div class="section">
                 <label class="control-label" for="mapName">Map Name</label>
-                <input class="form-control input-sm" type="text" id="mapName" ng-model="$ctrl.mapId">
+                <input class="form-control input-sm" type="text" id="mapName" ng-model="$ctrl.map.id">
             </div>
 
 
@@ -44,7 +44,7 @@
             <div class="section">
                 <label class="control-label" for="placeKey" >Place Key</label>
 
-                <key keys="$ctrl.keyList" ng-model="$ctrl.map.placeKey" for-id="'placeKey'"></key>
+                <key keys="$ctrl.keyList" ng-model="$ctrl.map.geoKey" for-id="'placeKey'"></key>
             </div>
 
             <div class="section">

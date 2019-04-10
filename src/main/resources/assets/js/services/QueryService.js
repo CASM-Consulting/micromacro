@@ -41,6 +41,25 @@ MicroMacroApp.factory("Queries", function($q, Server, $http) {
             });
         },
 
+        save : function(workspaceId, queryId, query) {
+            return $q(function(resolve) {
+                var path;
+                if(query._TYPE == "select") {
+                    path = "addSelect";
+                } else {
+                    path = "addProximity";
+                }
+
+                Server.post("api/workspace/"+path, query,  {
+                    params : {
+                        workspaceId : workspaceId,
+                        queryId : queryId
+                    },
+                    success : resolve
+                });
+            });
+        },
+        
         query : function(query, params) {
             return $q(function(resolve) {
                 var type = query._TYPE;
@@ -119,25 +138,6 @@ MicroMacroApp.factory("Queries", function($q, Server, $http) {
                     success : function(data) {
                         resolve(data);
                     }
-                });
-            });
-        },
-
-        saveQuery : function(workspaceId, queryId, query) {
-            return $q(function(resolve) {
-                var path;
-                if(query._TYPE == "select") {
-                    path = "addSelect";
-                } else {
-                    path = "addProximity";
-                }
-
-                Server.post("api/workspace/"+path, query,  {
-                    params : {
-                        workspaceId : workspaceId,
-                        queryId : queryId
-                    },
-                    success : resolve
                 });
             });
         },

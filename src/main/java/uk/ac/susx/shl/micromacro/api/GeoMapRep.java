@@ -1,0 +1,11 @@
+package uk.ac.susx.shl.micromacro.api;
+
+import java.util.List;
+import java.util.Map;
+
+public class GeoMapRep {
+    public String id;
+    public List<String> queries;
+    public Map geoKey;
+    public Map idKey;
+}

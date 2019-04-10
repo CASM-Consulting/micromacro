@@ -78,23 +78,20 @@ public class MicroMacroApplication extends Application<MicroMacroConfiguration> 
 
         final Method52DAO method52DAO = new Method52DAO(jdbi);
 
-        final Gson gson = GsonBuilderFactory.get()/*.registerTypeAdapterFactory(StreamTypeAdapter.get())*/.create();
-        final DatumDAO datumDAO = new DatumDAO(jdbi, method52DAO);
+        final Gson gson = GsonBuilderFactory.get()
+                .registerTypeAdapter(GeoMap.class, new GeoMapTypeAdapter())
+                /*.registerTypeAdapterFactory(StreamTypeAdapter.get())*/
+                .create();
 
         final QueryFactory queryFactory = new QueryFactory(gson);
+        final GeoMapFactory geoMapFactory = new GeoMapFactory(gson);
         Files.createDirectories(Paths.get("data"));
 
 
         final DefaultHealthCheck healthCheck = new DefaultHealthCheck();
         environment.healthChecks().register("default", healthCheck);
 
-//        final Client client = new JerseyClientBuilder(environment).using(configuration.getJerseyClientConfiguration()).build(getName());
-
         environment.jersey().register(new Method52Resource(method52DAO));
-
-//        QueryResultCache cache = new QueryResultCache(configuration.resultsCachePath);
-
-//        environment.jersey().register(new SelectResource(datumDAO, cache));
 
         CachingDAO<String, SqlQuery> cachingDAO = new CachingDAO<>(new BaseDAO<>(jdbi, new DatumStringMapper()), configuration.resultsCachePath);
 
@@ -105,7 +102,7 @@ public class MicroMacroApplication extends Application<MicroMacroConfiguration> 
 
         environment.jersey().register(new TableResource(method52DAO));
 
-        final WorkspaceFactory workspaceFactory = new WorkspaceFactory(queryFactory, configuration.historical);
+        final WorkspaceFactory workspaceFactory = new WorkspaceFactory(queryFactory, geoMapFactory, configuration.historical);
 
         final Workspaces workspaces = new Workspaces(configuration.workspaceMapPath, workspaceFactory);
 
