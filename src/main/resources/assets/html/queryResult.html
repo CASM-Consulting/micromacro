@@ -31,7 +31,11 @@
                 <input class="form-control" type="text" ng-model="$ctrl.annotate.value" placeholder="value">
                 <button class="btn btn-primary" ng-click="$ctrl.annotateQuery()">Annotate Query</button>
             </span>
-            <span ng-if="!$ctrl.query.isCached"><button class="btn btn-default" ng-click="$ctrl.cacheResults()">More Results</button></span>
+
+            <span ng-if="!$ctrl.query.isCached">
+                <button ng-disable="$ctrl.loading" class="btn btn-default" ng-click="$ctrl.cacheResults()">More Results</button>
+                <span ng-show="$ctrl.loading" class="animate-flicker">Loading...</span>
+            </span>
         </div>
     </div>
 

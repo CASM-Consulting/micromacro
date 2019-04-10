@@ -127,12 +127,15 @@ MicroMacroApp.component('queryResult', {
         };
 
         $ctrl.cacheResults  = () => {
+            $ctrl.loading = true;
             return Queries.count($ctrl.query).then( (count) => {
                 if(isPartitioned()) {
                     $ctrl.totalItems = count * $ctrl.numPerPage;
                 } else {
                     $ctrl.totalItems = count;
                 }
+
+                $ctrl.loading = false;
             });
         }
 

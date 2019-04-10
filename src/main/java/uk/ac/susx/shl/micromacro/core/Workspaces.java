@@ -38,12 +38,16 @@ public class Workspaces {
 
     public Workspace get(String name) {
 
-        Map ws = (Map)workspaces.get(name);
+        JsonFSObject ws = workspaces.getJson(name);
 
         return workspaceFactory.workspace(ws);
     }
 
     public Workspace create(String name) {
+        if(workspaces.containsKey(name)){
+            throw new IllegalStateException(name + " already exists.");
+        }
+
         Workspace workspace = new Workspace(name);
 
         workspaces.put(name, workspaceFactory.rep(workspace));

@@ -101,3 +101,28 @@ MicroMacroApp.directive('invertedCheckbox', function ()
     };
 });
 
+
+MicroMacroApp.directive('loadingState', function ($rootScope) {
+    var loadingStates = {};
+
+    $rootScope.$on('$stateChangeStart', function (event, toState) {
+        loadingStates[toState.name] = true;
+    });
+
+    ['$stateChangeSuccess', '$stateChangeError', '$stateNotFound'].forEach(function (eventType) {
+        $rootScope.$on(eventType, function (event, toState) {
+            delete loadingStates[toState.name];
+        });
+    });
+
+    return {
+        template: '<div ng-show="loading[state]" ng-transclude></div>',
+        transclude: true,
+        scope: {
+            state: '@loadingState'
+        },
+        controller: function ($scope) {
+            $scope.loading = loadingStates;
+        }
+    };
+});

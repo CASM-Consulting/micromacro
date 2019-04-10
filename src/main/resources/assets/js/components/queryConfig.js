@@ -89,7 +89,7 @@ MicroMacroApp.component('queryConfig', {
             $ctrl.query.literals = $ctrl.workspace.tableLiterals[$ctrl.query.table];
             Queries.saveQuery($stateParams.workspaceId, $ctrl.queryId, $ctrl.query).then(function(query){
 //                alert("saved");
-                $state.go("^.query", {workspaceId:$stateParams.workspaceId, queryId:$ctrl.queryId, ver:0});
+                //$state.go("^.query", {workspaceId:$stateParams.workspaceId, queryId:$ctrl.queryId, ver:0});
                 $scope.queryVer = 0;
             }).then(()=>{
                 var target = ".";

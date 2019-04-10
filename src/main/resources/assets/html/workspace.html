@@ -1,27 +1,27 @@
-<div class="row">
+<div>
+    <div class="row">
 
-    <div class="col-md-2">
-        <span class="lead">{{$ctrl.workspace.name}}</span>
-        <!--<ul>-->
-        <!--<li ng-repeat="(name, query) in $ctrl.workspace.queries"><a ui-sref=".query({queryId: name})">{{name}}</a></li>-->
-        <!--</ul>-->
+        <div class="col-md-2">
+            <span class="lead">{{$ctrl.workspace.name}}</span>
+            <!--<ul>-->
+            <!--<li ng-repeat="(name, query) in $ctrl.workspace.queries"><a ui-sref=".query({queryId: name})">{{name}}</a></li>-->
+            <!--</ul>-->
+        </div>
+        <div class="col-md-10">
+            <uib-tabset active="$ctrl.mainActive">
+                <uib-tab index="0"
+                         heading="Queries"
+                         select="$ctrl.loadQueries()">
+                </uib-tab>
+                <uib-tab index="1"
+                         heading="Maps"
+                         select="$ctrl.loadMaps()">
+                </uib-tab>
+            </uib-tabset>
+        </div>
     </div>
-    <div class="col-md-10">
-        <uib-tabset active="$ctrl.mainActive">
-            <uib-tab index="0"
-                     heading="Queries"
-                     select="$ctrl.loadQueries()">
-            </uib-tab>
-            <uib-tab index="1"
-                     heading="Maps"
-                     select="$ctrl.loadMaps()">
-            </uib-tab>
-        </uib-tabset>
+    <div class="row">
+        <div loading-state="workspace.query.execute">Loading...</div>
+        <div ui-view></div>
     </div>
 </div>
-<div class="row">
-
-    <div ui-view></div>
-
-</div>
-
