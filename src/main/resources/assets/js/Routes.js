@@ -10,20 +10,11 @@ MicroMacroApp.config(function($stateProvider){
         }
     });
 
-    $stateProvider.state('workspace.queries',{
-        url: '/queries',
-        component:'queries',
-        resolve: {
-            queryList: function(workspace) {
-                var queryList = Object.keys(workspace.queries);
-                queryList.sort();
-                return queryList;
-            },
-            tables: function(Tables) {
-                return Tables.list();
-            }
-        }
-    });
+    /*
+
+    MAPS
+
+    */
 
     $stateProvider.state('workspace.maps',{
         url: '/maps',
@@ -33,6 +24,11 @@ MicroMacroApp.config(function($stateProvider){
                 var queryList = Object.keys(workspace.queries);
                 queryList.sort();
                 return queryList;
+            },
+            mapList: function(workspace) {
+                var mapList = Object.keys(workspace.maps);
+                mapList.sort();
+                return mapList;
             }
         }
     });
@@ -68,6 +64,27 @@ MicroMacroApp.config(function($stateProvider){
         views : {
             'map@workspace.maps' : {
                 component:'map'
+            }
+        }
+    });
+
+    /*
+
+    QUERIES
+
+    */
+
+    $stateProvider.state('workspace.queries',{
+        url: '/queries',
+        component:'queries',
+        resolve: {
+            queryList: function(workspace) {
+                var queryList = Object.keys(workspace.queries);
+                queryList.sort();
+                return queryList;
+            },
+            tables: function(Tables) {
+                return Tables.list();
             }
         }
     });

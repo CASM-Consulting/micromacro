@@ -86,7 +86,7 @@ MicroMacroApp.factory("Maps", function($q, Queries, Datums, Server) {
 
             return Queries.partition(query, date).then(data => {
 
-                var key = Datums.key(config.placeKey).key();
+                var key = Datums.key(config.geoKey).key();
 
                 var features = data.filter(datum => key in datum).flatMap(datum => {
                     return datum[key].spans.map(span => {

@@ -24,9 +24,9 @@ public class GeoMap {
         return queries;
     }
     public Key geoKey(){
-        return idKey;
+        return geoKey;
     }
     public Key idKey(){
-        return geoKey;
+        return idKey;
     }
 }

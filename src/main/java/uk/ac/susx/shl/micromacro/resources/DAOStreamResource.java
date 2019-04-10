@@ -10,6 +10,7 @@ import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -51,46 +52,60 @@ public class DAOStreamResource<T, Q extends SqlQuery> {
      * @throws Exception
      */
     public void daoStreamResponse(final AsyncResponse asyncResponse, Q query, Function<Stream<T>, Object> handler) throws Exception {
-
         AtomicReference<Stream<T>> streamRef = new AtomicReference<>();
         AtomicBoolean complete = new AtomicBoolean(false);
-        try {
 
-            List<BiFunction> functions = new ArrayList<>();
+        Supplier<Void> handle = () -> {
+            try {
 
-            if(query instanceof Partitioner && ((Partitioner) query).partition() != null) {
+                List<BiFunction> functions = new ArrayList<>();
 
-                Partitioner partitioner = (Partitioner)query;
+                if (query instanceof Partitioner && ((Partitioner) query).partition() != null) {
 
-                functions.add(new PartitionPager(partitioner.partition().key().toString()));
+                    Partitioner partitioner = (Partitioner) query;
+
+                    functions.add(new PartitionPager(partitioner.partition().key().toString()));
+                }
+
+                Supplier<Object> task = () -> {
+                    Stream<T> stream = datumDAO.stream(query, functions.toArray(new BiFunction[]{}));
+                    streamRef.set(stream);
+                    return handler.apply(stream);
+                };
+
+                CompletableFuture
+                        .supplyAsync(task, executorService)
+                        .thenApply(result -> Response.status(Response.Status.OK).entity(result).build())
+                        .whenComplete((r, e) -> {
+                            if (e != null) {
+                                LOG.warning(e.getMessage());
+                                asyncResponse.resume(e);
+                            } else {
+                                asyncResponse.resume(r);
+                            }
+                            if (streamRef.get() != null) {
+                                streamRef.get().close();
+                            }
+                            complete.set(true);
+                        }).get(); //must block
+            } catch (InterruptedException | ExecutionException e) {
+                if (streamRef.get() != null) {
+                    streamRef.get().close();
+                }
+            } finally {
+                if(streamRef.get()!=null && !complete.get()) {
+                    streamRef.get().close();
+                }
             }
-
-            Supplier<Object> task = ()-> {
-                Stream<T> stream = datumDAO.stream(query, functions.toArray(new BiFunction[]{}));
-                streamRef.set(stream);
-                return handler.apply(stream);
-            };
-
-            CompletableFuture
-                    .supplyAsync(task, executorService)
-                    .thenApply(result -> Response.status(Response.Status.OK).entity(result).build())
-                    .whenComplete( (r,e) -> {
-                        if(e != null) {
-                            LOG.warning(e.getMessage());
-                            asyncResponse.resume(e);
-                        } else {
-                            asyncResponse.resume(r);
-                        }
-                        if(streamRef.get()!=null) {
-                            streamRef.get().close();
-                        }
-                        complete.set(true);
-                    }).get(); //must block
-
-        } finally {
-            if(streamRef.get()!=null && !complete.get()) {
-                streamRef.get().close();
-            }
-        }
+            return null;
+        };
+        CompletableFuture
+                .supplyAsync(handle, executorService)
+                .exceptionally(e -> {
+                    if(streamRef.get()!=null && !complete.get()) {
+                        streamRef.get().close();
+                    }
+                    return null;
+                });
     }
 }
