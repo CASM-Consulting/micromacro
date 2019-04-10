@@ -187,38 +187,38 @@
                         layers="$ctrl.leafletMap.layers"
                 ></leaflet>
 
-                <button ng-click="changeTiles('oldlondon')" class="btn btn-default">Old London</button>
-                <button ng-click="changeTiles('openstreetmap')" class="btn btn-default">Open Street Maps</button>
+<!--                <button ng-click="changeTiles('oldlondon')" class="btn btn-default">Old London</button>-->
+<!--                <button ng-click="changeTiles('openstreetmap')" class="btn btn-default">Open Street Maps</button>-->
 
-                <input ng-model="query" type="text" />
-                <button ng-click="search(query)" class="btn btn-default">Search</button>
-                <button ng-click="extract(query)" class="btn btn-default">Extract</button>
-                <button ng-click="getAll()" class="btn btn-default">Get All</button>
+<!--                <input ng-model="query" type="text" />-->
+<!--                <button ng-click="search(query)" class="btn btn-default">Search</button>-->
+<!--                <button ng-click="extract(query)" class="btn btn-default">Extract</button>-->
+<!--                <button ng-click="getAll()" class="btn btn-default">Get All</button>-->
 
             </div>
 
-            <div class="col-md-2 trials">
-                <div ng-repeat="trial in trials"><button class="btn btn-primary btn-xs" ng-click="selectTrial(trial.id)" >{{trial.id}}</button></div>
-            </div>
+<!--            <div class="col-md-2 trials">-->
+<!--                <div ng-repeat="trial in trials"><button class="btn btn-primary btn-xs" ng-click="selectTrial(trial.id)" >{{trial.id}}</button></div>-->
+<!--            </div>-->
 
             <!--<div>-->
             <!--{{selectedMarker}}-->
             <!--</div>-->
         </div>
 
-        <div class="row">
+<!--        <div class="row">-->
 
-            <div class="trial col-md-12">
-                <p ng-repeat="sentence in selectedTrial.data track by $index">
-                <span
-                        ng-repeat="token in sentence.tokens track by $index"
-                        ng-class="{ matchedPlace: selectedTrial.matchedPlaceMap[$parent.$index][$index], unmatchedPlace: selectedTrial.unmatchedPlaceMap[$parent.$index][$index], matchedPub: selectedTrial.matchedPubMap[$parent.$index][$index], unmatchedPub: selectedTrial.unmatchedPubMap[$parent.$index][$index] }"
-                >
-                    {{token}}
-                </span>
-                </p>
-            </div>
-        </div>
+<!--            <div class="trial col-md-12">-->
+<!--                <p ng-repeat="sentence in selectedTrial.data track by $index">-->
+<!--                <span-->
+<!--                        ng-repeat="token in sentence.tokens track by $index"-->
+<!--                        ng-class="{ matchedPlace: selectedTrial.matchedPlaceMap[$parent.$index][$index], unmatchedPlace: selectedTrial.unmatchedPlaceMap[$parent.$index][$index], matchedPub: selectedTrial.matchedPubMap[$parent.$index][$index], unmatchedPub: selectedTrial.unmatchedPubMap[$parent.$index][$index] }"-->
+<!--                >-->
+<!--                    {{token}}-->
+<!--                </span>-->
+<!--                </p>-->
+<!--            </div>-->
+<!--        </div>-->
 
         <!--<div class="col-md-4">-->
         <!--<div ng-repeat="match in matches">-->
