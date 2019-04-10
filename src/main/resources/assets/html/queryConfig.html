@@ -8,7 +8,7 @@
                 <input class="form-control input-sm" type="text" id="queryName" ng-model="$ctrl.queryId">
             </div>
 
-            <div class="section">
+            <!--<div class="section">
 
                 <label class="control-label" for="queryVer">Version</label>
                 <div class="input-group">
@@ -21,26 +21,26 @@
                          ng-click="redo()"
                          ng-disabled="queryVer == 0">Fwd</div>
                 </div>
-            </div>
+            </div>-->
 
             <div class="section">
                 <label class="control-label" for="table" >Table</label>
                 <select class="form-control input-sm" id="table"
                         ng-model="$ctrl.query.table"
                         ng-options="table for table in $ctrl.tables"
-                        ng-change="reload()">
+                        ng-change="$ctrl.reload()">
                 </select>
             </div>
 
-            <div class="section">
+            <!--<div class="section">
 
                 <label class="control-label" >Literals</label>
 
                 <literals literals="$ctrl.query.literals" keys="$ctrl.keyList"></literals>
-            </div>
+            </div>-->
 
 
-            <div ng-if="$ctrl.query._TYPE=='proxy'">
+            <div ng-if="$ctrl.query._TYPE=='proximity'">
                 <div class="section">
                     <label class="control-label" >Table Where</label>
                     <div>
@@ -54,14 +54,14 @@
                     <label class="control-label" >Target</label>
                     <input class="form-control" type="text" ng-model="$ctrl.query.target">
 
-                    <label class=" control-label">Proxy</label>
-                    <input class="form-control" type="text" ng-model="$ctrl.query.proxy">
+                    <label class=" control-label">Proximity</label>
+                    <input class="form-control" type="text" ng-model="$ctrl.query.proximity">
 
                     <label class=" control-label">Partition</label>
                     <partition keys="$ctrl.keyList" ng-model="$ctrl.query.partition"></partition>
 
-                    <label class=" control-label">Proximity</label>
-                    <input type="number" step="1" min="1" class="form-control" ng-model="$ctrl.query.proximity">
+                    <label class=" control-label">Distance</label>
+                    <input type="number" step="1" min="1" class="form-control" ng-model="$ctrl.query.distance">
                 </div>
 
             </div>
@@ -74,18 +74,21 @@
                     <order-by keys="$ctrl.keyList" ng-model="$ctrl.query.orderBy" ></order-by>
                 </div>
 
-                <div class="checkbox">
-                    <label>
-                        <input type="checkbox" ng-checked="!!$ctrl.query.partition" ng-click="$ctrl.partitionSelect()">
-                        Partition
-                    </label>
-                </div>
+                <div class="section">
 
-                <div ng-if="$ctrl.query.partition" class="section">
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox" ng-checked="!!$ctrl.query.partition" ng-click="$ctrl.partitionSelect()">
+                            Partition
+                        </label>
+                    </div>
 
-                    <label class="control-label">Partition</label>
-                    <partition keys="$ctrl.keyList" ng-model="$ctrl.query.partition"></partition>
+                    <div ng-if="$ctrl.query.partition">
 
+                        <label class="control-label">Partition</label>
+                        <partition keys="$ctrl.keyList" ng-model="$ctrl.query.partition"></partition>
+
+                    </div>
                 </div>
 
                 <div class="section">

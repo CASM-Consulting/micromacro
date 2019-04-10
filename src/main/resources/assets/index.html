@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="css/notes.css">
     <link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="node_modules/angular-ui-grid/ui-grid.min.css">
-    <!--<link rel="stylesheet" href="node_modules/leaflet/dist/leaflet.css">-->
+    <link rel="stylesheet" href="node_modules/leaflet/dist/leaflet.css">
     <!--<link rel="stylesheet" href="node_modules/nvd3/build/nv.d3.min.css">-->
     <style>
     </style>
@@ -41,11 +41,11 @@
 
 <!--leaflet-->
 <script src="node_modules/leaflet/dist/leaflet-src.js"></script>
-<script src="node_modules/ui-leaflet/dist/ui-leaflet.js"></script>
 <script src="node_modules/moment/moment.js"></script>
 <script src="node_modules/leaflet.timeline/dist/leaflet.timeline.js"></script>
 <script src="node_modules/leaflet.heat/dist/leaflet-heat.js"></script>
-<script src="node_modules/ui-leaflet-layers/dist/ui-leaflet-layers.js"></script>
+<script src="node_modules/ui-leaflet/dist/ui-leaflet.js"></script>
+<!--<script src="node_modules/ui-leaflet-layers/dist/ui-leaflet-layers.js"></script>-->
 
 
 
@@ -59,11 +59,16 @@
 <script src="/js/services/DatumService.js"></script>
 <script src="/js/services/TypeService.js"></script>
 <script src="/js/services/RowService.js"></script>
+<script src="/js/services/MapService.js"></script>
 <!--<script src="/js/services/FilterService.js"></script>-->
 <script src="/js/components/workspaces.js"></script>
 <script src="/js/components/workspace.js"></script>
+<script src="/js/components/queries.js"></script>
 <script src="/js/components/queryConfig.js"></script>
 <script src="/js/components/queryResult.js"></script>
+<script src="/js/components/maps.js"></script>
+<script src="/js/components/mapConfig.js"></script>
+<script src="/js/components/map.js"></script>
 <script src="/js/components/literals.js"></script>
 <script src="/js/components/spanText.js"></script>
 <script src="/js/components/notes.js"></script>
@@ -83,6 +88,8 @@
 <script src="/built/Types.js"></script>
 <script src="/built/Util.js"></script>
 <script src="/built/DatumFactory.js"></script>
+
+
 
 <div id="end"></div>
 </body>

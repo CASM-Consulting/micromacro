@@ -2,9 +2,12 @@ package uk.ac.susx.shl.micromacro.resources;
 
 
 import uk.ac.susx.shl.micromacro.core.*;
+import uk.ac.susx.shl.micromacro.jdbi.CachingDAO;
 import uk.ac.susx.tag.method51.core.data.store2.query.DatumQuery;
-import uk.ac.susx.tag.method51.core.data.store2.query.Proxy;
+import uk.ac.susx.tag.method51.core.data.store2.query.Proximity;
 import uk.ac.susx.tag.method51.core.data.store2.query.Select;
+import uk.ac.susx.tag.method51.core.data.store2.query.SqlQuery;
+import uk.ac.susx.tag.method51.core.meta.filters.KeyFilter;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -19,12 +22,12 @@ public class WorkspaceResource {
 
     private final Workspaces workspaces;
     private final QueryFactory queryFactory;
-    private final QueryResultCache cache;
+    private final CachingDAO<String, SqlQuery> cachingDAO;
 
-    public WorkspaceResource(Workspaces workspaces, QueryFactory queryFactory, QueryResultCache cache) {
+    public WorkspaceResource(Workspaces workspaces, QueryFactory queryFactory, CachingDAO<String, SqlQuery> cachingDAO) {
         this.workspaces = workspaces;
         this.queryFactory = queryFactory;
-        this.cache = cache;
+        this.cachingDAO = cachingDAO;
     }
 
 
@@ -76,10 +79,6 @@ public class WorkspaceResource {
 
         Map rep = queryFactory.rep(query.get(ver));
 
-        boolean isCached = cache.isCached(query.get(ver));
-
-        rep.put("isCached", isCached);
-
         return Response.ok().entity(
             rep
         ).build();
@@ -101,14 +100,14 @@ public class WorkspaceResource {
     }
 
     @POST
-    @Path("addProxy")
-    public Response addProxy(@QueryParam("workspaceId") String workspaceId,
+    @Path("addProximity")
+    public Response addProximity(@QueryParam("workspaceId") String workspaceId,
                              @QueryParam("queryId") String queryId,
-                             Proxy proxy) throws SQLException {
+                             Proximity proximity) throws SQLException {
 
         Workspace workspace = workspaces.get(workspaceId);
 
-        workspace.add(queryId, proxy);
+        workspace.add(queryId, proximity);
 
         workspaces.save(workspace);
 
@@ -130,7 +129,7 @@ public class WorkspaceResource {
         workspaces.save(workspace);
 
         return Response.ok().entity(
-                queryFactory.rep(workspaces.get(workspaceId).queries().get(queryId).get())
+                queryFactory.rep(select)
         ).build();
     }
 
@@ -145,7 +144,7 @@ public class WorkspaceResource {
         Query<T> query = workspace.getQuery(queryId);
 
         for(T q : query.history()) {
-            cache.clearCache(q);
+            cachingDAO.clearCache(q);
         }
 
         return Response.ok().build();
@@ -159,10 +158,27 @@ public class WorkspaceResource {
 
         for(Query<T> query : workspace.queries().values() ) {
             for(T q : query.history()) {
-                cache.clearCache(q);
+                cachingDAO.clearCache(q);
             }
         }
 
         return Response.ok().build();
+    }
+
+    @POST
+    @Path("setTableLiterals")
+    public Response setTableLiterals(@QueryParam("workspaceId") String workspaceId,
+                              @QueryParam("table") String table,
+                              Map<String, KeyFilter> literals) throws SQLException {
+
+        Workspace workspace = workspaces.get(workspaceId);
+
+        workspace.tableLiterals(table, literals);
+
+        workspaces.save(workspace);
+
+        return Response.ok().entity(
+                workspaces.get(workspaceId).tableLiterals(table)
+        ).build();
     }
 }

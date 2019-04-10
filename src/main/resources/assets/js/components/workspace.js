@@ -2,32 +2,30 @@ MicroMacroApp.component('workspace', {
     templateUrl : 'html/workspace.html',
     bindings : {
         workspace : '<',
-        queryList : '<'
+        queryList : '<',
+        tables : '<'
     },
-    controller: function($scope, $state, $stateParams, Queries, spinnerService, Workspaces) {
+    controller: function($scope, $state, $stateParams, Queries, spinnerService, Workspaces, Tables) {
         var $ctrl = this;
+        $ctrl.workspaceId = $stateParams.workspaceId;
 
+        var first = true;
+
+        $ctrl.loadQueries = () => {
+            first || $state.go("workspace.queries")
+            first = false;
+        }
+
+        $ctrl.loadMaps = () => {
+            first || $state.go("workspace.maps")
+            first = false;
+        }
 
         $ctrl.$onInit = () => {
-            $ctrl.active = $ctrl.queryList.indexOf($stateParams.queryId);
-            var firstLoad = true;
-            $ctrl.loadQuery = (name) => {
-                if(firstLoad) {
-                    firstLoad = false;
-                } else {
-                    $state.go('workspace.query', {workspaceId:$stateParams.workspaceId, queryId: name});
-                }
-//                $state.go('workspace.query', {workspaceId:$stateParams.workspaceId, queryId: name});
-            }
-
-            $ctrl.optimise = (query) => {
-                Queries.optimise(query).then((resp)=>{
-                    alert(resp);
-                });
-            }
-
-            $ctrl.clearCache = (queryId) => {
-                Workspaces.clearCache($stateParams.workspaceId, queryId)
+            if($state.$current.name.startsWith("workspace.queries")) {
+                $ctrl.mainActive = 0;
+            } else if($state.$current.name.startsWith("workspace.maps")) {
+                $ctrl.mainActive = 1;
             }
         }
     }

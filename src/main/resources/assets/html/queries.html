@@ -1,0 +1,76 @@
+<div>
+    <div class="col-md-2">
+        <h4>Queries</h4>
+        <button class='btn btn-default' ui-sref=".newQuery({type:'proximity'})">New Proximity</button>
+        <button class='btn btn-default' ui-sref=".newQuery({type:'select'})">New Select</button>
+
+        <div ui-view="config"></div>
+    </div>
+
+    <div class="col-md-10">
+        <div>
+
+            <div class="section form-group form-group-sm">
+                <label class="control-label" for="table" >Table Literals</label>
+                <select class="form-control input-sm" id="table"
+                        ng-model="$ctrl.table"
+                        ng-options="table for table in $ctrl.tables">
+                </select>
+
+                <div><a href ng-if="$ctrl.table" ng-click="$ctrl.addTable($ctrl.table)">+</a></div>
+
+                <div class="section" ng-repeat="table in $ctrl.tableList">
+                    <label>Literals for <em>{{table}}</em></label>
+
+                    <literals
+                            literals="$ctrl.workspace.tableLiterals[table]"
+                            keys="$ctrl.tableKeys[table]"
+                            table="table"
+                            workspace="$ctrl.workspaceId">
+                    </literals>
+
+                    <span><a href ng-click="$ctrl.removeTable(table,$index)">-</a></span>
+                </div>
+            </div>
+
+
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Table</th>
+                    <th>Versions</th>
+                    <th># Returned</th>
+                    <th>Operations</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="name in $ctrl.queryList">
+                    <td> <a href ng-click="$ctrl.active = $index">{{name}}</a> </td>
+                    <td> {{$ctrl.workspace.queries[name].history[0]._TYPE}} </td>
+                    <td> {{$ctrl.workspace.queries[name].history[0].table}} </td>
+                    <td> {{$ctrl.workspace.queries[name].history.length}} </td>
+                    <td> ### </td>
+                    <td>
+                        <button class="btn btn-sm" ng-click="$ctrl.optimise($ctrl.workspace.queries[name].history[0])">Optimise</button>
+                        <button class="btn btn-sm" ng-click="$ctrl.clearCache(name)">Clear Cache</button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <uib-tabset active="$ctrl.active">
+            <uib-tab ng-repeat="name in $ctrl.queryList"
+                     index="$index"
+                     heading="{{name}}"
+                     select="$ctrl.loadQuery(name)">
+                <!--<div ui-view="summary"></div>-->
+            </uib-tab>
+        </uib-tabset>
+        <div ui-view="result"></div>
+    </div>
+
+    <div ui-view="queryNotes"></div>
+
+</div>

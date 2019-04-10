@@ -10,19 +10,23 @@ import io.dropwizard.setup.Environment;
 
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.jdbi.v3.core.Jdbi;
+import org.jdbi.v3.core.statement.SqlLogger;
+import org.jdbi.v3.core.statement.StatementContext;
 import uk.ac.susx.shl.micromacro.core.*;
-import uk.ac.susx.shl.micromacro.jdbi.DatumDAO;
-import uk.ac.susx.shl.micromacro.jdbi.Method52DAO;
-import uk.ac.susx.shl.micromacro.core.data.text.PubMatcher;
+import uk.ac.susx.shl.micromacro.jdbi.*;
 import uk.ac.susx.shl.micromacro.health.DefaultHealthCheck;
 import uk.ac.susx.shl.micromacro.resources.*;
+import uk.ac.susx.tag.method51.core.data.store2.query.Select;
+import uk.ac.susx.tag.method51.core.data.store2.query.SqlQuery;
 import uk.ac.susx.tag.method51.core.gson.GsonBuilderFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.logging.Logger;
 
 public class MicroMacroApplication extends Application<MicroMacroConfiguration> {
+    private static final Logger LOG = Logger.getLogger(MicroMacroApplication.class.getName());
 
     public static void main(final String[] args) throws Exception {
         new MicroMacroApplication().run(args);
@@ -60,6 +64,18 @@ public class MicroMacroApplication extends Application<MicroMacroConfiguration> 
         final JdbiFactory factory = new JdbiFactory();
         final Jdbi jdbi = factory.build(environment, configuration.getDataSourceFactory(), "postgresql");
 
+        jdbi.setSqlLogger(new SqlLogger() {
+            @Override
+            public void logBeforeExecution(StatementContext context) {
+                LOG.info(context.getRenderedSql());
+            }
+
+            @Override
+            public void logAfterExecution(StatementContext context) {
+                LOG.info("done: " + context.getRenderedSql());
+            }
+        });
+
         final Method52DAO method52DAO = new Method52DAO(jdbi);
 
         final Gson gson = GsonBuilderFactory.get()/*.registerTypeAdapterFactory(StreamTypeAdapter.get())*/.create();
@@ -74,21 +90,28 @@ public class MicroMacroApplication extends Application<MicroMacroConfiguration> 
 
 //        final Client client = new JerseyClientBuilder(environment).using(configuration.getJerseyClientConfiguration()).build(getName());
 
-        environment.jersey().register(new Method52Resouce(method52DAO));
+        environment.jersey().register(new Method52Resource(method52DAO));
 
-        QueryResultCache cache = new QueryResultCache(configuration.resultsCachePath);
+//        QueryResultCache cache = new QueryResultCache(configuration.resultsCachePath);
 
-        environment.jersey().register(new QueryResources(datumDAO, cache));
+//        environment.jersey().register(new SelectResource(datumDAO, cache));
+
+        CachingDAO<String, SqlQuery> cachingDAO = new CachingDAO<>(new BaseDAO<>(jdbi, new DatumStringMapper()), configuration.resultsCachePath);
+
+        DAO<String, SqlQuery> lockingCachingDatumDAO = new LockingDAO<>(cachingDAO);
+
+        environment.jersey().register(new SelectResource((DAO)lockingCachingDatumDAO, method52DAO));
+        environment.jersey().register(new ProximityResource((DAO)lockingCachingDatumDAO, method52DAO));
 
         environment.jersey().register(new TableResource(method52DAO));
 
-        final WorkspaceFactory workspaceFactory = new WorkspaceFactory(queryFactory);
+        final WorkspaceFactory workspaceFactory = new WorkspaceFactory(queryFactory, configuration.historical);
 
         final Workspaces workspaces = new Workspaces(configuration.workspaceMapPath, workspaceFactory);
 
         environment.jersey().register(new WorkspacesResource(workspaces, workspaceFactory));
 
-        environment.jersey().register(new WorkspaceResource(workspaces, queryFactory, cache));
+        environment.jersey().register(new WorkspaceResource(workspaces, queryFactory, cachingDAO));
     }
 
 }

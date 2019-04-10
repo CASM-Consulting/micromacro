@@ -1,232 +1,171 @@
 
 <div>
-    <div class="container">
-        <div class="row">
-            <div class="col-md-3">
-                <button ng-click="resetConfig()" class="btn btn-default">Reset Config</button>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-3">
-                <span>From</span>
-                <p class="input-group">
-                    <input type="text"
-                           class="form-control"
-                           uib-datepicker-popup
-                           ng-model="config.from"
-                           is-open="fromOpen"
-                           datepicker-options="fromDateOptions"
-                           ng-required="true"
-                           close-text="Close"  />
-                    <span class="input-group-btn">
-                        <button type="button"
-                                class="btn btn-default"
-                                ng-click="fromOpen = true;">
-                            <i class="glyphicon glyphicon-calendar"></i></button>
-                    </span>
-                </p>
-            </div>
-            <div class="col-md-3">
-                <span>To</span>
-                <p class="input-group">
-                    <input type="text"
-                           class="form-control"
-                           uib-datepicker-popup
-                           ng-model="config.to"
-                           is-open="toOpen"
-                           datepicker-options="toDateOptions"
-                           ng-required="true"
-                           close-text="Close" />
-                    <span class="input-group-btn">
-                        <button type="button"
-                                class="btn btn-default"
-                                ng-click="toOpen = true;">
-                            <i class="glyphicon glyphicon-calendar"></i></button>
-                    </span>
-                </p>
-            </div>
+<!--    <div class="container">-->
+<!--        <div class="row">-->
+<!--            <div class="col-md-3">-->
+<!--                <button ng-click="resetConfig()" class="btn btn-default">Reset Config</button>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--        <div class="row">-->
+<!--            <div class="col-md-3">-->
+<!--                <span>From</span>-->
+<!--                <p class="input-group">-->
+<!--                    <input type="text"-->
+<!--                           class="form-control"-->
+<!--                           uib-datepicker-popup-->
+<!--                           ng-model="config.from"-->
+<!--                           is-open="fromOpen"-->
+<!--                           datepicker-options="fromDateOptions"-->
+<!--                           ng-required="true"-->
+<!--                           close-text="Close"  />-->
+<!--                    <span class="input-group-btn">-->
+<!--                        <button type="button"-->
+<!--                                class="btn btn-default"-->
+<!--                                ng-click="fromOpen = true;">-->
+<!--                            <i class="glyphicon glyphicon-calendar"></i></button>-->
+<!--                    </span>-->
+<!--                </p>-->
+<!--            </div>-->
+<!--            <div class="col-md-3">-->
+<!--                <span>To</span>-->
+<!--                <p class="input-group">-->
+<!--                    <input type="text"-->
+<!--                           class="form-control"-->
+<!--                           uib-datepicker-popup-->
+<!--                           ng-model="config.to"-->
+<!--                           is-open="toOpen"-->
+<!--                           datepicker-options="toDateOptions"-->
+<!--                           ng-required="true"-->
+<!--                           close-text="Close" />-->
+<!--                    <span class="input-group-btn">-->
+<!--                        <button type="button"-->
+<!--                                class="btn btn-default"-->
+<!--                                ng-click="toOpen = true;">-->
+<!--                            <i class="glyphicon glyphicon-calendar"></i></button>-->
+<!--                    </span>-->
+<!--                </p>-->
+<!--            </div>-->
 
-        </div>
+<!--        </div>-->
 
-        <div class="row">
-            <div class="col-md-3">
-                <span>Select table</span>
-                <span>
-                    <select ng-model="config.table">
-                        <option ng-repeat="tbl in tables" ng-value="tbl">{{tbl}}</option>
-                    </select>
-                </span>
-                <div>
-                    <button ng-click="loadData()" class="btn btn-default">Load</button>
-                </div>
-            </div>
+<!--        <div class="row">-->
+<!--            <div class="col-md-12">-->
+<!--                <span class="">Heatmap</span>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--        <div class="row">-->
+<!--            <div class="col-md-2">-->
+<!--                <span>Intensity</span>-->
+<!--                <span>-->
+<!--                    <input ng-model="config.heatmap.intensity" step="1" type="number">-->
+<!--                </span>-->
+<!--            </div>-->
 
-            <div class="col-md-3">
-                <div>
-                    <span>Trial Id Key</span>
-                    <span>
-                    <select ng-model="config.trialIdKey">
-                        <option ng-repeat="key in keys | toArray | orderBy:'$key' " ng-value="key.$key">{{key.$key}}</option>
-                    </select>
-                    </span>
-                </div>
-                <div>
-                    <span>Sentence Id Key</span>
-                    <span>
-                        <select ng-model="config.sentenceIdKey" >
-                            <option ng-repeat="key in keys | toArray | orderBy:'$key' " ng-value="key.$key">{{key.$key}}</option>
-                        </select>
-                    </span>
-                </div>
-            </div>
+<!--            <div class="col-md-2">-->
+<!--                <span>Decay</span>-->
+<!--                <span>-->
+<!--                    <input ng-model="config.heatmap.decay" step="1" type="number">-->
+<!--                </span>-->
+<!--            </div>-->
 
-            <div class="col-md-3">
-                <span>Select Keys</span>
-                <select multiple ng-model="config.annotationKeys">
-                    <option ng-repeat="key in keys | toArray | orderBy:'$key' " ng-value="key.$key">{{key.$key}}</option>
-                </select>
-            </div>
+<!--            <div class="col-md-2">-->
+<!--                <span>Radius</span>-->
+<!--                <span>-->
+<!--                    <input ng-model="config.heatmap.radius" step="1" type="number">-->
+<!--                </span>-->
+<!--            </div>-->
 
+<!--            <div class="col-md-2">-->
+<!--                <span>Blur</span>-->
+<!--                <span>-->
+<!--                    <input ng-model="config.heatmap.blur" step="1" type="number">-->
+<!--                </span>-->
+<!--            </div>-->
 
-        </div>
+<!--            &lt;!&ndash;<div class="col-md-2">&ndash;&gt;-->
+<!--            &lt;!&ndash;<span>Timeline Duration</span>&ndash;&gt;-->
+<!--            &lt;!&ndash;<span>&ndash;&gt;-->
+<!--            &lt;!&ndash;<input ng-model="timelineDuration" step="100" type="number">&ndash;&gt;-->
+<!--            &lt;!&ndash;</span>&ndash;&gt;-->
+<!--            &lt;!&ndash;</div>&ndash;&gt;-->
+<!--        </div>-->
+<!--        &lt;!&ndash;<div class="row">&ndash;&gt;-->
+<!--        &lt;!&ndash;<div class="col-md-2">&ndash;&gt;-->
+<!--        &lt;!&ndash;<span>Threshold</span>&ndash;&gt;-->
+<!--        &lt;!&ndash;<span>&ndash;&gt;-->
+<!--        &lt;!&ndash;<input ng-model="config.scoreThresh" step="0.1" min="0" max="1" type="number">&ndash;&gt;-->
+<!--        &lt;!&ndash;</span>&ndash;&gt;-->
+<!--        &lt;!&ndash;</div>&ndash;&gt;-->
 
+<!--        &lt;!&ndash;</div>&ndash;&gt;-->
 
-        <div class="row">
-            <div class="col-md-3">
-                <span>New table</span>
-                <span>
-                    <input ng-model="config.newTable">
-                </span>
-            </div>
+<!--&lt;!&ndash;        <div class="row">&ndash;&gt;-->
+<!--&lt;!&ndash;            <div class="col-md-1">&ndash;&gt;-->
+<!--&lt;!&ndash;                <span>Place Type</span>&ndash;&gt;-->
+<!--&lt;!&ndash;                <span>&ndash;&gt;-->
+<!--&lt;!&ndash;                    <div>&ndash;&gt;-->
+<!--&lt;!&ndash;                        <label><input type="checkbox" ng-model="config.filter.pubs"> pubs</label>&ndash;&gt;-->
+<!--&lt;!&ndash;                    </div>&ndash;&gt;-->
+<!--&lt;!&ndash;                    <div>&ndash;&gt;-->
+<!--&lt;!&ndash;                        <label><input type="checkbox" ng-model="config.filter.places"> places</label>&ndash;&gt;-->
+<!--&lt;!&ndash;                    </div>&ndash;&gt;-->
+<!--&lt;!&ndash;                </span>&ndash;&gt;-->
+<!--&lt;!&ndash;            </div>&ndash;&gt;-->
 
-            <div class="col-md-3">
-                <span>
-                    <button ng-click="saveSents2Table()" class="btn btn-default">Save Sentences to table</button>
-                </span>
-                <span>
-                    <button ng-click="saveStatements2Table()" class="btn btn-default">Save Statements to table</button>
-                </span>
-            </div>
-        </div>
+<!--&lt;!&ndash;            <div class="col-md-2">&ndash;&gt;-->
+<!--&lt;!&ndash;                <span>Crime Type</span>&ndash;&gt;-->
+<!--&lt;!&ndash;                <span>&ndash;&gt;-->
+<!--&lt;!&ndash;                    <div ng-repeat="cat in offences.cats | toArray | orderBy:'$key' ">&ndash;&gt;-->
+<!--&lt;!&ndash;                        <label>&ndash;&gt;-->
+<!--&lt;!&ndash;                            <input type="checkbox"&ndash;&gt;-->
+<!--&lt;!&ndash;                                   inverted-checkbox="cat.$key"&ndash;&gt;-->
+<!--&lt;!&ndash;                                   inverted-checkbox-model="config.filter.cat"&ndash;&gt;-->
+<!--&lt;!&ndash;                                   inverted-checkbox-change="persistConfig"&ndash;&gt;-->
+<!--&lt;!&ndash;                            > {{cat.$key}}&ndash;&gt;-->
+<!--&lt;!&ndash;                        </label>&ndash;&gt;-->
+<!--&lt;!&ndash;                    </div>&ndash;&gt;-->
+<!--&lt;!&ndash;                </span>&ndash;&gt;-->
+<!--&lt;!&ndash;            </div>&ndash;&gt;-->
 
-        <div class="row">
-            <div class="col-md-12">
-                <span class="">Heatmap</span>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-2">
-                <span>Intensity</span>
-                <span>
-                    <input ng-model="config.heatmap.intensity" step="1" type="number">
-                </span>
-            </div>
+<!--&lt;!&ndash;            <div class="col-md-3">&ndash;&gt;-->
+<!--&lt;!&ndash;                <span>Annotation</span>&ndash;&gt;-->
+<!--&lt;!&ndash;                <span>&ndash;&gt;-->
+<!--&lt;!&ndash;                    <div ng-repeat="anno in config.annotationKeys">&ndash;&gt;-->
+<!--&lt;!&ndash;                        <label>&ndash;&gt;-->
+<!--&lt;!&ndash;                            <span ng-if="keys[anno].type.class == 'java.lang.String' || keys[anno].type.class == 'uk.ac.susx.tag.method51.twitter.LabelDecision' ">&ndash;&gt;-->
+<!--&lt;!&ndash;                                <input type="checkbox"&ndash;&gt;-->
+<!--&lt;!&ndash;                                       inverted-checkbox="anno"&ndash;&gt;-->
+<!--&lt;!&ndash;                                       inverted-checkbox-model="config.filter.annotations"&ndash;&gt;-->
+<!--&lt;!&ndash;                                       inverted-checkbox-change="persistConfig"&ndash;&gt;-->
+<!--&lt;!&ndash;                                >&ndash;&gt;-->
+<!--&lt;!&ndash;                            </span>&ndash;&gt;-->
+<!--&lt;!&ndash;                            <span ng-if="keys[anno].type.class == 'java.lang.Double'">&ndash;&gt;-->
+<!--&lt;!&ndash;                                <input type="number" ng-model="config.filter.annotations[anno]" min="0" max="1" step="0.01" style="width:50px">&ndash;&gt;-->
+<!--&lt;!&ndash;                            </span>&ndash;&gt;-->
 
-            <div class="col-md-2">
-                <span>Decay</span>
-                <span>
-                    <input ng-model="config.heatmap.decay" step="1" type="number">
-                </span>
-            </div>
+<!--&lt;!&ndash;                            {{anno}}&ndash;&gt;-->
+<!--&lt;!&ndash;                        </label>&ndash;&gt;-->
+<!--&lt;!&ndash;                    </div>&ndash;&gt;-->
+<!--&lt;!&ndash;                </span>&ndash;&gt;-->
+<!--&lt;!&ndash;            </div>&ndash;&gt;-->
 
-            <div class="col-md-2">
-                <span>Radius</span>
-                <span>
-                    <input ng-model="config.heatmap.radius" step="1" type="number">
-                </span>
-            </div>
+<!--            &lt;!&ndash;<div class="col-md-4">&ndash;&gt;-->
+<!--            &lt;!&ndash;<span>Crime Sub Type</span>&ndash;&gt;-->
+<!--            &lt;!&ndash;<span  >&ndash;&gt;-->
+<!--            &lt;!&ndash;<div style="max-height:400px;overflow:scroll;">&ndash;&gt;-->
+<!--            &lt;!&ndash;<div ng-repeat="subCat in offences.subCats | toArray | orderBy:'cat' ">&ndash;&gt;-->
+<!--            &lt;!&ndash;<input&ndash;&gt;-->
+<!--            &lt;!&ndash;inverted-checkbox="subCat.$key"&ndash;&gt;-->
+<!--            &lt;!&ndash;inverted-checkbox-model="config.filter.subCat"&ndash;&gt;-->
+<!--            &lt;!&ndash;inverted-checkbox-change="persistConfig"&ndash;&gt;-->
+<!--            &lt;!&ndash;type="checkbox"&ndash;&gt;-->
+<!--            &lt;!&ndash;&gt; {{subCat.cat}} - {{subCat.$key}}&ndash;&gt;-->
+<!--            &lt;!&ndash;</div>&ndash;&gt;-->
+<!--            &lt;!&ndash;</div>&ndash;&gt;-->
+<!--            &lt;!&ndash;</span>&ndash;&gt;-->
+<!--            &lt;!&ndash;</div>&ndash;&gt;-->
 
-            <div class="col-md-2">
-                <span>Blur</span>
-                <span>
-                    <input ng-model="config.heatmap.blur" step="1" type="number">
-                </span>
-            </div>
-
-            <!--<div class="col-md-2">-->
-            <!--<span>Timeline Duration</span>-->
-            <!--<span>-->
-            <!--<input ng-model="timelineDuration" step="100" type="number">-->
-            <!--</span>-->
-            <!--</div>-->
-        </div>
-        <!--<div class="row">-->
-        <!--<div class="col-md-2">-->
-        <!--<span>Threshold</span>-->
-        <!--<span>-->
-        <!--<input ng-model="config.scoreThresh" step="0.1" min="0" max="1" type="number">-->
-        <!--</span>-->
-        <!--</div>-->
-
-        <!--</div>-->
-
-        <div class="row">
-            <div class="col-md-1">
-                <span>Place Type</span>
-                <span>
-                    <div>
-                        <label><input type="checkbox" ng-model="config.filter.pubs"> pubs</label>
-                    </div>
-                    <div>
-                        <label><input type="checkbox" ng-model="config.filter.places"> places</label>
-                    </div>
-                </span>
-            </div>
-
-            <div class="col-md-2">
-                <span>Crime Type</span>
-                <span>
-                    <div ng-repeat="cat in offences.cats | toArray | orderBy:'$key' ">
-                        <label>
-                            <input type="checkbox"
-                                   inverted-checkbox="cat.$key"
-                                   inverted-checkbox-model="config.filter.cat"
-                                   inverted-checkbox-change="persistConfig"
-                            > {{cat.$key}}
-                        </label>
-                    </div>
-                </span>
-            </div>
-
-            <div class="col-md-3">
-                <span>Annotation</span>
-                <span>
-                    <div ng-repeat="anno in config.annotationKeys">
-                        <label>
-                            <span ng-if="keys[anno].type.class == 'java.lang.String' || keys[anno].type.class == 'uk.ac.susx.tag.method51.twitter.LabelDecision' ">
-                                <input type="checkbox"
-                                       inverted-checkbox="anno"
-                                       inverted-checkbox-model="config.filter.annotations"
-                                       inverted-checkbox-change="persistConfig"
-                                >
-                            </span>
-                            <span ng-if="keys[anno].type.class == 'java.lang.Double'">
-                                <input type="number" ng-model="config.filter.annotations[anno]" min="0" max="1" step="0.01" style="width:50px">
-                            </span>
-
-                            {{anno}}
-                        </label>
-                    </div>
-                </span>
-            </div>
-
-            <!--<div class="col-md-4">-->
-            <!--<span>Crime Sub Type</span>-->
-            <!--<span  >-->
-            <!--<div style="max-height:400px;overflow:scroll;">-->
-            <!--<div ng-repeat="subCat in offences.subCats | toArray | orderBy:'cat' ">-->
-            <!--<input-->
-            <!--inverted-checkbox="subCat.$key"-->
-            <!--inverted-checkbox-model="config.filter.subCat"-->
-            <!--inverted-checkbox-change="persistConfig"-->
-            <!--type="checkbox"-->
-            <!--&gt; {{subCat.cat}} - {{subCat.$key}}-->
-            <!--</div>-->
-            <!--</div>-->
-            <!--</span>-->
-            <!--</div>-->
-
-        </div>
+<!--        </div>-->
 
 
         <div class="row" >
@@ -240,12 +179,12 @@
                 <leaflet
                         width="800px"
                         height="800px"
-                        center="center"
-                        tiles="tiles"
-                        defaults="defaults"
-                        markers="markers"
-                        geojson="geojson"
-                        layers="layers"
+                        center="$ctrl.leafletMap.center"
+                        tiles="$ctrl.leafletMap.tiles"
+                        defaults="$ctrl.leafletMap.defaults"
+                        markers="$ctrl.leafletMap.markers"
+                        geojson="$ctrl.leafletMap.geojson"
+                        layers="$ctrl.leafletMap.layers"
                 ></leaflet>
 
                 <button ng-click="changeTiles('oldlondon')" class="btn btn-default">Old London</button>

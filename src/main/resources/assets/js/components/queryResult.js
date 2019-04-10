@@ -4,7 +4,8 @@ MicroMacroApp.component('queryResult', {
         query: '<',
         keys: '<',
         result: '<',
-        defaultKeys: '<'
+        defaultKeys: '<',
+        literals : '<'
     },
     controller : function($scope, $state, $stateParams, Queries, Datums, Rows, Types) {
         var $ctrl = this;
@@ -104,8 +105,8 @@ MicroMacroApp.component('queryResult', {
                 }
             });
 
-            if(isProxy()) {
-                $ctrl.pages = Queries.binProxyResultByPartition($ctrl.result, $ctrl.query.partition.key);
+            if(isPartitioned()) {
+                $ctrl.pages = Queries.binProximityResultByPartition($ctrl.result, $ctrl.query.partition.key);
                 $ctrl.page = Rows.getRowsColumns($ctrl.pages[$ctrl.currentPage-1], $ctrl.keys, $ctrl.selectedKeys);
             }
 
@@ -127,9 +128,12 @@ MicroMacroApp.component('queryResult', {
 
         $ctrl.cacheResults  = () => {
             $ctrl.loading = true;
-            return Queries.execute($ctrl.query, {cacheOnly:true}).then( (count) => {
-                $ctrl.totalItems = count;
-            }).then(() => {
+            return Queries.count($ctrl.query).then( (count) => {
+                if(isPartitioned()) {
+                    $ctrl.totalItems = count * $ctrl.numPerPage;
+                } else {
+                    $ctrl.totalItems = count;
+                }
 
                 $ctrl.loading = false;
             });
@@ -139,7 +143,7 @@ MicroMacroApp.component('queryResult', {
 //            spinnerService.show('booksSpinner');
         }
 
-        var isProxy = () => $ctrl.query._TYPE == "proxy";
+        var isPartitioned = () => $ctrl.query.partition &&  $ctrl.query.partition.key;
 
         $ctrl.cols = function(max, num) {
             return Math.floor(max/num);
@@ -168,12 +172,12 @@ MicroMacroApp.component('queryResult', {
 
         var updateData = function() {
             resolveDisplayKeys();
-            if(isProxy()) {
+            if(isPartitioned()) {
                 var page = $ctrl.currentPage - 1;
                 if($ctrl.pages[$ctrl.currentPage-1]) {
                     $ctrl.page = Rows.getRowsColumns($ctrl.pages[$ctrl.currentPage-1], $ctrl.keys, $ctrl.selectedKeys);
                 } else {
-                    Queries.execute($ctrl.query, {cacheOnly:false, page:page}).then( (data)=> {
+                    Queries.page($ctrl.query, page).then( (data)=> {
                         $ctrl.page = Rows.getRowsColumns(data, $ctrl.keys, $ctrl.selectedKeys);
                     });
                 }
@@ -184,7 +188,7 @@ MicroMacroApp.component('queryResult', {
                 if($ctrl.result[skip] && $ctrl.result[skip+limit-1]) {
                     $ctrl.page = Rows.getRowsColumns($ctrl.result.slice(skip, skip+limit), $ctrl.keys, $ctrl.selectedKeys);
                 } else {
-                    Queries.execute($ctrl.query, {cacheOnly:false, skip:skip, limit:limit}).then( (data)=> {
+                    Queries.skipLimit($ctrl.query, skip, limit).then( (data)=> {
                         $ctrl.page = Rows.getRowsColumns(data, $ctrl.keys, $ctrl.selectedKeys);
                     });
                 }
@@ -201,7 +205,7 @@ MicroMacroApp.component('queryResult', {
 
             updateQuery._TYPE += "Update";
 
-            Queries.execute(updateQuery);
+            Queries.update(updateQuery);
         };
 
     }

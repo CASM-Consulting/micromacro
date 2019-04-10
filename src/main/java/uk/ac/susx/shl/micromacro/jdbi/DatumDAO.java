@@ -1,12 +1,12 @@
 package uk.ac.susx.shl.micromacro.jdbi;
 
 import com.google.gson.Gson;
+import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.Jdbi;
 import uk.ac.susx.shl.micromacro.api.DatumRep;
 import uk.ac.susx.tag.method51.core.data.store2.query.CreateIndex;
 import uk.ac.susx.tag.method51.core.data.store2.query.DatumQuery;
 import uk.ac.susx.tag.method51.core.data.store2.query.Index;
-import uk.ac.susx.tag.method51.core.data.store2.query.Proxy;
 import uk.ac.susx.tag.method51.core.gson.GsonBuilderFactory;
 import uk.ac.susx.tag.method51.core.meta.Datum;
 import uk.ac.susx.tag.method51.core.meta.Key;
@@ -53,9 +53,11 @@ public class DatumDAO {
 
     public <T extends DatumQuery> Stream<DatumRep> execute2Rep(T query) {
         KeySet keys = method52DAO.schema(query.table());
-        return jdbi.withHandle(handle -> handle.createQuery(query.sql())
-                .map(new DatumRepMapper(keys))
-                .stream()
+        return jdbi.withHandle(handle -> {
+                    return handle.createQuery(query.sql())
+                            .map(new DatumRepMapper(keys))
+                            .stream();
+                }
         );
     }
 
@@ -67,7 +69,7 @@ public class DatumDAO {
         );
     }
 
-    public <T extends DatumQuery> Function<String, Datum> datumMapper(T query) {
+    public <T extends DatumQuery> Function<String, Datum> string2Datum(T query) {
         KeySet keys = method52DAO.schema(query.table());
         Gson gson = GsonBuilderFactory.get(keys).create();
 
@@ -75,7 +77,7 @@ public class DatumDAO {
     }
 
 
-    public Function<String, Map> datumMapper() {
+    public Function<String, Map> string2Map() {
         Gson gson = GsonBuilderFactory.get().create();
         return (str) -> gson.fromJson(str, Map.class);
     }

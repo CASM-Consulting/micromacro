@@ -14,7 +14,7 @@ assets:
   overrides:
     /: src/main/resources/assets/
 
-
+historical: false
 resultsCachePath: data/queryCache
 sessionsPath: data/sessionsPapers
 obMapPath: data/cache2

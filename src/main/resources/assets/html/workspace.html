@@ -1,60 +1,27 @@
-<div class="row">
+<div>
+    <div class="row">
 
-    <div class="col-md-2">
-        <h2>{{$ctrl.workspace.name}}</h2>
-        <h3>Queries</h3>
-        <button class='btn btn-default' ui-sref=".newQuery({type:'proxy'})">New Proxy</button>
-        <button class='btn btn-default' ui-sref=".newQuery({type:'select'})">New Select</button>
-        <!--<ul>-->
+        <div class="col-md-2">
+            <span class="lead">{{$ctrl.workspace.name}}</span>
+            <!--<ul>-->
             <!--<li ng-repeat="(name, query) in $ctrl.workspace.queries"><a ui-sref=".query({queryId: name})">{{name}}</a></li>-->
-        <!--</ul>-->
-
-        <div ui-view="config"></div>
-    </div>
-
-    <div class="col-md-10">
-        <div >
-            <table class="table">
-                <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Type</th>
-                    <th>Table</th>
-                    <th>Versions</th>
-                    <th># Returned</th>
-                    <th>Operations</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr ng-repeat="name in $ctrl.queryList">
-                    <td> <a href ng-click="$ctrl.active = $index">{{name}}</a> </td>
-                    <td> {{$ctrl.workspace.queries[name].history[0]._TYPE}} </td>
-                    <td> {{$ctrl.workspace.queries[name].history[0].table}} </td>
-                    <td> {{$ctrl.workspace.queries[name].history.length}} </td>
-                    <td> ### </td>
-                    <td>
-                        <button class="btn btn-sm" ng-click="$ctrl.optimise($ctrl.workspace.queries[name].history[0])">Optimise</button>
-                        <button class="btn btn-sm" ng-click="$ctrl.clearCache(name)">Clear Cache</button>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
+            <!--</ul>-->
         </div>
-        <uib-tabset active="$ctrl.active">
-            <uib-tab ng-repeat="name in $ctrl.queryList"
-                     index="$index"
-                     heading="{{name}}"
-                     select="$ctrl.loadQuery(name)">
-                <!--<div ui-view="summary"></div>-->
-            </uib-tab>
-        </uib-tabset>
-        <div ui-view="result"></div><div loading-state="workspace.query.execute">Loading...</div>
+        <div class="col-md-10">
+            <uib-tabset active="$ctrl.mainActive">
+                <uib-tab index="0"
+                         heading="Queries"
+                         select="$ctrl.loadQueries()">
+                </uib-tab>
+                <uib-tab index="1"
+                         heading="Maps"
+                         select="$ctrl.loadMaps()">
+                </uib-tab>
+            </uib-tabset>
+        </div>
     </div>
-
-    <!--<div class="col-md-10">-->
-        <!--<div ui-view="result"></div>-->
-    <!--</div>-->
-
-    <div ui-view="queryNotes"></div>
-
+    <div class="row">
+        <div loading-state="workspace.query.execute">Loading...</div>
+        <div ui-view></div>
+    </div>
 </div>

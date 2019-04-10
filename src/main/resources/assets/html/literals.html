@@ -1,36 +1,36 @@
-<div>
-    <div ng-repeat="(letter, literal) in $ctrl.literals" class="section">
-        <b>Literal:</b><b class="pull-right">{{letter}}</b>
-        <literal ng-click="$ctrl.setLiteral(letter, literal)" literal="literal" keys="$ctrl.keys"></literal>
+<div >
+    <div style="display:flex; flex-wrap: wrap">
+        <div ng-repeat="(letter, literal) in $ctrl.literals" class="section" >
+            <b>Literal:</b><b class="pull-right">{{letter}}</b>
+            <literal ng-click="$ctrl.setLiteral(letter, literal)" literal="literal" keys="$ctrl.keys"></literal>
+        </div>
     </div>
     <div class="section">
-        <div><em>New Literal</em></div>
+        <div><a href ng-click="$ctrl.isUncollapsed = !$ctrl.isUncollapsed"><b>New Literal</b></a></div>
 
-        <label class="control-label" for="literal-letter">Letter</label>
-        <input class="form-control" type="text" id="literal-letter" ng-model="$ctrl.letter">
+        <div uib-collapse="!$ctrl.isUncollapsed">
+            <label class="control-label" for="literal-letter">Letter</label>
+            <input class="form-control" type="text" id="literal-letter" ng-model="$ctrl.letter">
 
-        <label class="control-label" for="literal-key">Key</label>
-        <!--<select class="form-control" id="literal-key"-->
-        <!--ng-options="key as id for (id, key) in $ctrl.keys track by ((key.namespace || '') + key.name)"-->
-        <!--ng-model="$ctrl.key"-->
-        <!--&gt;</select>-->
-        <key keys="$ctrl.keys" ng-model="$ctrl.key" for-id="'literal-key'"></key>
+            <label class="control-label" for="literal-key">Key</label>
 
-        <!--<filter key="$ctrl.key"></filter>-->
-        <label class="control-label" for="literal-type">Type</label>
-        <select class="form-control" id="literal-type"
-                ng-model="$ctrl.type"
-        >
-            <option>equals</option>
-            <option>present</option>
-            <option>date</option>
-            <option>regex</option>
-        </select>
+            <key keys="$ctrl.keys" ng-model="$ctrl.key" for-id="'literal-key'"></key>
 
-        <label class="control-label" for="literal-args">Arguments</label>
-        <input class="form-control" type="text" id="literal-args" ng-model="$ctrl.args">
+            <label class="control-label" for="literal-type">Type</label>
+            <select class="form-control" id="literal-type"
+                    ng-model="$ctrl.type"
+            >
+                <option>equals</option>
+                <option>present</option>
+                <option>date</option>
+                <option>regex</option>
+            </select>
 
-        <button class="btn btn-default" ng-click="$ctrl.addLiteral()">Set Literal</button>
+            <label class="control-label" for="literal-args">Arguments</label>
+            <input class="form-control" type="text" id="literal-args" ng-model="$ctrl.args">
+
+            <button class="btn btn-default" ng-click="$ctrl.addLiteral()">Set Literal</button>
+        </div>
     </div>
 
 </div>
