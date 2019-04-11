@@ -122,10 +122,10 @@ MicroMacroApp.component('map', {
 
                             return L.circleMarker(latlng, {radius:5, color:colour}).bindPopup(function(l) {
                                 return "<ul>" +
-                                "<li>Match: " + data.with[0].match + "</li>"+
+                                "<li>Match: " + data.metadata.with[0].match + "</li>"+
                                 // "<li>Original: " + data.metadata.spanned + "</li>"+
-                                "<li>Lat: " + latlng[0] + "</li>"+
-                                "<li>Lng: " + latlng[1] + "</li>"+
+                                "<li>Lat: " + latlng.lat + "</li>"+
+                                "<li>Lng: " + latlng.lng+ "</li>"+
                                 // "<li>Date: " + data.metadata.date + "</li>"+
                                 // "<li>Trial: " + data.metadata.trialId + "</li>"+
                                 "</ul>";

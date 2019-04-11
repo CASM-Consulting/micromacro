@@ -9,7 +9,7 @@ MicroMacroApp.component('queries', {
         var $ctrl = this;
         $ctrl.workspaceId = $stateParams.workspaceId;
 
-        var firstLoad = true;
+        var firstLoad = $state.$current.name.endsWith("execute");
 
         $ctrl.$onInit = () => {
             $ctrl.active = $ctrl.queryList.indexOf($stateParams.queryId);
