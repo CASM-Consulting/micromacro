@@ -1,8 +1,6 @@
 package uk.ac.susx.shl.micromacro.jdbi;
 
 import com.google.gson.Gson;
-import org.mapdb.DB;
-import uk.ac.susx.tag.method51.core.data.store2.query.Partitioner;
 import uk.ac.susx.tag.method51.core.data.store2.query.SqlQuery;
 import uk.ac.susx.tag.method51.core.gson.GsonBuilderFactory;
 
@@ -13,16 +11,16 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.logging.Logger;
 
-public class PartitionPager implements BiFunction<SqlQuery, Object, Function<String, String>> {
+public class PartitionedPager implements BiFunction<SqlQuery, Object, Function<String, String>> {
 
-    private static final Logger LOG = Logger.getLogger(PartitionPager.class.getName());
+    private static final Logger LOG = Logger.getLogger(PartitionedPager.class.getName());
 
     private final Function<String, String> getter;
 
     public static final String ID2PAGE = "-id2Page";
     public static final String ID2INTARR = "-id2IntArr";
 
-    public PartitionPager(String key) {
+    public PartitionedPager(String key) {
 
         Gson gson = GsonBuilderFactory.get().create();
 

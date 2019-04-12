@@ -10,6 +10,7 @@ MicroMacroApp.directive("partition", function () {
         link : function(scope, element, attrs) {
 
             scope.partition.orderBy = scope.partition.orderBy || {};
+            scope.partition.function = scope.partition.function || "ROW_NUMBER";
 
 //            scope.$watchCollection("keys", function(newVal, oldVal) {
 //

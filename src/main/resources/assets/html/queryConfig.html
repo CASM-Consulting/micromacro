@@ -44,8 +44,7 @@
                 <div class="section">
                     <label class="control-label" >Table Where</label>
                     <div>
-                        <input class="form-control" type="text"
-                               ng-model="$ctrl.query.tableWhere">
+                        <input class="form-control" type="text" ng-model="$ctrl.query.tableWhere">
                     </div>
                 </div>
 
@@ -57,11 +56,28 @@
                     <label class=" control-label">Proximity</label>
                     <input class="form-control" type="text" ng-model="$ctrl.query.proximity">
 
-                    <label class=" control-label">Partition</label>
-                    <partition keys="$ctrl.keyList" ng-model="$ctrl.query.partition"></partition>
+                    <label class=" control-label">Scope</label>
+                    <partition keys="$ctrl.keyList" ng-model="$ctrl.query.scope"></partition>
 
                     <label class=" control-label">Distance</label>
                     <input type="number" step="1" min="1" class="form-control" ng-model="$ctrl.query.distance">
+                </div>
+
+                <div class="section">
+
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox" ng-checked="!!$ctrl.query.partition" ng-click="$ctrl.partitionQuery()">
+                            Partition
+                        </label>
+                    </div>
+
+                    <div ng-if="$ctrl.query.partition">
+
+                        <label class="control-label">Partition</label>
+                        <partition keys="$ctrl.keyList" ng-model="$ctrl.query.partition"></partition>
+
+                    </div>
                 </div>
 
             </div>
@@ -78,7 +94,7 @@
 
                     <div class="checkbox">
                         <label>
-                            <input type="checkbox" ng-checked="!!$ctrl.query.partition" ng-click="$ctrl.partitionSelect()">
+                            <input type="checkbox" ng-checked="!!$ctrl.query.partition" ng-click="$ctrl.partitionQuery()">
                             Partition
                         </label>
                     </div>

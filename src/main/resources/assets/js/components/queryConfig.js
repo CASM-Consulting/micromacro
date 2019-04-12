@@ -48,9 +48,8 @@ MicroMacroApp.component('queryConfig', {
                 $ctrl.query.orderBy = {};
             }
 
-            if($ctrl.query._TYPE == "proximity" && !$ctrl.query.partition) {
-                $ctrl.query.partition = {
-                    'function' : 'ROW_NUMBER'
+            if($ctrl.query._TYPE == "proximity" && !$ctrl.query.scope) {
+                $ctrl.query.scope = {
                 };
             }
 
@@ -62,7 +61,7 @@ MicroMacroApp.component('queryConfig', {
             }
         };
 
-        $ctrl.partitionSelect = () => {
+        $ctrl.partitionQuery = () => {
             if($ctrl.query.partition) {
                 delete $ctrl.query.partition;
             } else {

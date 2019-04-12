@@ -1,8 +1,9 @@
 package uk.ac.susx.shl.micromacro.resources;
 
 import uk.ac.susx.shl.micromacro.jdbi.DAO;
-import uk.ac.susx.shl.micromacro.jdbi.PartitionPager;
-import uk.ac.susx.tag.method51.core.data.store2.query.Partitioner;
+import uk.ac.susx.shl.micromacro.jdbi.PartitionedPager;
+import uk.ac.susx.tag.method51.core.data.store2.query.Partitioned;
+import uk.ac.susx.tag.method51.core.data.store2.query.Scoped;
 import uk.ac.susx.tag.method51.core.data.store2.query.SqlQuery;
 
 import javax.ws.rs.container.AsyncResponse;
@@ -42,6 +43,22 @@ public class DAOStreamResource<T, Q extends SqlQuery> {
         executorService = Executors.newFixedThreadPool(100);
     }
 
+    private boolean isPartitioned(Q query) {
+        return query instanceof Partitioned && ((Partitioned) query).partition() != null;
+    }
+
+    private boolean isScoped(Q query) {
+        return query instanceof Scoped && ((Scoped) query).scope() != null;
+    }
+
+    private boolean isScopedAndPartition(Q query) {
+        return isPartitioned(query) && isScoped(query);
+    }
+
+    private boolean isScopedOrPartition(Q query) {
+        return isPartitioned(query) || isScoped(query);
+    }
+
     /**
      * The intended use of AsyncResponse is to release the handling thread to the web framework for a long running
      * compute; however, it's being used here to allow for a callback after the stream has been consumed by the
@@ -60,11 +77,14 @@ public class DAOStreamResource<T, Q extends SqlQuery> {
 
                 List<BiFunction> functions = new ArrayList<>();
 
-                if (query instanceof Partitioner && ((Partitioner) query).partition() != null) {
+                if(isScopedAndPartition(query) || isPartitioned(query)) {
+                    Partitioned partitioned = (Partitioned) query;
 
-                    Partitioner partitioner = (Partitioner) query;
+                    functions.add(new PartitionedPager(partitioned.partition().key().toString()));
+                } else if(isScoped(query)) {
+                    Scoped scoped = (Scoped) query;
 
-                    functions.add(new PartitionPager(partitioner.partition().key().toString()));
+                    functions.add(new PartitionedPager(scoped.scope().key().toString()));
                 }
 
                 Supplier<Object> task = () -> {

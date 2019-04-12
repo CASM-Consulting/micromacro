@@ -32,7 +32,7 @@ public class ProximityResource {
 
     @POST
     @Path("query")
-    public void select(@Suspended final AsyncResponse asyncResponse,
+    public void query(@Suspended final AsyncResponse asyncResponse,
                            final Proximity proximity) throws Exception {
         resource.query(asyncResponse, proximity);
     }
