@@ -89,12 +89,15 @@ MicroMacroApp.component('map', {
 
             leafletData.getMap().then(function(map) {
 
+                var dates = [];
                 var times = [];
 
                 var date = moment($ctrl.minDate);
 
                 while(date <= $ctrl.maxDate) {
-                    times.push(moment(date).add(1000, "y").toDate().getTime())
+                    var tmp = moment(date);
+                    dates.push(tmp.format(DATE_FORMAT));
+                    times.push(tmp.add(1000, "y").toDate().getTime())
                     date.add(1, 'days');
                 }
 
@@ -111,7 +114,43 @@ MicroMacroApp.component('map', {
                     }
                 });
                 
+                $ctrl.lineChartData = [];
+                $ctrl.lineChartOptions = {
+                    chart : {
+                        height: 200,
+                        x: (d) => {
+                            return moment(d[0]).toDate();
+                        },
+                        y: (d) => {
+                            return d[1];
+                        },
+                        xAxis: {
+                            tickFormat: (d) => {
+                                return d3.time.format('%Y-%m-%d')(new Date(d));
+                            },
+                            axisLabel: 'Date'
+                        },
+                    }
+                };
+
+                var lineChartPromises = $ctrl.queries.map( (query, idx) => {
+
+                    return Queries.counts(query, dates).then(counts => {
+                        $ctrl.lineChartData.push({
+                            key : query._id,
+                            values : counts
+                        });
+                    });
+                });
+
+                $q.all(lineChartPromises).then( () => {
+                    $ctrl.lineChartDataReady = true;
+                });
+
+
                 timelines = $ctrl.queries.map( (query, idx) => {
+
+
                     var timeline = L.timeline(null, {
                         start : $ctrl.minDate.add(1000, "y").toDate().getTime(),
                         end: $ctrl.maxDate.add(1000, "y").toDate().getTime(),

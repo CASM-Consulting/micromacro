@@ -1,5 +1,6 @@
 package uk.ac.susx.shl.micromacro.resources;
 
+import uk.ac.susx.shl.micromacro.jdbi.CachingDAO;
 import uk.ac.susx.shl.micromacro.jdbi.DAO;
 import uk.ac.susx.shl.micromacro.jdbi.PartitionedPager;
 import uk.ac.susx.tag.method51.core.data.store2.query.Partitioned;
@@ -9,7 +10,9 @@ import uk.ac.susx.tag.method51.core.data.store2.query.SqlQuery;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -43,21 +46,65 @@ public class DAOStreamResource<T, Q extends SqlQuery> {
         executorService = Executors.newFixedThreadPool(100);
     }
 
-    private boolean isPartitioned(Q query) {
+    protected boolean isPartitioned(Q query) {
         return query instanceof Partitioned && ((Partitioned) query).partition() != null;
     }
 
-    private boolean isScoped(Q query) {
+    protected boolean isScoped(Q query) {
         return query instanceof Scoped && ((Scoped) query).scope() != null;
     }
 
-    private boolean isScopedAndPartition(Q query) {
+    protected boolean isScopedAndPartitioned(Q query) {
         return isPartitioned(query) && isScoped(query);
     }
 
-    private boolean isScopedOrPartition(Q query) {
+    protected boolean isScopedOrPartitioned(Q query) {
         return isPartitioned(query) || isScoped(query);
     }
+
+    protected boolean isCached(Q query) {
+        boolean cached = false;
+        CachingDAO<T, Q> cache = getCache();
+        if(cache != null) {
+            String id = cache.getQueryId(query);
+            if(cache.isCached(id)) {
+                cached = true;
+            }
+        }
+        return cached;
+    }
+    protected CachingDAO<T, Q> getCache() {
+        CachingDAO<T, Q> cache = null;
+        if(datumDAO.getDAO() instanceof CachingDAO) {
+            cache = (CachingDAO<T, Q>)datumDAO.getDAO();
+
+        }
+        return cache;
+    }
+    protected Map<Integer, int[]> getPages(Q query) {
+        Map<Integer, int[]> pages = new HashMap<>();
+        CachingDAO<T, Q> cache = getCache();
+        if(cache != null) {
+            String id = cache.getQueryId(query);
+            if(cache.isCached(id)) {
+                pages = cache.int2IntArr(id, PartitionedPager.ID2INTARR);
+            }
+        }
+        return pages;
+    }
+
+    protected Map<String, Integer> getParitions(Q query) {
+        Map<String, Integer> pages = new HashMap<>();
+        CachingDAO<T, Q> cache = getCache();
+        if(cache != null) {
+            String id = cache.getQueryId(query);
+            if(cache.isCached(id)) {
+                pages = cache.str2Int(id, PartitionedPager.ID2PAGE);
+            }
+        }
+        return pages;
+    }
+
 
     /**
      * The intended use of AsyncResponse is to release the handling thread to the web framework for a long running
@@ -77,7 +124,7 @@ public class DAOStreamResource<T, Q extends SqlQuery> {
 
                 List<BiFunction> functions = new ArrayList<>();
 
-                if(isScopedAndPartition(query) || isPartitioned(query)) {
+                if(isScopedAndPartitioned(query) || isPartitioned(query)) {
                     Partitioned partitioned = (Partitioned) query;
 
                     functions.add(new PartitionedPager(partitioned.partition().key().toString()));

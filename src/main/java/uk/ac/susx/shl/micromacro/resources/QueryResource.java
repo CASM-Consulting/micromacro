@@ -34,17 +34,11 @@ public class QueryResource<Q extends SqlQuery, U extends SqlUpdate> extends DAOS
     public void cacheOnly(AsyncResponse asyncResponse, Q query) throws Exception {
         daoStreamResponse(asyncResponse, query, (stream) -> {
             long total;
-            if(datumDAO.getDAO() instanceof CachingDAO) {
-                CachingDAO<String,Q> cache = (CachingDAO<String,Q>)datumDAO.getDAO();
-                String id = cache.getQueryId(query);
-                if(cache.isCached(id)) {
-                    if( (query instanceof Partitioned && ((Partitioned) query).partition() != null) ) {
-                        total = cache.int2IntArr(id, PartitionedPager.ID2INTARR).size();
-                    } else {
-                        total = datumDAO.list(query).size();
-                    }
+            if(isCached(query)) {
+                if( isScopedOrPartitioned(query) ) {
+                    total = getPages(query).size();
                 } else {
-                    total = stream.count();
+                    total = datumDAO.list(query).size();
                 }
             } else {
                 total = stream.count();
@@ -79,9 +73,11 @@ public class QueryResource<Q extends SqlQuery, U extends SqlUpdate> extends DAOS
     public void partition(AsyncResponse asyncResponse, String partition, Q query) throws Exception {
 
         daoStreamResponse(asyncResponse, query, (stream-> {
-            if(query instanceof Partitioned && ((Partitioned) query).partition() != null) {
 
-                CachingDAO<String, SqlQuery> cache = (CachingDAO<String, SqlQuery>)datumDAO.getDAO();
+            Object result = new ArrayList<>();
+            if(isPartitioned(query)) {
+
+                CachingDAO<String, Q> cache = getCache();
 
                 String id = cache.getQueryId(query);
 
@@ -95,13 +91,11 @@ public class QueryResource<Q extends SqlQuery, U extends SqlUpdate> extends DAOS
 
                     List<String> list = datumDAO.list(query);
 
-                    return list.subList(Math.min(list.size(), indices[0]), Math.min(list.size(), indices[1])).stream();
-                } else {
-                    return new ArrayList<>();
+                    result = list.subList(Math.min(list.size(), indices[0]), Math.min(list.size(), indices[1])).stream();
                 }
-            } else {
-                return new ArrayList<>();
             }
+
+            return result;
 
         }));
     }
@@ -121,6 +115,31 @@ public class QueryResource<Q extends SqlQuery, U extends SqlUpdate> extends DAOS
 
         return Response.status(Response.Status.OK).entity(
                 "OK"
+        ).build();
+    }
+
+    public Response counts(Q query, List<String> partitionIds) {
+
+        List<Object[]> counts = new ArrayList<>(partitionIds.size());
+
+        Map<Integer, int[]> pages = getPages(query);
+
+        Map<String, Integer> partitions = getParitions(query);
+
+        for(String partitionId : partitionIds) {
+            Integer pageId = partitions.get(partitionId);
+            int count = 0;
+            if(pageId != null) {
+                int[] indices = pages.get(pageId);
+                count =  indices[1] - indices[0];
+            }
+
+            counts.add(new Object[]{partitionId, count});
+
+        }
+
+        return Response.status(Response.Status.OK).entity(
+                counts
         ).build();
     }
 

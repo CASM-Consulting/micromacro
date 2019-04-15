@@ -10,6 +10,7 @@ import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.List;
 import java.util.logging.Logger;
 
 
@@ -77,6 +78,14 @@ public class SelectResource {
     public Response optimise(Select select) {
 
         return resource.optimise(select);
+    }
+
+    @POST
+    @Path("counts")
+    public Response counts(Select select,
+             @QueryParam("partitionIds") List<String> partitionIds) {
+
+        return resource.counts(select, partitionIds);
     }
 
 //    @POST

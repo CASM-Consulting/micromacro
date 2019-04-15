@@ -5,6 +5,7 @@
     "@uirouter/angularjs": "^1.0.21",
     "angular": "^1.7.6",
     "angular-animate": "^1.7.6",
+    "angular-nvd3": "^1.0.9",
     "angular-spinners": "^3.1.2",
     "angular-ui": "^1.0.0",
     "angular-ui-bootstrap": "^2.5.6",

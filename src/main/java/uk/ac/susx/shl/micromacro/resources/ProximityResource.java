@@ -5,6 +5,7 @@ import uk.ac.susx.shl.micromacro.jdbi.DAO;
 import uk.ac.susx.shl.micromacro.jdbi.Method52DAO;
 import uk.ac.susx.tag.method51.core.data.store2.query.Proximity;
 import uk.ac.susx.tag.method51.core.data.store2.query.ProximityUpdate;
+import uk.ac.susx.tag.method51.core.data.store2.query.Select;
 import uk.ac.susx.tag.method51.core.data.store2.query.Update;
 
 import javax.ws.rs.POST;
@@ -15,6 +16,7 @@ import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.List;
 import java.util.logging.Logger;
 
 
@@ -81,6 +83,15 @@ public class ProximityResource {
     public Response optimise(Proximity proximity) {
 
         return resource.optimise(proximity);
+    }
+
+
+    @POST
+    @Path("counts")
+    public Response counts(Proximity proximity,
+            @QueryParam("partitionIds") List<String> partitionIds) {
+
+        return resource.counts(proximity, partitionIds);
     }
 
 //    @POST

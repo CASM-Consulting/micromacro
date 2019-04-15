@@ -186,6 +186,7 @@
                         geojson="$ctrl.leafletMap.geojson"
                         layers="$ctrl.leafletMap.layers"
                 ></leaflet>
+<!--                <button ng-click="$ctrl.counts(query)" class="btn btn-default">Search</button>-->
 
 <!--                <button ng-click="changeTiles('oldlondon')" class="btn btn-default">Old London</button>-->
 <!--                <button ng-click="changeTiles('openstreetmap')" class="btn btn-default">Open Street Maps</button>-->
@@ -194,6 +195,11 @@
 <!--                <button ng-click="search(query)" class="btn btn-default">Search</button>-->
 <!--                <button ng-click="extract(query)" class="btn btn-default">Extract</button>-->
 <!--                <button ng-click="getAll()" class="btn btn-default">Get All</button>-->
+
+                <div> <label><input type="checkbox" ng-model="$ctrl.showPlot">Show Plot</label></div>
+                <div ng-if="$ctrl.lineChartDataReady && $ctrl.showPlot">
+                    <line-chart options="$ctrl.lineChartOptions" ng-model="$ctrl.lineChartData"></line-chart>
+                </div >
 
             </div>
 

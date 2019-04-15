@@ -233,6 +233,18 @@ MicroMacroApp.factory("Queries", function($q, Server, $http) {
                     success : resolve
                 });
             });
+        },
+
+        counts : (query, partitionIds) => {
+            var type = query._TYPE;
+            return $q(resolve => {
+                Server.post("api/query/"+type+"/counts/", query, {
+                    params : {
+                        partitionIds : partitionIds
+                    },
+                    success : resolve
+                });
+            });
         }
     }
 
