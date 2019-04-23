@@ -28,7 +28,6 @@ MicroMacroApp.component('queryResult', {
 
         $ctrl.$onInit = function() {
 
-            $ctrl.totalItems = $ctrl.result.length;
             //alphabetical key list
             $ctrl.keyList = [];
             for(var key in $ctrl.keys) {
@@ -105,9 +104,18 @@ MicroMacroApp.component('queryResult', {
                 }
             });
 
-            if(isPartitioned()) {
-                $ctrl.pages = Queries.binProximityResultByPartition($ctrl.result, $ctrl.query.partition.key);
+            if(isPartitionedOrScoped()) {
+                var key;
+                if(isScoped()) {
+                    key = $ctrl.query.scope.key;
+                } else {
+                    key = $ctrl.query.partition.key;
+                }
+                $ctrl.pages = Queries.binProximityResultByPartition($ctrl.result, key);
                 $ctrl.page = Rows.getRowsColumns($ctrl.pages[$ctrl.currentPage-1], $ctrl.keys, $ctrl.selectedKeys);
+                $ctrl.totalItems = $ctrl.pages.length * $ctrl.numPerPage;
+            } else {
+                $ctrl.totalItems = $ctrl.result.length;
             }
 
             if($ctrl.query.isCached) {
@@ -129,7 +137,7 @@ MicroMacroApp.component('queryResult', {
         $ctrl.cacheResults  = () => {
             $ctrl.loading = true;
             return Queries.count($ctrl.query).then( (count) => {
-                if(isPartitioned()) {
+                if(isPartitionedOrScoped()) {
                     $ctrl.totalItems = count * $ctrl.numPerPage;
                 } else {
                     $ctrl.totalItems = count;
@@ -143,7 +151,9 @@ MicroMacroApp.component('queryResult', {
 //            spinnerService.show('booksSpinner');
         }
 
-        var isPartitioned = () => $ctrl.query.partition &&  $ctrl.query.partition.key;
+        var isPartitioned = () => $ctrl.query.partition && $ctrl.query.partition.key ;
+        var isScoped = () => $ctrl.query.scope && $ctrl.query.scope.key;
+        var isPartitionedOrScoped = () => isPartitioned() || isScoped();
 
         $ctrl.cols = function(max, num) {
             return Math.floor(max/num);
@@ -172,7 +182,7 @@ MicroMacroApp.component('queryResult', {
 
         var updateData = function() {
             resolveDisplayKeys();
-            if(isPartitioned()) {
+            if(isPartitionedOrScoped()) {
                 var page = $ctrl.currentPage - 1;
                 if($ctrl.pages[$ctrl.currentPage-1]) {
                     $ctrl.page = Rows.getRowsColumns($ctrl.pages[$ctrl.currentPage-1], $ctrl.keys, $ctrl.selectedKeys);
