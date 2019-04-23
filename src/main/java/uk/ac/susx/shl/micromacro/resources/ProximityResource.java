@@ -1,17 +1,18 @@
 package uk.ac.susx.shl.micromacro.resources;
 
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 import uk.ac.susx.shl.micromacro.jdbi.DAO;
 import uk.ac.susx.shl.micromacro.jdbi.Method52DAO;
 import uk.ac.susx.tag.method51.core.data.store2.query.Proximity;
 import uk.ac.susx.tag.method51.core.data.store2.query.ProximityUpdate;
 import uk.ac.susx.tag.method51.core.data.store2.query.Select;
 import uk.ac.susx.tag.method51.core.data.store2.query.Update;
+import uk.ac.susx.tag.method51.core.gson.GsonBuilderFactory;
 
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.MediaType;
@@ -87,11 +88,12 @@ public class ProximityResource {
 
 
     @POST
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Path("counts")
-    public Response counts(Proximity proximity,
-            @QueryParam("partitionIds") List<String> partitionIds) {
-
-        return resource.counts(proximity, partitionIds);
+    public Response counts(@FormDataParam("query") String proximity,
+            @FormDataParam("partitionIds") String partitionIds) {
+        Gson gson = GsonBuilderFactory.get().create();
+        return resource.counts(gson.fromJson(proximity, Proximity.class), gson.fromJson(partitionIds, new TypeToken<List<String>>(){}.getType()));
     }
 
 //    @POST

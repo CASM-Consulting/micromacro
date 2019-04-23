@@ -3,6 +3,7 @@ package uk.ac.susx.shl.micromacro;
 import com.google.gson.Gson;
 import io.dropwizard.Application;
 import io.dropwizard.bundles.assets.ConfiguredAssetsBundle;
+import io.dropwizard.forms.MultiPartBundle;
 import io.dropwizard.jdbi3.JdbiFactory;
 import io.dropwizard.jersey.jackson.JsonProcessingExceptionMapper;
 import io.dropwizard.setup.Bootstrap;
@@ -40,6 +41,7 @@ public class MicroMacroApplication extends Application<MicroMacroConfiguration> 
     @Override
     public void initialize(final Bootstrap<MicroMacroConfiguration> bootstrap) {
         bootstrap.addBundle(new ConfiguredAssetsBundle("/assets/", "/"));
+        bootstrap.addBundle(new MultiPartBundle());
     }
 
     @Override

@@ -237,11 +237,15 @@ MicroMacroApp.factory("Queries", function($q, Server, $http) {
 
         counts : (query, partitionIds) => {
             var type = query._TYPE;
+            var fd = new FormData();
+            fd.append('query', JSON.stringify(query));
+            fd.append('partitionIds', JSON.stringify(partitionIds));
             return $q(resolve => {
-                Server.post("api/query/"+type+"/counts/", query, {
+                Server.post("api/query/"+type+"/counts/", fd, {
                     params : {
-                        partitionIds : partitionIds
                     },
+                    transformRequest: angular.identity,
+                    headers: {'Content-Type': undefined} ,
                     success : resolve
                 });
             });

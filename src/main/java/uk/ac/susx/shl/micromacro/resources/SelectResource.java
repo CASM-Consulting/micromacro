@@ -1,9 +1,13 @@
 package uk.ac.susx.shl.micromacro.resources;
 
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 import uk.ac.susx.shl.micromacro.jdbi.DAO;
 import uk.ac.susx.shl.micromacro.jdbi.Method52DAO;
 import uk.ac.susx.tag.method51.core.data.store2.query.*;
+import uk.ac.susx.tag.method51.core.gson.GsonBuilderFactory;
 
 import javax.ws.rs.*;
 import javax.ws.rs.container.AsyncResponse;
@@ -81,11 +85,12 @@ public class SelectResource {
     }
 
     @POST
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Path("counts")
-    public Response counts(Select select,
-             @QueryParam("partitionIds") List<String> partitionIds) {
-
-        return resource.counts(select, partitionIds);
+    public Response counts(@FormDataParam("query") String select,
+                           @FormDataParam("partitionIds") String partitionIds) {
+        Gson gson = GsonBuilderFactory.get().create();
+        return resource.counts(gson.fromJson(select, Select.class), gson.fromJson(partitionIds, new TypeToken<List<String>>(){}.getType()));
     }
 
 //    @POST
