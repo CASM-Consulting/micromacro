@@ -246,6 +246,7 @@ MicroMacroApp.factory("Queries", function($q, Server, $http) {
                     },
                     transformRequest: angular.identity,
                     headers: {'Content-Type': undefined} ,
+//                    headers: {'Content-Type': "multipart/form-data"} ,
                     success : resolve
                 });
             });

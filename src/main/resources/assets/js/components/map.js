@@ -19,6 +19,9 @@ MicroMacroApp.component('map', {
                 url: "https://nls-2.tileserver.com/fpsUZba7ERPD/{z}/{x}/{y}.png"
             }
         };
+        $ctrl.changeTiles = function(tiles) {
+            $ctrl.leafletMap.tiles = tilesDict[tiles];
+        };
 
         $ctrl.leafletMap = {
             center: {
