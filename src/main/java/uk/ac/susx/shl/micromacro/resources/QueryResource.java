@@ -59,13 +59,20 @@ public class QueryResource<Q extends SqlQuery, U extends SqlUpdate> extends DAOS
 
     public void page(AsyncResponse asyncResponse, int page, Q query) throws Exception {
         daoStreamResponse(asyncResponse, query, (stream-> {
-                CachingDAO<String, SqlQuery> cache = (CachingDAO<String, SqlQuery>)datumDAO.getDAO();
+            CachingDAO<String, SqlQuery> cache = (CachingDAO<String, SqlQuery>)datumDAO.getDAO();
 
-                int[] indices = cache.int2IntArr(cache.getQueryId(query), PartitionedPager.ID2INTARR).get(page);
+            if(!isCached(query)) {
+                stream.count();
+            }
 
+            int[] indices = cache.int2IntArr(cache.getQueryId(query), PartitionedPager.ID2INTARR).get(page);
+
+            if(indices == null) {
+                return new ArrayList<>();
+            } else {
                 List<String> list = datumDAO.list(query);
-
                 return list.subList(Math.min(list.size(), indices[0]), Math.min(list.size(), indices[1])).stream();
+            }
         }));
 
     }

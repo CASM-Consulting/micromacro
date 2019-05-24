@@ -124,7 +124,7 @@ public class DAOStreamResource<T, Q extends SqlQuery> {
 
                 List<BiFunction> functions = new ArrayList<>();
 
-                if(isScopedAndPartitioned(query) || isPartitioned(query)) {
+                if(isPartitioned(query)) {
                     Partitioned partitioned = (Partitioned) query;
 
                     functions.add(new PartitionedPager(partitioned.partition().key().toString()));

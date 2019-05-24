@@ -8,10 +8,14 @@ class DatumFactory {
         const data:Map<string,any> = new Map();
 
         for(let i in rawData) {
-            
-            const value:any = DatumFactory.get(keys.get(i), rawData[i], keys);
 
-            data.set(i, value);
+            if(keys.has(i)) {
+            
+                const value:any = DatumFactory.get(keys.get(i), rawData[i], keys);
+
+                data.set(i, value);    
+            }
+            
         }
 
         return new Datum(data, keys);

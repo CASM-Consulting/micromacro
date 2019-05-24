@@ -167,7 +167,7 @@ public class CachingDAO<T, Q extends SqlQuery> implements DAO<T,Q> {
                 cachedCache(id).set(true);
                 cache.commit();
                 try {
-                    Thread.sleep(100);
+                    Thread.sleep(500);
                 } catch (InterruptedException e) {}
             });
 
