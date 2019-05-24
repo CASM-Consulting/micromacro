@@ -3,7 +3,9 @@ MicroMacroApp.factory("Server", function($http){
     return {
         get : function(url, options) {
 
-            var error = options.error || function(){};
+            var error = options.error || function(err){
+                alert(err.data.message);
+            };
             var success = options.success || function(){};
             options.params = options.params || {};
 
@@ -16,7 +18,9 @@ MicroMacroApp.factory("Server", function($http){
         },
         post : function(url, data, options) {
             options = options || {};
-            var error = options.error || function(){};
+            var error = options.error ||function(err){
+                alert(err.data.message);
+            }; 
             var success = options.success || function(){};
             options.params = options.params || {};
 

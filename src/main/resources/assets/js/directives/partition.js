@@ -7,10 +7,11 @@ MicroMacroApp.directive("partition", function () {
             keys : '<',
             forId : '<?'
         },
-        link : function(scope, element, attrs) {
+        link :  {
+            pre : function(scope, element, attrs) {
 
-            scope.partition.orderBy = scope.partition.orderBy || {};
-            scope.partition.function = scope.partition.function || "ROW_NUMBER";
+                scope.partition.orderBy = scope.partition.orderBy || {};
+                scope.partition.function = scope.partition.function || "ROW_NUMBER";
 
 //            scope.$watchCollection("keys", function(newVal, oldVal) {
 //
@@ -21,7 +22,7 @@ MicroMacroApp.directive("partition", function () {
 //                    scope.keyList.push(listItem);
 //                });
 //            });
-
+            }
         }
     }
 });
