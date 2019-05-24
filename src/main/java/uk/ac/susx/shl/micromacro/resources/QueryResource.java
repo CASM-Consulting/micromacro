@@ -1,6 +1,7 @@
 package uk.ac.susx.shl.micromacro.resources;
 
 
+import com.google.common.collect.ImmutableMap;
 import uk.ac.susx.shl.micromacro.jdbi.CachingDAO;
 import uk.ac.susx.shl.micromacro.jdbi.DAO;
 import uk.ac.susx.shl.micromacro.jdbi.Method52DAO;
@@ -121,7 +122,7 @@ public class QueryResource<Q extends SqlQuery, U extends SqlUpdate> extends DAOS
         method52DAO.optimiseTable((DatumQuery)query);
 
         return Response.status(Response.Status.OK).entity(
-                "OK"
+                ImmutableMap.of("message", "OK")
         ).build();
     }
 

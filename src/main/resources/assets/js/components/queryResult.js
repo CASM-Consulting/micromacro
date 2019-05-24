@@ -138,7 +138,7 @@ MicroMacroApp.component('queryResult', {
             $ctrl.loading = true;
             return Queries.count($ctrl.query).then( (count) => {
                 if(isPartitionedOrScoped()) {
-                    $ctrl.totalItems = count;// * $ctrl.numPerPage;
+                    $ctrl.totalItems = count * $ctrl.numPerPage;
                 } else {
                     $ctrl.totalItems = count;
                 }
@@ -181,6 +181,9 @@ MicroMacroApp.component('queryResult', {
         };
 
         var updateData = function() {
+            if($ctrl.totalItems === 0) {
+                return;
+            }
             resolveDisplayKeys();
             if(isPartitionedOrScoped()) {
                 var page = $ctrl.currentPage - 1;
