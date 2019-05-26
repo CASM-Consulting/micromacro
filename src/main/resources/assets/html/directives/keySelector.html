@@ -1,0 +1,35 @@
+<div ng-show="msg && showing" class="well well-small info-well" style="display:block">
+    <ul>
+        <li class="info-point">
+            {{msg}}
+        </li>
+    </ul>
+</div>
+
+<div class="keyselector-global-control">
+    <a ng-click="selectAll(); $event.stopPropagation();">include all</a> / <a ng-click="deselectAll(); $event.stopPropagation();">exclude all</a>
+</div>
+
+<div collapse-zone="kz" class="keyselector">
+    <div ng-repeat="(ns, ks) in namespace2keys" ng-class="{'mixed':nsMixed(ns), 'disabled':nsDisabled(ns)}">
+        <div class="ns" m-collapse="ns">
+            <div class="kr-control">
+                <a ng-click="selectAll(ns); $event.stopPropagation();">include all</a> / <a ng-click="deselectAll(ns); $event.stopPropagation();">exclude all</a>
+            </div>
+            <a>
+                <div class="kr-arrow" ng-class="{up: kz.isOpen(ns), down: !kz.isOpen(ns)}"></div>
+                {{ns}}
+            </a>
+        </div>
+        <ul class="keyselector-list" collapsible="ns">
+            <li class="name" ng-repeat="k in ks" ng-class="{'selecting': k.selected}" ng-click="toggleKey(k)">
+                <div class="kr-incenc">
+                    <a class="selected" ng-click="selectKey(k); $event.stopPropagation();">include</a>
+                    /
+                    <a class="deselected" ng-click="deselectKey(k); $event.stopPropagation();">exclude</a>
+                </div>
+                {{k.name}}
+            </li>
+        </ul>
+    </div>
+</div>

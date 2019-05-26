@@ -1,0 +1,117 @@
+.keyselector .ns:hover .kr-arrow.up {
+    border-bottom-color: #929292;
+    margin-top: -1px;
+    margin-bottom: 1px;
+}
+.keyselector .ns:hover .kr-arrow.down {
+    border-top-color: #929292;
+    margin-top: 5px;
+    margin-bottom: -5px;
+}
+
+.keyselector .ns a {
+    font-weight: 800;
+    cursor: pointer;
+    color: black;
+    text-decoration: none;
+}
+
+.keyselector .ns {
+    padding: 4px 6px;
+    border-top: 1px solid #DDD;
+    cursor: pointer;
+}
+
+.keyselector {
+    float: left;
+    min-width: 500px;
+}
+
+.keyselector .mixed {
+    background: repeating-linear-gradient(
+                  45deg,
+                  #FFF,
+                  #FFF 10px,
+                  #F0F0F0 10px,
+                  #F0F0F0 20px
+                );
+}
+
+.keyselector .disabled {
+   background: #F0F0F0 !important;
+   font-weight: 300;
+}
+
+.keyselector .kr-control {
+  float: right;
+}
+
+.keyselector-global-control {
+    font-size: 10pt;
+    font-variant: small-caps;
+    font-weight: 800;
+    cursor: pointer;
+    color: black;
+    text-decoration: none;
+    padding: 4px 6px;
+    text-align: right;
+    max-width: 488px;
+}
+
+.keyselector .kr-control a {
+    font-size: 10pt;
+    font-variant: small-caps;
+}
+
+.keyselector .kr-control a:hover {
+    text-decoration: underline;
+}
+.keyselector .kr-incenc {
+    float: right;
+}
+
+.keyselector .kr-incenc a {
+    border-radius: 3px;
+    background-color: #F0F0F0;
+    cursor: pointer;
+    font-size: 10pt;
+    font-style: normal;
+    font-variant: small-caps;
+    font-weight: 800;
+    padding: 0px 6px 3px;
+    color: #444;
+}
+
+.keyselector .kr-incenc a.deselected {
+    color: white;
+    background-color: var(--red);
+}
+
+.keyselector li.selecting .kr-incenc a.deselected {
+    color: #444;
+    background-color: #F0F0F0;
+}
+
+.keyselector li.selecting .kr-incenc a.selected {
+    color: white;
+    background-color: var(--green);
+}
+
+.keyselector li.selecting {
+    background-color: white;
+    font-weight: 600;
+}
+
+.keyselector-list {
+  list-style-type: none;
+  margin-left: 20px;
+}
+
+.keyselector-list li {
+  background-color: #F0F0F0;
+  border-left: 1px solid #DDD;
+  font-weight: 200;
+  cursor: pointer;
+  padding: 3px 8px 6px 15px;
+  margin: 0px 0px;
+}
