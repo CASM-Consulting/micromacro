@@ -1,7 +1,7 @@
 MicroMacroApp.directive("key", function () {
     return {
         restrict: 'E',
-        templateUrl : 'html/key.html',
+        templateUrl : 'html/directives/key.html',
         scope : {
             ngModel : '=',
             keys : '<',

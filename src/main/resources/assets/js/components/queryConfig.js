@@ -1,5 +1,5 @@
 MicroMacroApp.component('queryConfig', {
-    templateUrl : 'html/queryConfig.html',
+    templateUrl : 'html/components/queryConfig.html',
     bindings : {
         query: '<',
         tables: '<',

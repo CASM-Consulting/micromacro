@@ -2,7 +2,7 @@ MicroMacroApp.component('spanText', {
     bindings : {
         spanss: '<'
     },
-    templateUrl: 'html/spanText.html',
+    templateUrl: 'html/components/spanText.html',
     controller : function($scope, Spans) {
 
         var $ctrl = this;

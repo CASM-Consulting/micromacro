@@ -1,5 +1,5 @@
 MicroMacroApp.component("literals", {
-    templateUrl : 'html/literals.html',
+    templateUrl : 'html/components/literals.html',
     bindings : {
         literals : '<',
         keys : '<',
@@ -30,25 +30,6 @@ MicroMacroApp.component("literals", {
 
         $ctrl.$onInit = () => {
             console.log($ctrl.literals);
-        };
-    }
-});
-
-MicroMacroApp.component("literal", {
-    templateUrl : 'html/literal.html',
-    bindings : {
-        literal : '<',
-        keys : '<'
-    },
-    controller : function() {
-        var $ctrl = this;
-        $ctrl.displayName = (key) => {
-            var displayName = "";
-            if(key.namespace) {
-                displayName += key.namespace+"/";
-            }
-            displayName += key.name;
-            return displayName;
         };
     }
 });

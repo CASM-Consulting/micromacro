@@ -1,5 +1,5 @@
 MicroMacroApp.component('queryResult', {
-    templateUrl : 'html/queryResult.html',
+    templateUrl : 'html/components/queryResult.html',
     bindings : {
         query: '<',
         keys: '<',

@@ -1,5 +1,5 @@
 MicroMacroApp.component('queries', {
-    templateUrl : 'html/queries.html',
+    templateUrl : 'html/components/queries.html',
     bindings : {
         workspace : '<',
         queryList : '<',

@@ -1,5 +1,5 @@
 MicroMacroApp.component('summary', {
-    templateUrl : 'html/summary.html',
+    templateUrl : 'html/components/summary.html',
     bindings : {
         query : '<'
     },

@@ -11,7 +11,7 @@
 //});
 
 MicroMacroApp.component('queryNotes', {
-    templateUrl: 'html/notes.html',
+    templateUrl: 'html/components/notes.html',
     bindings: {
         notes: '<'
     },

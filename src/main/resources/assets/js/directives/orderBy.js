@@ -1,7 +1,7 @@
 MicroMacroApp.directive("orderBy", function () {
     return {
         restrict: 'E',
-        templateUrl : 'html/orderBy.html',
+        templateUrl : 'html/directives/orderBy.html',
         scope : {
             orderBy : '=ngModel',
             keys : '<',

@@ -1,7 +1,7 @@
 MicroMacroApp.directive("partition", function () {
     return {
         restrict: 'E',
-        templateUrl : 'html/partition.html',
+        templateUrl : 'html/directives/partition.html',
         scope : {
             partition : '=ngModel',
             keys : '<',

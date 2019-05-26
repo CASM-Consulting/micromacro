@@ -1,5 +1,5 @@
 MicroMacroApp.component('maps', {
-    templateUrl : 'html/maps.html',
+    templateUrl : 'html/components/maps.html',
     bindings : {
         workspace : '<',
         mapList : '<',

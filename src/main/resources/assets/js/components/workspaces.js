@@ -1,5 +1,5 @@
 MicroMacroApp.component('workspaces', {
-    templateUrl: 'html/workspaces.html',
+    templateUrl: 'html/components/workspaces.html',
     controller: function ($scope, Workspaces) {
 
         $scope.list = function() {

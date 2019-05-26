@@ -1,7 +1,7 @@
 MicroMacroApp.directive("lineChart", function () {
     return {
         restrict: 'E',
-        templateUrl : 'html/lineChart.html',
+        templateUrl : 'html/directives/lineChart.html',
         scope : {
             ngModel : '=',
             options : '='

@@ -1,5 +1,5 @@
 MicroMacroApp.component('mapConfig', {
-    templateUrl : 'html/mapConfig.html',
+    templateUrl : 'html/components/mapConfig.html',
     bindings : {
         map: '<?',
         queryList: '<',
