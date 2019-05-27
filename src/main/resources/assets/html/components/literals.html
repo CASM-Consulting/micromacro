@@ -1,7 +1,7 @@
 <div >
     <div style="display:flex; flex-wrap: wrap">
         <div ng-repeat="(letter, literal) in $ctrl.literals" class="section" >
-            <b>Literal:</b><b class="pull-right">{{letter}}</b>
+            <b>Literal:</b><span class="pull-right"><b>{{letter}}</b>&nbsp;<a href ng-click="$ctrl.deleteLiteral(letter)">-</a></span>
             <literal ng-click="$ctrl.setLiteral(letter, literal)" literal="literal" keys="$ctrl.keys"></literal>
         </div>
     </div>

@@ -31,5 +31,12 @@ MicroMacroApp.component("literals", {
         $ctrl.$onInit = () => {
             console.log($ctrl.literals);
         };
+
+        $ctrl.deleteLiteral = (letter) => {
+            delete $ctrl.literals[letter];
+            if($ctrl.workspace && $ctrl.table) {
+                Queries.setTableLiterals($ctrl.workspace, $ctrl.table, $ctrl.literals);
+            }
+        };
     }
 });
