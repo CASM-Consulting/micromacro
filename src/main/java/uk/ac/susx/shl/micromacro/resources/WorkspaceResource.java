@@ -1,6 +1,7 @@
 package uk.ac.susx.shl.micromacro.resources;
 
 
+import com.google.common.collect.ImmutableMap;
 import uk.ac.susx.shl.micromacro.core.*;
 import uk.ac.susx.shl.micromacro.jdbi.CachingDAO;
 import uk.ac.susx.tag.method51.core.data.store2.query.DatumQuery;
@@ -163,6 +164,21 @@ public class WorkspaceResource {
         ).build();
     }
 
+    @GET
+    @Path("deleteQuery")
+    public Response deleteQuery(@QueryParam("workspaceId") String workspaceId,
+                              @QueryParam("queryId") String queryId) throws SQLException {
+
+        Workspace workspace = workspaces.get(workspaceId);
+
+        workspace.deleteQuery(queryId);
+
+        workspaces.save(workspace);
+
+        return Response.ok().entity(
+            ImmutableMap.of("message", "ok")
+        ).build();
+    }
 
     @GET
     @Path("clearCache")

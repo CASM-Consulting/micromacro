@@ -59,6 +59,18 @@ MicroMacroApp.factory("Queries", function($q, Server, $http) {
                 });
             });
         },
+
+        deleteQuery : function(workspaceId, queryId) {
+            return $q(function(resolve) {
+                Server.get("api/workspace/deleteQuery", {
+                    params : {
+                        workspaceId : workspaceId,
+                        queryId : queryId
+                    },
+                    success : resolve
+                });
+            });
+        },
         
         query : function(query, params) {
             return $q(function(resolve) {

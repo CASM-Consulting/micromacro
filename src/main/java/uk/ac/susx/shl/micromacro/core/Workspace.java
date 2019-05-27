@@ -59,6 +59,11 @@ public class Workspace {
         return this;
     }
 
+    public Workspace deleteQuery(String name) {
+        queries.remove(name);
+        return this;
+    }
+
     public Map<String, Query> queries(){
 
         return queries;

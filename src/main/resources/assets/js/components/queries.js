@@ -65,6 +65,16 @@ MicroMacroApp.component('queries', {
                 });
             }
         }
+
+        $ctrl.deleteQuery = (queryId) => {
+            if(confirm("Are you sure you wish to delete " + queryId + "?")) {
+                Queries.deleteQuery($ctrl.workspaceId, queryId).then((response)=>{
+                    var idx = $ctrl.queryList.indexOf(queryId);
+                    $ctrl.queryList.splice(idx,1);
+                });
+            }
+        }
+
     }
 });
 
