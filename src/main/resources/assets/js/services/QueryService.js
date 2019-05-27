@@ -143,6 +143,27 @@ MicroMacroApp.factory("Queries", function($q, Server, $http) {
             });
         },
 
+        partitions : function(query, partitions) {
+            return $q(function(resolve) {
+                var type = query._TYPE;
+                var fd = new FormData();
+                fd.append('query', JSON.stringify(query));
+                fd.append('partitionIds', JSON.stringify(partitions));
+                Server.post("api/query/"+type+"/partitions", fd, {
+                    params : {},
+                    transformRequest: angular.identity,
+                    headers: {'Content-Type': undefined} ,
+                    success : function(data) {
+                        var parsed = {};
+                        angular.forEach(data, (value, key) => {
+                            parsed[key] = value.map( (raw) => {return JSON.parse(raw)} );
+                        });
+                        resolve(parsed);
+                    }
+                });
+            });
+        },
+
         update : function(query) {
             return $q(function(resolve) {
                 var type = query._TYPE;

@@ -69,7 +69,14 @@ public class SelectResource {
         resource.partition(asyncResponse, partition, select);
     }
 
-
+    @POST
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Path("partitions")
+    public Response partitoins(@FormDataParam("query") String select,
+                               @FormDataParam("partitionIds") String partitionIds) {
+        Gson gson = GsonBuilderFactory.get().create();
+        return resource.partitions(gson.fromJson(select, Select.class), gson.fromJson(partitionIds, new TypeToken<List<String>>(){}.getType()));
+    }
 
     @POST
     @Path("selectUpdate")

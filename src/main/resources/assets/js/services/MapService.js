@@ -4,6 +4,32 @@ MicroMacroApp.factory("Maps", function($q, Queries, Datums, Server) {
     var MAX_DATE = new Date( 8640000000000000);
     var MIN_DATE = new Date(-8640000000000000);
 
+    var data2geoJson = (data, key) => {
+
+        var features = data.filter(datum => key in datum).flatMap(datum => {
+            return datum[key].spans.map(span => {
+                var match = span.with[0];
+                var feature = {
+                    geometry: {
+                        type : "Point",
+                        coordinates : [match.resource.lng, match.resource.lat]
+                    },
+                    type : "Feature",
+                    metadata : span
+                }
+                return feature;
+            });
+
+        });
+
+        var featureCollection = {
+            type : "FeatureCollection",
+            features : features
+        };
+
+        return featureCollection;
+    };
+
     return {
 
         load : function(workspaceId, mapId) {
@@ -80,6 +106,8 @@ MicroMacroApp.factory("Maps", function($q, Queries, Datums, Server) {
             });
         },
 
+        data2geoJson : data2geoJson,
+
         getData : (query, config, time) => {
 
             var date = moment(time).format("YYYY-MM-DD");
@@ -88,28 +116,9 @@ MicroMacroApp.factory("Maps", function($q, Queries, Datums, Server) {
 
                 var key = Datums.key(config.geoKey).key();
 
-                var features = data.filter(datum => key in datum).flatMap(datum => {
-                    return datum[key].spans.map(span => {
-                        var match = span.with[0];
-                        var feature = {
-                            geometry: {
-                                type : "Point",
-                                coordinates : [match.resource.lng, match.resource.lat]
-                            },
-                            type : "Feature",
-                            metadata : span
-                        }
-                        return feature;
-                    });
-                    
-                });
+                var featureCollection = data2geoJson(data, key);
 
-                var featureCollcetion = {
-                    type : "FeatureCollection",
-                    features : features
-                };
-
-                return featureCollcetion;
+                return featureCollection;
             });
         }
         

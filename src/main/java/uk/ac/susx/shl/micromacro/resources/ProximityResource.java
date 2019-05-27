@@ -73,6 +73,15 @@ public class ProximityResource {
     }
 
     @POST
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Path("partitions")
+    public Response partitoins(@FormDataParam("query") String proximity,
+                               @FormDataParam("partitionIds") String partitionIds) {
+        Gson gson = GsonBuilderFactory.get().create();
+        return resource.partitions(gson.fromJson(proximity, Proximity.class), gson.fromJson(partitionIds, new TypeToken<List<String>>(){}.getType()));
+    }
+
+    @POST
     @Path("proximityUpdate")
     public Response update(final ProximityUpdate update) {
         return resource.update(update);

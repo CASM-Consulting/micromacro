@@ -11,9 +11,11 @@ import uk.ac.susx.tag.method51.core.data.store2.query.*;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 
@@ -81,32 +83,52 @@ public class QueryResource<Q extends SqlQuery, U extends SqlUpdate> extends DAOS
     public void partition(AsyncResponse asyncResponse, String partition, Q query) throws Exception {
 
         daoStreamResponse(asyncResponse, query, (stream-> {
-
-            Object result = new ArrayList<>();
-            if(isPartitioned(query)) {
-
-                CachingDAO<String, Q> cache = getCache();
-
-                String id = cache.getQueryId(query);
-
-                Map<String, Integer> partitions = cache.str2Int(id, PartitionedPager.ID2PAGE);
-
-                if(partitions.containsKey(partition)) {
-
-                    int page = partitions.get(partition);
-
-                    int[] indices = cache.int2IntArr(id, PartitionedPager.ID2INTARR).get(page);
-
-                    List<String> list = datumDAO.list(query);
-
-                    result = list.subList(Math.min(list.size(), indices[0]), Math.min(list.size(), indices[1])).stream();
-                }
-            }
-
-            return result;
-
+            return partition(query, partition).stream();
         }));
     }
+
+    private List<String> partition(Q query, String partition) {
+        List<String> result = new ArrayList<>();
+        if(isPartitioned(query)) {
+
+            CachingDAO<String, Q> cache = getCache();
+
+            String id = cache.getQueryId(query);
+
+            Map<String, Integer> partitions = cache.str2Int(id, PartitionedPager.ID2PAGE);
+
+            if(partitions.containsKey(partition)) {
+
+                int page = partitions.get(partition);
+
+                int[] indices = cache.int2IntArr(id, PartitionedPager.ID2INTARR).get(page);
+
+                List<String> list = datumDAO.list(query);
+
+                result = list.subList(Math.min(list.size(), indices[0]), Math.min(list.size(), indices[1]));
+            }
+        }
+        return result;
+    }
+
+    public Response partitions(Q query, List<String> partitionIds) {
+
+        Map<String, List<String>> result = new HashMap<>();
+
+        Map<Integer, int[]> pages = getPages(query);
+
+        Map<String, Integer> partitions = getParitions(query);
+
+        for(String partitionId : partitionIds) {
+            List<String> partitionData = partition(query, partitionId);
+            result.put(partitionId, partitionData);
+        }
+
+        return Response.status(Response.Status.OK).entity(
+                result
+        ).build();
+    }
+
 
     public <U extends SqlUpdate<T>,T> Response update(final U update) {
 

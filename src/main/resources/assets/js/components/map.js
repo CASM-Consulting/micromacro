@@ -4,10 +4,12 @@ MicroMacroApp.component('map', {
         map : '<'
     },
     controller : function(Datums, $q, $stateParams, $http, $compile, leafletData, debounce, $window, Queries, Maps) {
+        var $ctrl = this;
 
         var colours = ['purple', 'green', 'red', 'blue', 'orange', 'black'];
 
-        var $ctrl = this;
+        var heatmapDecay = 20;
+        var heatmapIntensity = 1;
 
         var DATE_FORMAT = 'YYYY-MM-DD';
 
@@ -58,8 +60,10 @@ MicroMacroApp.component('map', {
         $ctrl.queries = [];
 
         $ctrl.$onInit = () => {
-            
-            $ctrl.map = $ctrl.map || {id:'123', queries:['select1']};
+
+//            $ctrl.map = $ctrl.map || {id:'123', queries:['select1']};
+
+            $ctrl.geoKey = Datums.key($ctrl.map.geoKey).key();
 
             Maps.getQueries($stateParams.workspaceId, $ctrl.map).then((queries) => {
                 
@@ -150,6 +154,74 @@ MicroMacroApp.component('map', {
                     $ctrl.lineChartDataReady = true;
                 });
 
+                var drawHeat = (date) => {
+
+                    var from = moment(date).subtract(heatmapDecay, 'days');//.format(DATE_FORMAT);
+                    var to = moment(date);//.format(DATE_FORMAT);
+
+                    var dates = [];
+                    var data = [];
+
+                    var date = moment(from);
+
+                    while(date <= to) {
+                        var tmp = moment(date);
+                        dates.push(tmp.format(DATE_FORMAT));
+                        date.add(1, 'days');
+                    }
+
+                    var promises = $ctrl.queries.map((query) => {
+                        return Queries.partitions(query, dates);
+                    });
+
+                    $q.all(promises).then(( queryResults )=>{
+                        var merged = {};
+                        dates.forEach( ( date ) => {
+                            merged[date] = [];
+                            queryResults.forEach( (queryResult) => {
+                                merged[date] = merged[date].concat(queryResult[date]);
+                            });
+
+                            merged[date] = Maps.data2geoJson(merged[date], $ctrl.geoKey);
+                        });
+
+                        var i = 0;
+
+                        for(var d = moment(from); d.diff(to, 'days') <= 0; d.add(1, 'days') ) {
+                            var dayDate = moment(d).format(DATE_FORMAT);
+                            var dayData = merged[dayDate].features;
+
+                            var intensity = (i / heatmapDecay) * heatmapIntensity;
+
+                            for(var j = 0; j < dayData.length; ++j) {
+                                var point = [dayData[j].geometry.coordinates[1],dayData[j].geometry.coordinates[0]];
+                                data.push(point.concat(intensity));
+                            }
+
+                            ++i;
+                        }
+                        if(!data) return;
+
+                        leafletData.getLayers().then(function(layers) {
+                            if(layers.overlays.heat) {
+                                layers.overlays.heat.setLatLngs(data);
+                            } else {
+                                $ctrl.leafletMap.layers.overlays = {
+                                    heat : {
+                                        name: 'Heat Map',
+                                        type: 'heat',
+                                        data: data,
+                                        layerOptions: {
+                                            radius: 10,
+                                            blur: 5
+                                        },
+                                        visible: true
+                                    }
+                                };
+                            }
+                        });
+                    });
+                }
 
                 timelines = $ctrl.queries.map( (query, idx) => {
 
@@ -184,6 +256,7 @@ MicroMacroApp.component('map', {
                         .then(featureCollection => {
                             timeline.addData(featureCollection);
                         });
+                        drawHeat($ctrl.selectedDate);
                     });
                     return timeline;
                 });
@@ -195,7 +268,6 @@ MicroMacroApp.component('map', {
                 }
 
                 L.control.layers(null, overlays).addTo(map);
-
             });
         };
     }
