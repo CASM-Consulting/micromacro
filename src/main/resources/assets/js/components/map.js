@@ -84,6 +84,8 @@ MicroMacroApp.component('map', {
 
         var drawTimelines = () => {
 
+            var heatCache = {};
+
             timelines.forEach( timeline => {
                 if(timeline) {
                     timeline.remove();        
@@ -170,6 +172,23 @@ MicroMacroApp.component('map', {
                         date.add(1, 'days');
                     }
 
+                    var removeIdxs = [];
+                    var newCache = {};
+                    for(var i = 0; i < dates.length; ++i) {
+                        var date = dates[i];
+                        if( date in heatCache ) {
+                            removeIdxs.push(i);
+                            newCache[date] = heatCache[date];
+                        }
+                    }
+
+                    heatCache = newCache;
+
+                    for(var i = removeIdxs.length-1; i >= 0; --i){
+                        var idx = removeIdxs[i];
+                        dates.splice(idx, 1);
+                    }
+
                     var promises = $ctrl.queries.map((query) => {
                         return Queries.partitions(query, dates);
                     });
@@ -185,17 +204,23 @@ MicroMacroApp.component('map', {
                             merged[date] = Maps.data2geoJson(merged[date], $ctrl.geoKey);
                         });
 
+                        angular.forEach(merged, (value, key)=> {
+                            heatCache[key] = value;
+                        });
+
                         var i = 0;
 
                         for(var d = moment(from); d.diff(to, 'days') <= 0; d.add(1, 'days') ) {
                             var dayDate = moment(d).format(DATE_FORMAT);
-                            var dayData = merged[dayDate].features;
+                            if(dayDate in heatCache) {
+                                var dayData = heatCache[dayDate].features;
 
-                            var intensity = (i / heatmapDecay) * heatmapIntensity;
+                                var intensity = (i / heatmapDecay) * heatmapIntensity;
 
-                            for(var j = 0; j < dayData.length; ++j) {
-                                var point = [dayData[j].geometry.coordinates[1],dayData[j].geometry.coordinates[0]];
-                                data.push(point.concat(intensity));
+                                for(var j = 0; j < dayData.length; ++j) {
+                                    var point = [dayData[j].geometry.coordinates[1],dayData[j].geometry.coordinates[0]];
+                                    data.push(point.concat(intensity));
+                                }
                             }
 
                             ++i;
@@ -204,19 +229,25 @@ MicroMacroApp.component('map', {
 
                         leafletData.getLayers().then(function(layers) {
                             if(layers.overlays.heat) {
-                                layers.overlays.heat.setLatLngs(data);
+                                if(layers.overlays.heat._map) {
+                                    layers.overlays.heat.setLatLngs(data);
+                                }
                             } else {
+                                var heatOptions = {
+                                    name: 'Heat Map',
+                                    type: 'heat',
+                                    data: data,
+                                    layerOptions: {
+                                        radius: 10,
+                                        blur: 5
+                                    },
+                                    visible: true
+                                };
+
+//                                L.heatLayer(heatOptions).addTo(map);
+//
                                 $ctrl.leafletMap.layers.overlays = {
-                                    heat : {
-                                        name: 'Heat Map',
-                                        type: 'heat',
-                                        data: data,
-                                        layerOptions: {
-                                            radius: 10,
-                                            blur: 5
-                                        },
-                                        visible: true
-                                    }
+                                    heat : heatOptions
                                 };
                             }
                         });
@@ -226,11 +257,12 @@ MicroMacroApp.component('map', {
                 timelines = $ctrl.queries.map( (query, idx) => {
 
 
+
                     var timeline = L.timeline(null, {
                         start : $ctrl.minDate.add(1000, "y").toDate().getTime(),
                         end: $ctrl.maxDate.add(1000, "y").toDate().getTime(),
                         // getInterval: getInterval,
-                        drawOnSetTime: false,
+                        drawOnSetTime: true,
                         pointToLayer: function(data, latlng) {
                             var colour = colours[idx];
 
