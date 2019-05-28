@@ -171,10 +171,35 @@
         <div class="row" >
 
             <div class="map col-md-10">
-                <span ng-show="loadingData" class="flashing">LOADING DATA</span>
-                <span ng-show="loadingAnnotations" class="flashing">LOADING ANNOTATIONS</span>
-                <span ng-show="loadingPubs" class="flashing">LOADING PUBS</span>
+                <div class="section col-md-3">
+                    <label class="control-label" for="heat-radius">Radius</label>
+                    <input type="number" class="form-control input-sm" id="heat-radius"
+                           ng-change="$ctrl.setHeatRadius()"
+                           ng-model-options="{ debounce: 200 }"
+                           ng-model="$ctrl.map.options.heat.radius" >
 
+                    <label class="control-label" for="heat-intensity">Intensity</label>
+                    <input type="number" class="form-control input-sm" id="heat-intensity"
+                           ng-change="$ctrl.saveMap()"
+                           ng-model-options="{ debounce: 200 }"
+                           ng-model="$ctrl.map.options.heat.intensity" >
+
+                    <label class="control-label" for="heat-history">History</label>
+                    <input type="number" class="form-control input-sm" id="heat-history"
+                           ng-change="$ctrl.saveMap()"
+                           ng-model-options="{ debounce: 200 }"
+                           ng-model="$ctrl.map.options.heat.history" >
+
+                    <label class="control-label" for="heat-blur">Blur</label>
+                    <input type="number" class="form-control input-sm" id="heat-blur"
+                            ng-change="$ctrl.setHeatBlur()"
+                            ng-model-options="{ debounce: 200 }"
+                            ng-model="$ctrl.map.options.heat.blur">
+
+<!--                    <label class="control-label" for="heat-timestep">Time Step (ms)</label>-->
+<!--                    <input type="number" ng-model="$ctrl.map.options.timestep" class="form-control input-sm" id="heat-timestep">-->
+
+                </div>
 
                 <leaflet
                         width="800px"

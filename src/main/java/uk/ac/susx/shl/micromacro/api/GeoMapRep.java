@@ -8,4 +8,7 @@ public class GeoMapRep {
     public List<String> queries;
     public Map geoKey;
     public Map idKey;
+    public Map options;
+    public Map<String, Object> metadata;
+
 }

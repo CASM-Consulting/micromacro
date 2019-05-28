@@ -6,8 +6,11 @@ import uk.ac.susx.tag.method51.core.meta.JsonCodec;
 import uk.ac.susx.tag.method51.core.meta.Key;
 
 import java.lang.reflect.Type;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import static uk.ac.susx.tag.method51.core.meta.JsonCodecUtil.*;
 
 public class GeoMapTypeAdapter extends JsonCodec.Delegate<GeoMap> {
 
@@ -21,7 +24,10 @@ public class GeoMapTypeAdapter extends JsonCodec.Delegate<GeoMap> {
             Key idKey = context.deserialize(obj.get("idKey"), Key.class);
             List<String> queries = context.deserialize(obj.get("queries"), new TypeToken<List<String>>(){}.getType());
 
-            GeoMap map = new GeoMap(id, queries, geoKey, idKey);
+            Map options = ifThere(obj, "options", (e) -> context.deserialize(e, Map.class), (Map)new HashMap<>());
+            Map<String, Object> metadata = ifThere(obj, "options", (e) -> context.deserialize(e,  new TypeToken<Map<String, Object>>(){}.getType()), (Map<String,Object>)new HashMap<String,Object>());
+
+            GeoMap map = new GeoMap(id, queries, geoKey, idKey, options, metadata);
 
             return map;
         }, (GeoMap src, Type typeOfSrc, JsonSerializationContext context) -> {
@@ -32,6 +38,8 @@ public class GeoMapTypeAdapter extends JsonCodec.Delegate<GeoMap> {
             result.add("geoKey", context.serialize(src.geoKey(), Key.class));
             result.add("idKey", context.serialize(src.idKey(), Key.class));
             result.add("queries", context.serialize(src.queries(), List.class));
+            result.add("options", context.serialize(src.options(), Map.class));
+            result.add("metadata", context.serialize(src.metadata(), Map.class));
 
             return result;
         });

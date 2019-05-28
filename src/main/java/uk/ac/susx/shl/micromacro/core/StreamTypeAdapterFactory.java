@@ -13,6 +13,9 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.stream.Stream;
 
+/**
+ * Gson type adapter to get Gson to serialise streams as a stream
+ */
 public class StreamTypeAdapterFactory implements TypeAdapterFactory {
 
     private static final TypeAdapterFactory streamTypeAdapterFactory = new StreamTypeAdapterFactory();

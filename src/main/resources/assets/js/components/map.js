@@ -8,8 +8,6 @@ MicroMacroApp.component('map', {
 
         var colours = ['purple', 'green', 'red', 'blue', 'orange', 'black'];
 
-        var heatmapDecay = 20;
-        var heatmapIntensity = 1;
 
         var DATE_FORMAT = 'YYYY-MM-DD';
 
@@ -21,6 +19,14 @@ MicroMacroApp.component('map', {
                 url: "https://nls-2.tileserver.com/fpsUZba7ERPD/{z}/{x}/{y}.png"
             }
         };
+
+
+        $ctrl.saveMap = () => {
+            Maps.save($stateParams.workspaceId, $ctrl.map.id, $ctrl.map).then(function(map){
+                //ok?
+            });
+        }
+
         $ctrl.changeTiles = function(tiles) {
             $ctrl.leafletMap.tiles = tilesDict[tiles];
         };
@@ -62,6 +68,27 @@ MicroMacroApp.component('map', {
         $ctrl.$onInit = () => {
 
 //            $ctrl.map = $ctrl.map || {id:'123', queries:['select1']};
+
+            $ctrl.map.options.heat = $ctrl.map.options.heat || {radius : 10, intensity : 1, history :20, blur:5};
+
+            $ctrl.setHeatBlur = () => {
+                leafletData.getLayers().then(function(layers) {
+                    if(layers.overlays.heat ) {
+                        layers.overlays.heat.setOptions({blur:$ctrl.map.options.heat.blur});
+                    }
+                    $ctrl.saveMap();
+                });
+            };
+
+            $ctrl.setHeatRadius = () => {
+                leafletData.getLayers().then(function(layers) {
+                    if(layers.overlays.heat) {
+                        layers.overlays.heat.setOptions({radius:$ctrl.map.options.heat.radius});
+                    }
+                    $ctrl.saveMap();
+                });
+            };
+
 
             $ctrl.geoKey = Datums.key($ctrl.map.geoKey).key();
 
@@ -116,6 +143,8 @@ MicroMacroApp.component('map', {
                     steps: daysCovered,
                     start : $ctrl.minDate.add(1000, "y").toDate().getTime(),
                     end: $ctrl.maxDate.add(1000, "y").toDate().getTime(),
+                    duration : times.length * 120,
+
                     // duration : daysCovered * $ctrl.timelineDuration,
     //                enableKeyboardControls: true,
                     formatOutput: function(date){
@@ -158,7 +187,7 @@ MicroMacroApp.component('map', {
 
                 var drawHeat = (date) => {
 
-                    var from = moment(date).subtract(heatmapDecay, 'days');//.format(DATE_FORMAT);
+                    var from = moment(date).subtract($ctrl.map.options.heat.history, 'days');//.format(DATE_FORMAT);
                     var to = moment(date);//.format(DATE_FORMAT);
 
                     var dates = [];
@@ -215,7 +244,7 @@ MicroMacroApp.component('map', {
                             if(dayDate in heatCache) {
                                 var dayData = heatCache[dayDate].features;
 
-                                var intensity = (i / heatmapDecay) * heatmapIntensity;
+                                var intensity = (i / $ctrl.map.options.heat.history) * $ctrl.map.options.heat.intensity;
 
                                 for(var j = 0; j < dayData.length; ++j) {
                                     var point = [dayData[j].geometry.coordinates[1],dayData[j].geometry.coordinates[0]];
@@ -238,8 +267,8 @@ MicroMacroApp.component('map', {
                                     type: 'heat',
                                     data: data,
                                     layerOptions: {
-                                        radius: 10,
-                                        blur: 5
+                                        radius: $ctrl.map.options.heat.radius,
+                                        blur: $ctrl.map.options.heat.blur
                                     },
                                     visible: true
                                 };

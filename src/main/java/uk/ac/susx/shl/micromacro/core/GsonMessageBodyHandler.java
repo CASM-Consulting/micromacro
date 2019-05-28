@@ -24,6 +24,9 @@ import com.google.gson.GsonBuilder;
 import org.jetbrains.annotations.NotNull;
 import uk.ac.susx.tag.method51.core.gson.GsonBuilderFactory;
 
+/**
+ * Type adapter to get Jersey to use Gson for JSON marshalling
+ */
 @Provider
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
