@@ -79,7 +79,7 @@ public class SelectResource {
     }
 
     @POST
-    @Path("selectUpdate")
+    @Path("update")
     public Response update(final Update update) {
         return resource.update(update);
     }

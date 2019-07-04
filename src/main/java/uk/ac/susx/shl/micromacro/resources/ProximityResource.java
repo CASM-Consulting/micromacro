@@ -82,7 +82,7 @@ public class ProximityResource {
     }
 
     @POST
-    @Path("proximityUpdate")
+    @Path("update")
     public Response update(final ProximityUpdate update) {
         return resource.update(update);
     }

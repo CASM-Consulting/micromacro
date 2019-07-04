@@ -167,7 +167,7 @@ MicroMacroApp.factory("Queries", function($q, Server, $http) {
         update : function(query) {
             return $q(function(resolve) {
                 var type = query._TYPE;
-                Server.post("api/query/"+type, query, {
+                Server.post("api/query/"+type+"/update", query, {
                     success : function(data) {
                         resolve(data);
                     }

@@ -144,6 +144,8 @@ MicroMacroApp.component('queryResult', {
                 }
 
                 $ctrl.loading = false;
+            }).catch( () => {
+                $ctrl.loading = false;
             });
         }
 
@@ -209,6 +211,7 @@ MicroMacroApp.component('queryResult', {
         };
 
         $ctrl.annotateQuery = function() {
+            $ctrl.loading = true;
 
             var updateQuery = angular.copy($ctrl.query);
             var type = Types[$ctrl.annotate.type];
@@ -216,9 +219,15 @@ MicroMacroApp.component('queryResult', {
             updateQuery.key = DatumFactory.key($ctrl.annotate.key, type);
             updateQuery.value = $ctrl.annotate.value;
 
-            updateQuery._TYPE += "Update";
+//            updateQuery._TYPE += "Update";
 
-            Queries.update(updateQuery);
+            Queries.update(updateQuery).then( (count) => {
+                alert(count + " records updated. The cache for this query must be cleared and reloaded to reflect this change in the results.");
+
+                $ctrl.loading = false;
+            }).catch( () => {
+                $ctrl.loading = false;
+            });
         };
 
     }
