@@ -106,6 +106,13 @@ public class SelectResource {
         return resource.chunkCounts(select);
     }
 
+
+    @POST
+    @Path("partitionPage")
+    public Response partitionPage(@QueryParam("partitionId") String partitionId, Select select) {
+        return resource.partitionPage(select, partitionId);
+    }
+
 //    @POST
 //    @Path("select-distinct")
 //    public Response selectDistinct(SelectDistinct selectDistinct) throws SQLException {

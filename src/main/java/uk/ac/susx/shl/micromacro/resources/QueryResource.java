@@ -188,6 +188,17 @@ public class QueryResource<Q extends SqlQuery, U extends SqlUpdate> extends DAOS
         ).build();
     }
 
+    public Response partitionPage(Q query, Object id) {
+
+        Map<String, Integer> partitions = getParitions(query);
+
+        Integer pageId = partitions.get(id);
+
+        return Response.status(Response.Status.OK).entity(
+                pageId
+        ).build();
+    }
+
 //    @POST
 //    @Path("select-distinct")
 //    public Response selectDistinct(SelectDistinct selectDistinct) throws SQLException {

@@ -33,7 +33,7 @@ public class PartitionedPager implements BiFunction<SqlQuery, Object, Function<S
         AtomicReference<String> partitionId = new AtomicReference<>("");
         AtomicInteger page = new AtomicInteger(0);
         AtomicInteger i = new AtomicInteger(0);
-        AtomicReference<int[]> pageIndices = new AtomicReference<>(null);
+        AtomicReference<int[]> pageIndices = new AtomicReference<>(new int[]{0,0});
 
         String id = cache.getQueryId(query);
         Map<String, Integer> id2PageCache = cache.str2Int(id, ID2PAGE);
@@ -45,17 +45,12 @@ public class PartitionedPager implements BiFunction<SqlQuery, Object, Function<S
 
                 String partition = getter.apply(d);
 
-                if(!partition.equals(partitionId.get())) {
-
-                    id2PageCache.put(partition, page.get());
-
-                    if(pageIndices.get() == null) {
-
-                        pageIndices.getAndSet(new int[]{0,0});
-                    } else {
+                if(!partitionId.get().equals(""))  {
+                    if(!partition.equals(partitionId.get())) {
+                        id2PageCache.put(partitionId.get(), page.get());
 
                         pageCache.put(page.get(), pageIndices.get());
-                        pageIndices.getAndSet(new int[]{i.get(),0});
+                        pageIndices.getAndSet(new int[]{i.get(), 0});
                         page.incrementAndGet();
                     }
                 }

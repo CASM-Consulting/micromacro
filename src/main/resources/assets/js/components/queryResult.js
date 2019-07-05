@@ -236,6 +236,12 @@ MicroMacroApp.component('queryResult', {
             });
         };
 
+        $ctrl.gotoId = function(id) {
+            Queries.partitionPage($ctrl.query, id).then( (page) => {
+                $ctrl.currentPage = page+1;
+            });
+        };
+
     }
 });
 

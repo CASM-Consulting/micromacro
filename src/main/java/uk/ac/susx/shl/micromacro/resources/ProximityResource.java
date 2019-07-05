@@ -113,6 +113,13 @@ public class ProximityResource {
         return resource.chunkCounts(proximity);
     }
 
+
+    @POST
+    @Path("partitionPage")
+    public Response partitionPage(@QueryParam("partitionId") String partitionId, Proximity proximity) {
+        return resource.partitionPage(proximity, partitionId);
+    }
+
 //    @POST
 //    @Path("select-distinct")
 //    public Response selectDistinct(SelectDistinct selectDistinct) throws SQLException {

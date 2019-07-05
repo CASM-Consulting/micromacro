@@ -65,7 +65,10 @@
 
     <div class="row">
         <span class="col-md-2">
-            <input class="form-control" ng-model="$ctrl.currentPage">
+            <label class="section"> Goto Page <input class="form-control" style="width:40px" ng-model="$ctrl.currentPage"></label>
+        </span>
+        <span class="col-md-2">
+            <label class="section"> Goto ID <input class="form-control" style="width:150px" ng-change="$ctrl.gotoId($ctrl.selectedId)" ng-model="$ctrl.selectedId"></label>
         </span>
     </div>
 

@@ -292,7 +292,19 @@ MicroMacroApp.factory("Queries", function($q, Server, $http) {
                     success : resolve
                 });
             });
-        }
+        },
+
+        partitionPage : function(query, partitionId) {
+            return $q(function(resolve) {
+                var type = query._TYPE;
+                Server.post("api/query/"+type+"/partitionPage", query, {
+                    params : {partitionId:partitionId},
+                    success : function(page) {
+                        resolve(page);
+                    }
+                });
+            });
+        },
     }
 
 });
