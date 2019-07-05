@@ -173,6 +173,21 @@ public class QueryResource<Q extends SqlQuery, U extends SqlUpdate> extends DAOS
         ).build();
     }
 
+    public Response chunkCounts(Q query) {
+
+        Map<String, Integer> counts = getChunkCounts(query);
+
+        List<Map> formatted = new ArrayList<>();
+
+        for(Map.Entry<String, Integer> entry : counts.entrySet()) {
+            formatted.add(ImmutableMap.of("id", entry.getKey(), "count", entry.getValue()));
+        }
+
+        return Response.status(Response.Status.OK).entity(
+                formatted
+        ).build();
+    }
+
 //    @POST
 //    @Path("select-distinct")
 //    public Response selectDistinct(SelectDistinct selectDistinct) throws SQLException {

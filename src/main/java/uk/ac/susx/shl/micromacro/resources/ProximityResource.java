@@ -105,6 +105,14 @@ public class ProximityResource {
         return resource.counts(gson.fromJson(proximity, Proximity.class), gson.fromJson(partitionIds, new TypeToken<List<String>>(){}.getType()));
     }
 
+
+
+    @POST
+    @Path("chunkCounts")
+    public Response chunkCounts(Proximity proximity) {
+        return resource.chunkCounts(proximity);
+    }
+
 //    @POST
 //    @Path("select-distinct")
 //    public Response selectDistinct(SelectDistinct selectDistinct) throws SQLException {

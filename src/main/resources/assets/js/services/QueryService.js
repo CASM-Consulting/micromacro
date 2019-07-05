@@ -283,6 +283,15 @@ MicroMacroApp.factory("Queries", function($q, Server, $http) {
                     success : resolve
                 });
             });
+        },
+
+        chunkCounts : (query) => {
+            var type = query._TYPE;
+            return $q(resolve => {
+                Server.post("api/query/"+type+"/chunkCounts/", query, {
+                    success : resolve
+                });
+            });
         }
     }
 

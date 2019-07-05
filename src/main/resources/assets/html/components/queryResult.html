@@ -38,8 +38,29 @@
                 <button ng-disable="$ctrl.loading" class="btn btn-default" ng-click="$ctrl.cacheResults()">More Results</button>
                 <span ng-show="$ctrl.loading" class="animate-flicker">Loading...</span>
             </span>
+
+            <span ng-if="$ctrl.isScoped()">
+                <button class="btn btn-primary" ng-csv="$ctrl.chunkCounts()" csv-header="['id', 'count']" filename="chunk-counts.csv">Get Chunk Counts</button>
+            </span>
         </div>
     </div>
+
+<!--    <div class="row">-->
+<!--        <button class="btn btn-primary" ng-click="$ctrl.chunkCounts()">Get Chunk Counts</button>-->
+<!--        <table class="table table-striped">-->
+<!--            <thead>-->
+<!--            <tr>-->
+<!--                <th>ID</th><th>Chunk Count</th>-->
+<!--            </tr>-->
+<!--            </thead>-->
+<!--            <tbody>-->
+<!--            <tr ng-repeat="(id, count) in $ctrl.chunkCounts">-->
+<!--                <td>{{id}}</td><td>{{count}}</td>-->
+<!--            </tr>-->
+<!--            </tbody>-->
+<!--        </table>-->
+<!--    </div>-->
+
 
 
     <div class="row">
@@ -60,6 +81,8 @@
             </span>
         </div>
     </div>
+
+
 
 
     <div class="row">

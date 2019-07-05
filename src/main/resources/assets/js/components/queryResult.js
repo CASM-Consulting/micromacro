@@ -153,9 +153,9 @@ MicroMacroApp.component('queryResult', {
 //            spinnerService.show('booksSpinner');
         }
 
-        var isPartitioned = () => $ctrl.query.partition && $ctrl.query.partition.key ;
-        var isScoped = () => $ctrl.query.scope && $ctrl.query.scope.key;
-        var isPartitionedOrScoped = () => isPartitioned() || isScoped();
+        var isPartitioned = $ctrl.isPartitioned =  () => $ctrl.query.partition && $ctrl.query.partition.key ;
+        var isScoped = $ctrl.isScoped = () => $ctrl.query.scope && $ctrl.query.scope.key;
+        var isPartitionedOrScoped = $ctrl.isPartitionedOrScoped = () => isPartitioned() || isScoped();
 
         $ctrl.cols = function(max, num) {
             return Math.floor(max/num);
@@ -227,6 +227,12 @@ MicroMacroApp.component('queryResult', {
                 $ctrl.loading = false;
             }).catch( () => {
                 $ctrl.loading = false;
+            });
+        };
+
+        $ctrl.chunkCounts = function() {
+            return Queries.chunkCounts($ctrl.query).then( (chunkCounts) => {
+                return chunkCounts;
             });
         };
 

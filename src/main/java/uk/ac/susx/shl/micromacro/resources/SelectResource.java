@@ -100,6 +100,12 @@ public class SelectResource {
         return resource.counts(gson.fromJson(select, Select.class), gson.fromJson(partitionIds, new TypeToken<List<String>>(){}.getType()));
     }
 
+    @POST
+    @Path("chunkCounts")
+    public Response chunkCounts(Select select) {
+        return resource.chunkCounts(select);
+    }
+
 //    @POST
 //    @Path("select-distinct")
 //    public Response selectDistinct(SelectDistinct selectDistinct) throws SQLException {

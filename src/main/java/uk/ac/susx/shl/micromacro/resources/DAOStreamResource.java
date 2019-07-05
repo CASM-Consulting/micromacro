@@ -1,6 +1,7 @@
 package uk.ac.susx.shl.micromacro.resources;
 
 import uk.ac.susx.shl.micromacro.jdbi.CachingDAO;
+import uk.ac.susx.shl.micromacro.jdbi.ChunkCounter;
 import uk.ac.susx.shl.micromacro.jdbi.DAO;
 import uk.ac.susx.shl.micromacro.jdbi.PartitionedPager;
 import uk.ac.susx.tag.method51.core.data.store2.query.Partitioned;
@@ -106,6 +107,18 @@ public class DAOStreamResource<T, Q extends SqlQuery> {
     }
 
 
+    protected Map<String, Integer> getChunkCounts(Q query) {
+        Map<String, Integer> counts = new HashMap<>();
+        CachingDAO<T, Q> cache = getCache();
+        if(cache != null) {
+            String id = cache.getQueryId(query);
+            if(cache.isCached(id)) {
+                counts = cache.str2Int(id, ChunkCounter.ID2COUNT);
+            }
+        }
+        return counts;
+    }
+
     /**
      * The intended use of AsyncResponse is to release the handling thread to the web framework for a long running
      * compute; however, it's being used here to allow for a callback after the stream has been consumed by the
@@ -132,6 +145,11 @@ public class DAOStreamResource<T, Q extends SqlQuery> {
                     Scoped scoped = (Scoped) query;
 
                     functions.add(new PartitionedPager(scoped.scope().key().toString()));
+                }
+
+                if(isScoped(query)) {
+                    Scoped scoped = (Scoped) query;
+                    functions.add(new ChunkCounter(scoped.scope().key().toString()));
                 }
 
                 Supplier<Object> task = () -> {
