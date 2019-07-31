@@ -66,6 +66,7 @@ public class ChunkCounter implements StreamFunction<SqlQuery, String> {
 
                 if(partitionEnd || chunkEnd) {
                     i.addAndGet(j.get()-1);
+                    j.set(0);
                 }
 
                 if(partitionEnd) {
