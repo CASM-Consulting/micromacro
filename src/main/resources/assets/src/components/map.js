@@ -1,3 +1,5 @@
+import L from 'leaflet';
+
 const map = {
     templateUrl : 'html/components/map.html',
     bindings : {
