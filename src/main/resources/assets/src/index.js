@@ -42,6 +42,7 @@ import {initializeDirectives} from './directives';
 
 const MicroMacroApp = initializeMicromacro();
 console.log(MicroMacroApp);
+
 configureRoutes(MicroMacroApp);
 initializeServices(MicroMacroApp);
 initializeComponents(MicroMacroApp);

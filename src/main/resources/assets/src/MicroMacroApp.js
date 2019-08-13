@@ -1,8 +1,5 @@
 'use strict';
 
-console.log("MicroMacroApp.js");
-
-
 angular.module('angular-toArrayFilter', []) .filter('toArray', function () {
   return function (obj, addKey) {
     if (!angular.isObject(obj)) return obj;
