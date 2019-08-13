@@ -12,7 +12,7 @@ server:
 
 assets:
   overrides:
-    /: src/main/resources/assets/
+    /: src/main/resources/assets/dist/
 
 historical: false
 resultsCachePath: data/queryCache

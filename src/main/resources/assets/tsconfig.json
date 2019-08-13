@@ -4,11 +4,11 @@
         "allowJs": true,
         "target": "es5",
         "noImplicitAny": true,
-        "module": "none",
+        "module": "esnext",
         "lib": ["es2015"],
         "downlevelIteration": true
     },
     "include": [
-        "./ts/**/*"
+        "./src/ts/**/*"
     ]
 }

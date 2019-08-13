@@ -10,9 +10,19 @@ buildNumber.properties
 *.iml
 .idea/
 src/main/resources/assets/bower_components
-src/main/resources/assets/node_modules
+src/main/resources/assets/node_modules/
+src/main/resources/assets/dist/bundle.js
 # Avoid ignoring Maven wrapper jar file (.jar files are usually ignored)
 !/.mvn/wrapper/maven-wrapper.jar
 data
 *.jar
 src/main/resources/assets/built/
+
+# would be better to configure some pass-through mechanism for static assets in
+# webpack and just ignore the whole dist directory
+src/main/resources/assets/dist/*.woff
+src/main/resources/assets/dist/*.png
+src/main/resources/assets/dist/*.eot
+src/main/resources/assets/dist/*.woff2
+src/main/resources/assets/dist/*.svg
+src/main/resources/assets/dist/*.ttf
