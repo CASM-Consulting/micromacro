@@ -46,5 +46,8 @@ module.exports = {
             template: 'src/index.ejs'
         }),
         new CopyWebpackPlugin([{from: 'static'}])
-    ]
+    ],
+    optimization: {
+        minimize: false
+    }
 };
