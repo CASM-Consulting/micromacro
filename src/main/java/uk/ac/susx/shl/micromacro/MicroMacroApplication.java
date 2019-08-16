@@ -40,7 +40,7 @@ public class MicroMacroApplication extends Application<MicroMacroConfiguration> 
 
     @Override
     public void initialize(final Bootstrap<MicroMacroConfiguration> bootstrap) {
-        bootstrap.addBundle(new ConfiguredAssetsBundle("/assets/", "/"));
+        bootstrap.addBundle(new ConfiguredAssetsBundle("/assets/dist", "/", "index.html"));
         bootstrap.addBundle(new MultiPartBundle());
     }
 
