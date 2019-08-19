@@ -9,10 +9,10 @@ buildNumber.properties
 .mvn/timing.properties
 *.iml
 .idea/
-src/main/resources/assets/bower_components
-src/main/resources/assets/node_modules
 # Avoid ignoring Maven wrapper jar file (.jar files are usually ignored)
 !/.mvn/wrapper/maven-wrapper.jar
 data
 *.jar
-src/main/resources/assets/built/
+src/main/resources/assets/node_modules/
+src/main/resources/assets/dist/
+
