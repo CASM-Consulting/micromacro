@@ -18,7 +18,7 @@
     "angular-ui": "^1.0.0",
     "angular-ui-bootstrap": "^2.5.6",
     "angular-ui-grid": "^4.7.1",
-    "bootstrap": "3.4.0",
+    "bootstrap": "3.4.1",
     "css-loader": "^3.2.0",
     "file-loader": "^4.2.0",
     "immutable": "^4.0.0-rc.12",
