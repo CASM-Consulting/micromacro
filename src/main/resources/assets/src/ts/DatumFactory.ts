@@ -13,11 +13,10 @@ export class DatumFactory {
         const data: Map<string, any> = new Map();
 
         for (let i in rawData) {
+            const maybeValue = keys.get(i);
 
-            if (keys.has(i)) {
-
-                const value: any = DatumFactory.get(keys.get(i), rawData[i], keys);
-
+            if (maybeValue !== undefined) {
+                const value: any = DatumFactory.get(maybeValue, rawData[i], keys);
                 data.set(i, value);
             }
 
@@ -27,7 +26,6 @@ export class DatumFactory {
     }
 
     public static key<T>(name: string, type: Type<T>): Key<T> {
-
         let bits: string[] = name.split('/');
 
         if (bits.length == 2) {
@@ -63,9 +61,14 @@ export class DatumFactory {
     }
 
     public static spans<T, V>(obj: Obj, keys: Map<string, Key<any>>): Spans<T, V> {
+        const targetName = obj.target;
+        const maybeValue = keys.get(targetName);
 
-        const target: Key<T> = keys.get(obj.target);
+        if (maybeValue === undefined) {
+            throw new Error("invalid target " + targetName);
+        }
 
+        const target: Key<T> = maybeValue;
         let spans: Spans<T, V> = new Spans(target);
 
         for (let i in obj.spans) {
@@ -80,7 +83,12 @@ export class DatumFactory {
 
         // const wiith:V = DatumFactory.get(keys.get(obj.target), obj.with, keys);
 
-        const span: Span<T, V> = new Span<T, V>(keys.get(obj.target), obj.from, obj.to, obj.with);
+        const target = keys.get(obj.target);
+        if (target === undefined) {
+            throw new Error("invalid target " + target);
+        }
+
+        const span: Span<T, V> = new Span<T, V>(target, obj.from, obj.to, obj.with);
 
         return span;
     }

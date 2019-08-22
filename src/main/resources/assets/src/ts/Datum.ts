@@ -28,7 +28,11 @@ export class Datum {
     }
 
     public getKey<T>(key: string): Key<T> {
-        return this.keys.get(key);
+        const val = this.keys.get(key);
+        if (val === undefined)
+            throw new Error("unknown key " + key);
+
+        return val;
     }
 
     public with<T>(key: Key<T>, value: T): Datum {
