@@ -1,3 +1,5 @@
+import {Types} from '../ts/Types';
+
 function types() {
     return {
         SPANS : Types.SPANS,
