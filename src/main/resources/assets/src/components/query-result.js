@@ -67,7 +67,9 @@ const queryResult = {
                 var syncKeys = (selected) => {
                     if($ctrl.selectedKeys != selected && selected) {
                         $ctrl.selectedKeys = selected.reduce((keys, key)=> {
-                            keys[key] = true;
+                            if($ctrl.keys[key]) {
+                                keys[key] = true;
+                            }
                             return keys;
                         }, {});
                     }

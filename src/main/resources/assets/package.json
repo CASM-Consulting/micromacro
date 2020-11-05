@@ -22,7 +22,7 @@
     "css-loader": "^3.2.0",
     "file-loader": "^4.2.0",
     "immutable": "^4.0.0-rc.12",
-    "jquery": "^3.3.1",
+    "jquery": "^3.5.1",
     "leaflet": "^1.4.0",
     "leaflet.heat": "^0.2.0",
     "leaflet.timeline": "^1.2.1",

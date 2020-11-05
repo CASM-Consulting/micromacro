@@ -1,0 +1,15 @@
+.sg-collapse {
+
+}
+
+.sg-collapse.out {
+    display: none;
+}
+
+.sg-collapse.transitioning {
+    overflow: hidden;
+    -webkit-transition:height 0.34s ease;
+    -moz-transition:height 0.34s ease;
+    -o-transition:height 0.34s ease;
+    transition:height 0.34s ease;
+}

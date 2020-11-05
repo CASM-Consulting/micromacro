@@ -1,8 +1,16 @@
+.kr-arrow {
+    display: inline-block;
+    height: 0;
+    width: 0;
+    border: 6px solid transparent;
+}
+
 .keyselector .ns:hover .kr-arrow.up {
     border-bottom-color: #929292;
     margin-top: -1px;
     margin-bottom: 1px;
 }
+
 .keyselector .ns:hover .kr-arrow.down {
     border-top-color: #929292;
     margin-top: 5px;

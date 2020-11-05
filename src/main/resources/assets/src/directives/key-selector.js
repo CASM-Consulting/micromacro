@@ -4,41 +4,32 @@ function keySelector(Collapse) {
         scope : {
             "selectedKeys" : "=",
             "keys" : "=",
-            "invert" : "=",
+//            "invert" : "=",
             "msg": "=",
             "useField": "=?",
             "onSelect": "&?"
         },
-        templateUrl : 'html/directives/key-selector.html',
+        templateUrl : 'html/directives/keySelector.html',
         link: function($scope, element, attr) {
             $scope.kz = Collapse.newCollapseZone();
-            $scope.selectedKeys = $scope.selectedKeys || [];
+            $scope.selectedKeys = $scope.selectedKeys || {};
             $scope.showing = false;
 
             var useField = 'useField' in attr? $scope.useField : false;
             var onChange = 'onSelect' in attr? $scope.onSelect : function(){};
 
-            $scope.$watch(useField? 'keys.'+useField: 'keys.incoming', function (val) {
+            $scope.$watch('keys', function (val) {
                 if (val) {
-                    $scope.selectedKeys = $scope.selectedKeys || [];
                     $scope.namespace2keys = {}
-                    val = Object.keys(val);
                     $scope.showing = val.length > 0;
                     val.sort();
                     angular.forEach(val, function (keyName) {
                         var key = {str: keyName};
-                        if(!$scope.invert) {
-                            if ($scope.selectedKeys.indexOf(keyName) > -1) {
-                                key.selected = true;
-                            } else {
-                                key.selected = false;
-                            }
+
+                        if ($scope.selectedKeys[keyName]) {
+                            key.selected = true;
                         } else {
-                            if ($scope.selectedKeys.indexOf(keyName) > -1) {
-                                key.selected = false;
-                            } else {
-                                key.selected = true;
-                            }
+                            key.selected = false;
                         }
 
                         var idx = keyName.indexOf("/"),
@@ -66,34 +57,18 @@ function keySelector(Collapse) {
             });
 
             $scope.selectKey = function (key, noSave) {
-                if(!$scope.invert) {
-                    if(!key.selected) {
-                        $scope.selectedKeys.push(key.str);
-                        key.selected = true;
-                        if (!noSave) onChange();
-                    }
-                } else {
-                    if(!key.selected) {
-                        $scope.selectedKeys.splice($scope.selectedKeys.indexOf(key.str), 1);
-                        key.selected = true;
-                        if (!noSave) onChange();
-                    }
+                if(!key.selected) {
+                    $scope.selectedKeys[key.str] = true;
+                    key.selected = true;
+                    if (!noSave) onChange();
                 }
             };
 
             $scope.deselectKey = function (key, noSave) {
-                if(!$scope.invert) {
-                    if (key.selected) {
-                        $scope.selectedKeys.splice($scope.selectedKeys.indexOf(key.str), 1);
-                        key.selected = false;
-                        if (!noSave) onChange();
-                    }
-                } else {
-                    if (key.selected) {
-                        $scope.selectedKeys.push(key.str);
-                        key.selected = false;
-                        if (!noSave) onChange();
-                    }
+                if (key.selected) {
+                    $scope.selectedKeys[key.str] = false;
+                    key.selected = false;
+                    if (!noSave) onChange();
                 }
             }
 
