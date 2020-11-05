@@ -48,6 +48,9 @@ module.exports = {
         new CopyWebpackPlugin([{from: 'static'}])
     ],
     optimization: {
-        minimize: false
+        minimize: false,
+        splitChunks: {
+            chunks: 'all',
+        }
     }
 };
