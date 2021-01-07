@@ -298,6 +298,7 @@ const map = {
                             var colour = colours[idx];
 
                             return L.circleMarker(latlng, {radius:5, color:colour}).bindPopup(function(l) {
+
                                 return "<ul>" +
                                     "<li>Match: " + data.metadata.with[0].match + "</li>"+
                                     // "<li>Original: " + data.metadata.spanned + "</li>"+

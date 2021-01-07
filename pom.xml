@@ -11,7 +11,7 @@
 
     <groupId>uk.ac.susx.shl</groupId>
     <artifactId>micromacro</artifactId>
-    <version>1.2.5</version>
+    <version>1.2.6</version>
     <packaging>jar</packaging>
 
     <name>micromacro</name>
@@ -37,7 +37,7 @@
         <fuzzywuzzy.version>1.1.10</fuzzywuzzy.version>
         <!--<stanford.version>3.9.1</stanford.version>-->
         <opennlp.version>1.8.4</opennlp.version>
-        <mapdb.version>3.0.7</mapdb.version>
+        <mapdb.version>3.0.8</mapdb.version>
         <natty.version>0.13</natty.version>
         <junit.jupiter.version>5.2.0</junit.jupiter.version>
         <commons-csv.version>1.5</commons-csv.version>

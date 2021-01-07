@@ -1,4 +1,5 @@
 import {DatumFactory} from '../ts/DatumFactory';
+import {Datum} from '../ts/Datum';
 
 function queries($q, Server, $http) {
     return {
