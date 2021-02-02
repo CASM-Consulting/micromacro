@@ -1,4 +1,5 @@
 import L from 'leaflet';
+import moment from 'moment';
 
 const map = {
     templateUrl : 'html/components/map.html',
@@ -299,14 +300,27 @@ const map = {
 
                             return L.circleMarker(latlng, {radius:5, color:colour}).bindPopup(function(l) {
 
+                                var lat = Math.round10(latlng.lat, -5);
+                                var lng = Math.round10(latlng.lng, -5);
+
+                                var matches = data.metadata.with.map(d => {
+                                    return { match : d.match, doc : d.documentRef };
+                                });
+
+                                var html = matches.map( m => {
+                                    return "<li>" + m.documentRef + "</li>";
+                                } )
+                                .join(" ");
+
                                 return "<ul>" +
-                                    "<li>Match: " + data.metadata.with[0].match + "</li>"+
-                                    // "<li>Original: " + data.metadata.spanned + "</li>"+
-                                "<li>Lat: " + latlng.lat + "</li>"+
-                                    "<li>Lng: " + latlng.lng+ "</li>"+
-                                    // "<li>Date: " + data.metadata.date + "</li>"+
-                                // "<li>Trial: " + data.metadata.trialId + "</li>"+
-                                "</ul>";
+                                            html
+                                            +
+                                            // "<li>Match: " + match + "</li>"+
+                                            // "<li>Original: " + data.metadata.spanned + "</li>"+
+                                            "<li>lat/lng: " + lat  + ", " + lng + "</li>"+
+                                            // "<li>Date: " + data.metadata.date + "</li>"+
+                                            // "<li>Trial: " + data.metadata.trialId + "</li>"+
+                                        "</ul>";
                             });
                         }
                     });

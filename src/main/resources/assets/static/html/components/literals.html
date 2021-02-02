@@ -6,7 +6,7 @@
         </div>
     </div>
     <div class="section">
-        <div><a href ng-click="$ctrl.isUncollapsed = !$ctrl.isUncollapsed"><b>New Literal</b></a></div>
+        <div><a href ng-click="$ctrl.isUncollapsed = !$ctrl.isUncollapsed"><b>New Constraint</b></a></div>
 
         <div uib-collapse="!$ctrl.isUncollapsed">
             <label class="control-label" for="literal-letter">Letter</label>
@@ -27,9 +27,10 @@
             </select>
 
             <label class="control-label" for="literal-args">Arguments</label>
+
             <input class="form-control" type="text" id="literal-args" ng-model="$ctrl.args">
 
-            <button class="btn btn-default" ng-click="$ctrl.addLiteral()">Set Literal</button>
+            <button class="btn btn-default" ng-click="$ctrl.addLiteral()">Set Constraint</button>
         </div>
     </div>
 

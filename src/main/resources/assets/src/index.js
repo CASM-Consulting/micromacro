@@ -17,12 +17,16 @@ require('angular-ui');
 require('angular-ui-bootstrap');
 require('@uirouter/angularjs');
 require('ui-leaflet');
+require('leaflet.timeline');
+require('leaflet.heat');
 require('angular-simple-logger');
 require('angular-animate');
 require('angular-spinners');
 require('angular-nvd3');
 require('angular-sanitize');
 require('ng-csv');
+require('moment');
+require('round10').polyfill();
 
 
 require('./ts/List');

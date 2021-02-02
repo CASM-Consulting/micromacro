@@ -30,6 +30,7 @@
     "moment": "^2.22.2",
     "ng-csv": "^0.3.6",
     "nvd3": "^1.8.6",
+    "round10": "^1.0.3",
     "style-loader": "^1.0.0",
     "ts-loader": "^6.0.4",
     "typescript": "^3.5.3",

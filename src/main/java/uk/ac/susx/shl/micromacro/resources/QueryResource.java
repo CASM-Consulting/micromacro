@@ -29,10 +29,22 @@ public class QueryResource<Q extends SqlQuery, U extends SqlUpdate> extends DAOS
         this.method52DAO = method52DAO;
     }
 
+    /**
+     *
+     * @param asyncResponse
+     * @param query
+     * @throws Exception
+     */
     public void query(AsyncResponse asyncResponse, Q query) throws Exception {
         daoStreamResponse(asyncResponse, query, (stream-> StreamSupport.stream(stream.spliterator(), false) ));
     }
 
+    /**
+     * Run the query for caching purposes only, don't return anything.
+     * @param asyncResponse
+     * @param query
+     * @throws Exception
+     */
     public void cacheOnly(AsyncResponse asyncResponse, Q query) throws Exception {
         daoStreamResponse(asyncResponse, query, (stream) -> {
             long total;
@@ -46,19 +58,34 @@ public class QueryResource<Q extends SqlQuery, U extends SqlUpdate> extends DAOS
                 total = stream.count();
             }
 
-
             return total;
         });
     }
 
-    public void skipLimit(AsyncResponse asyncResponse, int skip, int limit, Q query) throws Exception {
+    /**
+     * Return [offset : offset + limit] of query results.
+     * @param asyncResponse
+     * @param offset
+     * @param limit
+     * @param query
+     * @throws Exception
+     */
+    public void skipLimit(AsyncResponse asyncResponse, int offset, int limit, Q query) throws Exception {
 
         daoStreamResponse(asyncResponse, query, (stream-> {
             List<String> list = datumDAO.list(query);
-            return list.subList(Math.min(list.size(), skip), Math.min(list.size(), skip + limit)).stream();
+            return list.subList(Math.min(list.size(), offset), Math.min(list.size(), offset + limit)).stream();
         }));
     }
 
+
+    /**
+     * Index directly to a page of the query response. Cache if not already cached (slow).
+     * @param asyncResponse
+     * @param page
+     * @param query
+     * @throws Exception
+     */
     public void page(AsyncResponse asyncResponse, int page, Q query) throws Exception {
         daoStreamResponse(asyncResponse, query, (stream-> {
             CachingDAO<String, SqlQuery> cache = (CachingDAO<String, SqlQuery>)datumDAO.getDAO();
@@ -79,6 +106,14 @@ public class QueryResource<Q extends SqlQuery, U extends SqlUpdate> extends DAOS
 
     }
 
+
+    /**
+     * Index to a partition of a query response.
+     * @param asyncResponse
+     * @param partition
+     * @param query
+     * @throws Exception
+     */
     public void partition(AsyncResponse asyncResponse, String partition, Q query) throws Exception {
 
         daoStreamResponse(asyncResponse, query, (stream-> {
@@ -110,6 +145,12 @@ public class QueryResource<Q extends SqlQuery, U extends SqlUpdate> extends DAOS
         return result;
     }
 
+    /**
+     * Get multiple partitions.
+     * @param query
+     * @param partitionIds
+     * @return
+     */
     public Response partitions(Q query, List<String> partitionIds) {
 
         Map<String, List<String>> result = new HashMap<>();
@@ -138,6 +179,12 @@ public class QueryResource<Q extends SqlQuery, U extends SqlUpdate> extends DAOS
         return Response.status(Response.Status.OK).entity( n ).build();
     }
 
+
+    /**
+     * Attempt to optimise table by creating indexes on the query keys.
+     * @param query
+     * @return
+     */
     public Response optimise(Q query) {
 
         method52DAO.optimiseTable((DatumQuery)query);
@@ -147,6 +194,12 @@ public class QueryResource<Q extends SqlQuery, U extends SqlUpdate> extends DAOS
         ).build();
     }
 
+    /**
+     * Return counts for the given partitions ids.
+     * @param query
+     * @param partitionIds
+     * @return
+     */
     public Response counts(Q query, List<String> partitionIds) {
 
         List<Object[]> counts = new ArrayList<>(partitionIds.size());
@@ -187,6 +240,13 @@ public class QueryResource<Q extends SqlQuery, U extends SqlUpdate> extends DAOS
         ).build();
     }
 
+
+    /**
+     * Get the page number for the given partition id.
+     * @param query
+     * @param id
+     * @return
+     */
     public Response partitionPage(Q query, Object id) {
 
         Map<String, Integer> partitions = getParitions(query);

@@ -1,3 +1,5 @@
+import moment from 'moment';
+
 function maps($q, Queries, Datums, Server) {
     var MAX_DATE = new Date( 8640000000000000);
     var MIN_DATE = new Date(-8640000000000000);
@@ -13,7 +15,8 @@ function maps($q, Queries, Datums, Server) {
                         coordinates : [match.resource.lng, match.resource.lat]
                     },
                     type : "Feature",
-                    metadata : span
+                    metadata : span,
+                    datum: datum
                 }
                 return feature;
             });
