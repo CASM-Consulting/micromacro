@@ -42,9 +42,18 @@
 <!--            </div>-->
 
             <div class="section">
-                <label class="control-label" for="placeKey" >Place Key</label>
-
+                <label class="control-label" for="placeKey">Place Key</label>
                 <key keys="$ctrl.keyList" ng-model="$ctrl.map.geoKey" for-id="'placeKey'"></key>
+            </div>
+
+            <div class="section">
+                <label class="control-label" for="contextKey">Context Key</label>
+                <key keys="$ctrl.keyList" ng-model="$ctrl.map.contextKey" for-id="'contextKey'"></key>
+            </div>
+
+            <div class="section">
+                <label class="control-label" for="contextKey">Entry Key</label>
+                <key keys="$ctrl.keyList" ng-model="$ctrl.map.entryKey" for-id="'entryKey'"></key>
             </div>
 
             <div class="section">

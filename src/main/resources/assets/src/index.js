@@ -5,6 +5,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'angular-ui-grid/ui-grid.min.css';
 import 'leaflet/dist/leaflet.css';
 import 'nvd3/build/nv.d3.min.css';
+import 'leaflet.markercluster/dist/MarkerCluster.css';
+import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 
 // angular imports.
 
@@ -17,8 +19,11 @@ require('angular-ui');
 require('angular-ui-bootstrap');
 require('@uirouter/angularjs');
 require('ui-leaflet');
+require('leaflet.markercluster');
 require('leaflet.timeline');
 require('leaflet.heat');
+require('leaflet.markercluster.layersupport');
+require('leaflet.markercluster.placementstrategies');
 require('angular-simple-logger');
 require('angular-animate');
 require('angular-spinners');

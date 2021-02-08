@@ -65,6 +65,7 @@ const map = {
 
         var timelines = [];
         var timelineControl = null;
+        var layerControl = null;
 
         $ctrl.queries = [];
 
@@ -286,9 +287,35 @@ const map = {
                     });
                 }
 
+                var markerClusterOptions = {
+//                    iconCreateFunction : iconCreateFunction,
+                    clockHelpingCircleOptions: {
+                        weight: 0.7,
+                        opacity: 1,
+                        color: "black",
+                        fillOpacity: 0,
+                        dashArray: "10 5",
+                    },
+                    maxClusterRadius : 30,
+                    helpingCircles : true,
+                    elementsPlacementStrategy : 'default',
+                    spiderLegPolylineOptions : {weight: 1},
+                    spiderfyDistanceMultiplier: 1.1,
+                    zoomToBoundsOnClick : false,
+                    spiderfyOnMaxZoom : false,
+                    singleMarkerMode : false
+                };
+
+//                var clusters = L.markerClusterGroup();
+                var clusters = L.markerClusterGroup.layerSupport(markerClusterOptions);
+
+                clusters.on('clusterclick', function(e){
+                    var cluster = e.layer;
+                    cluster.spiderfy();
+                });
+
+
                 timelines = $ctrl.queries.map( (query, idx) => {
-
-
 
                     var timeline = L.timeline(null, {
                         start : $ctrl.minDate.add(1000, "y").toDate().getTime(),
@@ -327,6 +354,10 @@ const map = {
                     timeline.times = times;
                     timelineControl.addTo(map);
                     timelineControl.addTimelines(timeline);
+
+                    timeline.addTo(clusters);
+                    clusters.checkIn(timeline);
+
                     timeline.addTo(map);
                     timeline.on('change', function(e){
                         $ctrl.selectedDate = moment(e.target.time).subtract(1000, "y").toDate();
@@ -345,7 +376,11 @@ const map = {
                     overlays[$ctrl.queries[i]._id] = timelines[i];
                 }
 
-                L.control.layers(null, overlays).addTo(map);
+                clusters.addTo(map);
+                map.addLayer(clusters);
+
+                layerControl = L.control.layers(null, overlays).addTo(map);
+
             });
         };
     }
