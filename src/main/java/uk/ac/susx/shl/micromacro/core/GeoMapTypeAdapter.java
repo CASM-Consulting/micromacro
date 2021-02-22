@@ -21,13 +21,15 @@ public class GeoMapTypeAdapter extends JsonCodec.Delegate<GeoMap> {
 
             String id = obj.get("id").getAsString();
             Key geoKey = context.deserialize(obj.get("geoKey"), Key.class);
+            Key contextKey = context.deserialize(obj.get("contextKey"), Key.class);
+            Key entryKey = context.deserialize(obj.get("entryKey"), Key.class);
             Key idKey = context.deserialize(obj.get("idKey"), Key.class);
             List<String> queries = context.deserialize(obj.get("queries"), new TypeToken<List<String>>(){}.getType());
 
             Map options = ifThere(obj, "options", (e) -> context.deserialize(e, Map.class), (Map)new HashMap<>());
             Map<String, Object> metadata = ifThere(obj, "options", (e) -> context.deserialize(e,  new TypeToken<Map<String, Object>>(){}.getType()), (Map<String,Object>)new HashMap<String,Object>());
 
-            GeoMap map = new GeoMap(id, queries, geoKey, idKey, options, metadata);
+            GeoMap map = new GeoMap(id, queries, geoKey, contextKey, entryKey, idKey, options, metadata);
 
             return map;
         }, (GeoMap src, Type typeOfSrc, JsonSerializationContext context) -> {
@@ -36,6 +38,9 @@ public class GeoMapTypeAdapter extends JsonCodec.Delegate<GeoMap> {
 
             result.addProperty("id", src.id());
             result.add("geoKey", context.serialize(src.geoKey(), Key.class));
+            result.add("geoKey", context.serialize(src.geoKey(), Key.class));
+            result.add("contextKey", context.serialize(src.contextKey(), Key.class));
+            result.add("entryKey", context.serialize(src.entryKey(), Key.class));
             result.add("idKey", context.serialize(src.idKey(), Key.class));
             result.add("queries", context.serialize(src.queries(), List.class));
             result.add("options", context.serialize(src.options(), Map.class));

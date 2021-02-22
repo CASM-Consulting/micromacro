@@ -7,7 +7,7 @@ function maps($q, Queries, Datums, Server) {
     var data2geoJson = (data, key) => {
 
         var features = data.filter(datum => key in datum).flatMap(datum => {
-            return datum[key].spans.map(span => {
+            return datum[key].spans.map( (span, idx) => {
                 var match = span.with[0];
                 var feature = {
                     geometry: {
@@ -16,7 +16,8 @@ function maps($q, Queries, Datums, Server) {
                     },
                     type : "Feature",
                     metadata : span,
-                    datum: datum
+                    datum: datum,
+                    idx : idx
                 }
                 return feature;
             });

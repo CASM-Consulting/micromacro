@@ -6,7 +6,7 @@ const map = {
     bindings : {
         map : '<'
     },
-    controller : function(Datums, $q, $stateParams, $http, $compile, leafletData, debounce, $window, Queries, Maps) {
+    controller : function(Datums, $q, $stateParams, $http, $compile, $scope, leafletData, debounce, $window, Queries, Maps) {
         var $ctrl = this;
 
         var colours = ['purple', 'green', 'red', 'blue', 'orange', 'black'];
@@ -23,12 +23,17 @@ const map = {
             }
         };
 
+        $scope.getContext = () => {
+            alert("blah");
+        };
+
+
 
         $ctrl.saveMap = () => {
             Maps.save($stateParams.workspaceId, $ctrl.map.id, $ctrl.map).then(function(map){
                 //ok?
             });
-        }
+        };
 
         $ctrl.changeTiles = function(tiles) {
             $ctrl.leafletMap.tiles = tilesDict[tiles];
@@ -330,16 +335,21 @@ const map = {
                                 var lat = Math.round10(latlng.lat, -5);
                                 var lng = Math.round10(latlng.lng, -5);
 
+                                var contextId = data.datum[Datums.key($ctrl.map.contextKey).key()];
+                                var entryId = data.datum[Datums.key($ctrl.map.entryKey).key()];
+
                                 var matches = data.metadata.with.map(d => {
                                     return { match : d.match, doc : d.documentRef };
                                 });
 
-                                var html = matches.map( m => {
-                                    return "<li>" + m.documentRef + "</li>";
+                                var docRef = $ctrl.map.geoKey;
+
+                                var html = matches.map( (m, jdx) => {
+                                    return '<li><a  ng-click="getContext()">' + entryId + ' : ' + data.idx + ' : ' + jdx + '</a></li>';
                                 } )
                                 .join(" ");
 
-                                return "<ul>" +
+                                return $compile("<ul>" +
                                             html
                                             +
                                             // "<li>Match: " + match + "</li>"+
@@ -347,7 +357,7 @@ const map = {
                                             "<li>lat/lng: " + lat  + ", " + lng + "</li>"+
                                             // "<li>Date: " + data.metadata.date + "</li>"+
                                             // "<li>Trial: " + data.metadata.trialId + "</li>"+
-                                        "</ul>";
+                                        "</ul>")($scope.$new())[0];
                             });
                         }
                     });
