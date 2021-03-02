@@ -20,6 +20,17 @@
     font-weight:bold;
 }
 
+.span:hover {
+    opacity: 50%;
+    cursor: pointer;
+}
+
+.token:hover {
+    opacity: 50%;
+    cursor: pointer;
+}
+
+
 
 .leaflet-bottom.leaflet-left{
     width: 100%;
@@ -64,3 +75,4 @@
    -o-animation: flickerAnimation 1s infinite;
     animation: flickerAnimation 1s infinite;
 }
+
