@@ -1,10 +1,25 @@
 import {DatumFactory} from '../ts/DatumFactory';
 import {Datum} from '../ts/Datum';
 
-function queries($q, Server, $http) {
+function queries($q, Server, $http, Tables) {
+    var queryTableCache = {};
+
+    var promiseTable = (workspaceId, queryId) => {
+        if(query in $ctrl.queryTableCache) {
+            return $q( (r) => {
+                r($ctrl.queryTableCache[queryId]);
+            });
+        } else {
+            return Queries.load(workspaceId, queryId)
+                .then((data)=>{
+                    $ctrl.queryTableCache[queryId] = data.table;
+                    return data.table;
+                });
+        }
+    };
+
     return {
         binProximityResultByPartition : function (result, partitionKey) {
-
 
             partitionKey = DatumFactory.keyFromObj(partitionKey).key();
             var curPartition = null;
@@ -192,6 +207,7 @@ function queries($q, Server, $http) {
                 });
             });
         },
+
         getMeta : function(workspaceId, queryId, metaKey, type, defaultValue) {
 
             return $q(function(resolve) {
@@ -214,6 +230,17 @@ function queries($q, Server, $http) {
                     },
                     success : resolve
                 });
+            });
+        },
+
+        getTable : (workspaceId, queryId) => {
+
+            return promiseTable(workspaceId, queryId);
+        },
+
+        getTableKeys : (workspaceId, queryId) => {
+            return promiseTable(workspaceId, queryId).then( (table) => {
+                return Tables.schema(table);
             });
         },
 

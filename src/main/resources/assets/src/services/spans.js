@@ -7,13 +7,13 @@ function spans(Datums, Types) {
         var spanss = spanColumn.spans;
         var spanIndices = [];
 
-        for(var i = 0; i < text.length; ++i) {
+        for(var i = 0; i < text.length+1; ++i) {
             spanIndices.push({begins:[],ends:[]});
         }
 
         var idx = 0;
 
-        var n = text.length-1;
+        var n = text.length;
 
         for(var i in spanss) {
             var spans = spanss[i].spans.spans;

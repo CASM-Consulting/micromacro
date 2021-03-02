@@ -32,6 +32,45 @@ function maps($q, Queries, Datums, Server) {
         return featureCollection;
     };
 
+    /**
+     * Collects keys from tables across all relevant map queries.
+     */
+    var getKeys = (map) => {
+
+        var dateKey = $ctrl.map.dateKey;
+        var keysPromises = [];
+
+        $ctrl.keyList = [];
+
+        angular.forEach(map.queries, (on, query) => {
+            on && keysPromises.push(promiseTable(query));
+        });
+
+        $q.all(tablePromises).then((tables) => {
+
+            var schemaPromises = tables.map( (table) => {
+                return promiseSchema(table);
+            });
+
+            $q.all(schemaPromises).then( (keyss) => {
+                var keys = keyss[0];
+                var rest = keyss.slice(1);
+                if(rest.length > 0) {
+                    rest.reduce((keys, moreKeys) => {
+                        angular.forEach(keys, (key, name) => {
+                            if(!(name in moreKeys)) {
+                                delete keys[name];
+                            }
+                        });
+                        return keys;
+                    }, keys);
+                }
+                $ctrl.keyList = keyList(keys);
+                $ctrl.map.dateKey = dateKey;
+            })
+        });
+    }
+
     return {
 
         load : function(workspaceId, mapId) {

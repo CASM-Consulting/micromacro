@@ -1,7 +1,28 @@
 import {DatumFactory} from '../ts/DatumFactory';
 
 function tables($q, Server) {
+
+    var tableKeyCache = {};
+
+    var promiseSchema = (table) => {
+        if(table in $ctrl.tableKeyCache) {
+            return $q( (r) => {
+                r($ctrl.tableKeyCache[table]);
+            });
+        } else {
+            return Tables.schema(table)
+                .then((keys)=> {
+                    $ctrl.tableKeyCache[table] = keys;
+                    return keys;
+                });
+        }
+    };
+
+
+
+
     return {
+
         list : function() {
             return $q(function(resolve) {
                 Server.get("api/tables/list", {

@@ -1,12 +1,14 @@
 import L from 'leaflet';
 import moment from 'moment';
+import {DatumFactory} from '../ts/DatumFactory';
 
 const map = {
     templateUrl : 'html/components/map.html',
     bindings : {
         map : '<'
     },
-    controller : function(Datums, $q, $stateParams, $http, $compile, $scope, leafletData, debounce, $window, Queries, Maps) {
+    controller : function(Datums, $q, $stateParams, $http, $compile, $scope, leafletData, debounce, $window,
+                            Queries, Maps, Rows) {
         var $ctrl = this;
 
         var colours = ['purple', 'green', 'red', 'blue', 'orange', 'black'];
@@ -335,29 +337,39 @@ const map = {
                                 var lat = Math.round10(latlng.lat, -5);
                                 var lng = Math.round10(latlng.lng, -5);
 
+                                var displayKeys = {};
+                                displayKeys[Datums.key($ctrl.map.geoKey).key()] = true;
+
+                                var row = Rows.getRowsColumns([data.datum], $ctrl.map.keys, displayKeys);
+
+                                var datum = Datums.datum(data.datum, $ctrl.map.keys);
+
                                 var contextId = data.datum[Datums.key($ctrl.map.contextKey).key()];
                                 var entryId = data.datum[Datums.key($ctrl.map.entryKey).key()];
+                                var spans = datum.get(spansKey);
 
-                                var matches = data.metadata.with.map(d => {
-                                    return { match : d.match, doc : d.documentRef };
-                                });
+                                var localScope = $scope.$new();
+                                localScope.data = data;
+                                var spanColumn = {};
+                                spanColumn.text = datum.get(datum.resolve(spans.target).target);
+                                spanColumn.spans = [spans];
+                                localScope.spanColumn = spanColumn;
+
+                                data.contextId = contextId;
+                                data.entryId = entryId;
 
                                 var docRef = $ctrl.map.geoKey;
 
-                                var html = matches.map( (m, jdx) => {
-                                    return '<li><a  ng-click="getContext()">' + entryId + ' : ' + data.idx + ' : ' + jdx + '</a></li>';
-                                } )
-                                .join(" ");
-
                                 return $compile("<ul>" +
-                                            html
-                                            +
-                                            // "<li>Match: " + match + "</li>"+
-                                            // "<li>Original: " + data.metadata.spanned + "</li>"+
-                                            "<li>lat/lng: " + lat  + ", " + lng + "</li>"+
-                                            // "<li>Date: " + data.metadata.date + "</li>"+
-                                            // "<li>Trial: " + data.metadata.trialId + "</li>"+
-                                        "</ul>")($scope.$new())[0];
+                                    '<li><a  ng-click="getContext()">{{data.entryId}}</a></li>' +
+                                        '<span-text spanss="spanColumn"> </span-text>'
+                                        +
+                                        // "<li>Match: " + match + "</li>"+
+                                        // "<li>Original: " + data.metadata.spanned + "</li>"+
+                                        "<li>lat/lng: " + lat  + ", " + lng + "</li>"+
+                                        // "<li>Date: " + data.metadata.date + "</li>"+
+                                        // "<li>Trial: " + data.metadata.trialId + "</li>"+
+                                    "</ul>")(localScope)[0];
                             });
                         }
                     });

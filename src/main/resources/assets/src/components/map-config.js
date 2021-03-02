@@ -97,6 +97,8 @@ const mapConfig = {
                         }
                         $ctrl.keyList = keyList(keys);
                         $ctrl.map.dateKey = dateKey;
+                        $ctrl.map.keys = keys;
+                        $ctrl.map.keyList = $ctrl.keyList;
                     })
                 });
             }
