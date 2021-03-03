@@ -1,7 +1,7 @@
 const spanText = {
     bindings : {
         spanss: '<',
-        updateSpan: '&'
+        updateSpan: '&?'
     },
     templateUrl: 'html/components/spanText.html',
     controller : function($scope, Spans) {
@@ -44,11 +44,15 @@ const spanText = {
             };
 
             $ctrl.selectSegment = (segment) => {
+                if(!$ctrl.updateSpan) {
+                    return;
+                }
                 if($ctrl.activeEnd) {
                     var span = $ctrl.activeEnd.span;
                     if(segment.to >= span.from) {
                         var i = $ctrl.activeEnd.i;
                         var j = $ctrl.activeEnd.j;
+//                        span = angular.copy(span);
                         span.to = segment.to;
                         $ctrl.updateSpan({span: span, i: i, j: j});
                         $ctrl.activeEnd = false;
@@ -58,6 +62,7 @@ const spanText = {
                     if(segment.from < span.to) {
                         var i = $ctrl.activeBegin.i;
                         var j = $ctrl.activeBegin.j;
+//                        span = angular.copy(span);
                         span.from = segment.from;
                         $ctrl.updateSpan({span: span, i: i, j: j});
                         $ctrl.activeBegin = false;

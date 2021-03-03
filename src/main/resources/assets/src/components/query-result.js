@@ -25,6 +25,8 @@ const queryResult = {
 
         $ctrl.widths = {};
 
+        $ctrl.changes = [];
+
         $ctrl.page = [];
         //        $ctrl.currentPage = 1;
         $ctrl.numPerPage = 10;
@@ -249,9 +251,11 @@ const queryResult = {
 
         $ctrl.updateSpan = function(row, key, span, i, j) {
             var spans = row[key];
-            spans.spans[i].spans.spans[j] = span;
+            $ctrl.changes.push(spans);
             //copy to trigger model update on span-text component
-            row[key] = angular.copy(spans);
+            spans = angular.copy(spans);
+            spans.spans[i].spans.spans[j] = span;
+            row[key] = spans;
 //            console.log("" + i + "" + j);
         };
     }
