@@ -8,12 +8,16 @@
           ng-repeat="end in segment.ends"
           style="color:{{end.color}}"
           ng-click="$ctrl.changeEnd(end)"
+          uib-tooltip="{{end.span._text}}"
     >
         ]
     </span>
     <span class="span span-begin"
           ng-repeat="begin in segment.begins"
-          style="color:{{begin.color}}">
+          style="color:{{begin.color}}"
+          ng-click="$ctrl.changeBegin(begin)"
+          uib-tooltip="{{begin.span._text}}"
+    >
         [
     </span>
 </span>

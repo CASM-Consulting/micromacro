@@ -21,16 +21,23 @@
 }
 
 .span:hover {
-    opacity: 50%;
+    opacity: 100%;
     cursor: pointer;
 }
 
 .token:hover {
-    opacity: 50%;
+    opacity: 100%;
     cursor: pointer;
 }
 
+.token {
+    opacity: 80%;
+}
 
+
+.span {
+    opacity: 50%;
+}
 
 .leaflet-bottom.leaflet-left{
     width: 100%;

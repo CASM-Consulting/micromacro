@@ -18,6 +18,7 @@ function spans(Datums, Types) {
         for(var i in spanss) {
             var spans = spanss[i].spans.spans;
             angular.forEach(spans, (span, j) => {
+                span._text = text.substring(span.from, span.to);
                 spanIndices[span.from].begins.push({
                         color: colours[idx],
                         span : span,
@@ -45,16 +46,16 @@ function spans(Datums, Types) {
 
             if(spansAtIdx.begins.length || spansAtIdx.ends.length) {
                 var segmentText = text.substring(prev, i);
-                prev = i;
 
                 segments.push({
                     text: segmentText,
                     begins : spansAtIdx.begins,
                     ends : spansAtIdx.ends,
-                    i : i*1
+                    from : prev*1,
+                    to : i*1
                 });
+                prev = i;
             }
-
         }
 
         if(prev < text.length) {
