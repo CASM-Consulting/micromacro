@@ -1,9 +1,19 @@
 <span ng-repeat="segment in $ctrl.segments" >
-    <span class="token"> {{segment.text}} </span>
-    <span class="span span-end" ng-repeat="end in ::segment.ends" style="color:{{end.color}}">
+    <span class="token"
+          ng-click="$ctrl.selectSegment(segment)"
+    >
+        {{segment.text}}
+    </span>
+    <span class="span span-end"
+          ng-repeat="end in segment.ends"
+          style="color:{{end.color}}"
+          ng-click="$ctrl.changeEnd(end)"
+    >
         ]
     </span>
-    <span class="span span-begin" ng-repeat="begin in ::segment.begins" style="color:{{begin.color}}">
+    <span class="span span-begin"
+          ng-repeat="begin in segment.begins"
+          style="color:{{begin.color}}">
         [
     </span>
 </span>

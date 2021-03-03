@@ -17,9 +17,21 @@ function spans(Datums, Types) {
 
         for(var i in spanss) {
             var spans = spanss[i].spans.spans;
-            angular.forEach(spans, (span) => {
-                spanIndices[span.from].begins.push({color: colours[idx]});
-                spanIndices[Math.min(n,span.to)].ends.push({color: colours[idx]});
+            angular.forEach(spans, (span, j) => {
+                spanIndices[span.from].begins.push({
+                        color: colours[idx],
+                        span : span,
+                        i : i,
+                        j : j
+                    });
+
+                spanIndices[span.to].ends.push({
+                        color: colours[idx],
+                        span : span,
+                        i : i,
+                        j : j
+                    });
+
             });
             ++idx;
         }
@@ -38,7 +50,8 @@ function spans(Datums, Types) {
                 segments.push({
                     text: segmentText,
                     begins : spansAtIdx.begins,
-                    ends : spansAtIdx.ends
+                    ends : spansAtIdx.ends,
+                    i : i*1
                 });
             }
 

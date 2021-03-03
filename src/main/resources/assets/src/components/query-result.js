@@ -247,6 +247,12 @@ const queryResult = {
             });
         };
 
+        $ctrl.updateSpan = function(row, key, span, i, j) {
+            var spans = row[key];
+            spans.spans[i].spans.spans[j] = span;
+            row[key] = angular.copy(spans);
+            console.log("" + i + "" + j);
+        };
     }
 };
 

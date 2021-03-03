@@ -102,7 +102,7 @@
                         <div>
                             <div ng-if="row[key].type=='spans'">
                                 <div>
-                                    <span-text spanss="row[key]"> </span-text>
+                                    <span-text update-span="$ctrl.updateSpan(row, key, span, i, j)" spanss="row[key]"> </span-text>
                                 </div>
                             </div>
 
