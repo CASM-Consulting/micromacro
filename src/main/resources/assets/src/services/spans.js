@@ -1,5 +1,5 @@
 function spans(Datums, Types) {
-    var colours = ['red', 'grey', 'blue', 'green', 'orange']
+    var colours = ['grey',  'orange', 'green', 'blue', 'red']
 
 
     var segments = function(spanColumn) {

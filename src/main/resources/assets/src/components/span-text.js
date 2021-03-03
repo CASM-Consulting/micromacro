@@ -11,6 +11,20 @@ const spanText = {
         $ctrl.activeEnd = false;
         $ctrl.activeBegin = false;
 
+        $ctrl.isSelected = ( segment ) => {
+            var span = false;
+            if($ctrl.activeEnd) {
+                span = $ctrl.activeEnd.span;
+            } else if($ctrl.activeBegin) {
+                span = $ctrl.activeBegin.span;
+            }
+            if(span) {
+                return segment.from >= span.from && segment.to <= span.to;
+            } else {
+                false;
+            }
+        };
+
         $ctrl.$onInit = function() {
 
             $ctrl.segments = Spans.segments($ctrl.spanss);
@@ -20,17 +34,13 @@ const spanText = {
             });
 
             $ctrl.changeEnd = (end) => {
-                if(!$ctrl.activeEnd) {
-                    $ctrl.activeEnd = end;
-                    $ctrl.activeBeing = false;
-                }
+                $ctrl.activeEnd = end;
+                $ctrl.activeBegin = false;
             };
 
             $ctrl.changeBegin = (begin) => {
-                if(!$ctrl.activeBegin) {
-                    $ctrl.activeBegin = begin;
-                    $ctrl.activeEnd = false;
-                }
+                $ctrl.activeBegin = begin;
+                $ctrl.activeEnd = false;
             };
 
             $ctrl.selectSegment = (segment) => {
@@ -52,6 +62,8 @@ const spanText = {
                         $ctrl.updateSpan({span: span, i: i, j: j});
                         $ctrl.activeBegin = false;
                     }
+                } else if( $ctrl.activeSegment ) {
+
                 }
             };
         };

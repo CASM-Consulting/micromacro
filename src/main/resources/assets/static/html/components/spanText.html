@@ -1,6 +1,7 @@
 <span ng-repeat="segment in $ctrl.segments" >
     <span class="token"
           ng-click="$ctrl.selectSegment(segment)"
+          ng-class="{underline:$ctrl.isSelected(segment)}"
     >
         {{segment.text}}
     </span>

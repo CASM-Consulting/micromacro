@@ -17,7 +17,6 @@
 }
 
 .span-begin, .span-end {
-    font-weight:bold;
 }
 
 .span:hover {
@@ -34,9 +33,12 @@
     opacity: 80%;
 }
 
+.token.underline {
+    text-decoration: underline;
+}
 
 .span {
-    opacity: 50%;
+    opacity: 70%;
 }
 
 .leaflet-bottom.leaflet-left{

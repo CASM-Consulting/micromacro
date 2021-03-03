@@ -252,7 +252,7 @@ const queryResult = {
             spans.spans[i].spans.spans[j] = span;
             //copy to trigger model update on span-text component
             row[key] = angular.copy(spans);
-            console.log("" + i + "" + j);
+//            console.log("" + i + "" + j);
         };
     }
 };
