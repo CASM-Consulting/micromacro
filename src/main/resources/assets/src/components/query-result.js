@@ -249,13 +249,25 @@ const queryResult = {
             });
         };
 
-        $ctrl.updateSpan = function(row, key, span, i, j) {
-            var spans = row[key];
-            $ctrl.changes.push(spans);
+        var updateChanged = function(index, original, update) {
+            if(!$ctrl.changes[index]) {
+                $ctrl.changes[index] = {
+                    original : original
+                };
+            }
+
+            $ctrl.changes[index]['update'] = update;
+        };
+
+        $ctrl.updateSpan = function(index, row, key, span, i, j) {
+            var original = row[key];
             //copy to trigger model update on span-text component
-            spans = angular.copy(spans);
-            spans.spans[i].spans.spans[j] = span;
-            row[key] = spans;
+            var update = angular.copy(original);
+            update.spans[i].spans.spans[j] = span;
+            row[key] = update;
+
+            updateChanged(index, original, update);
+
 //            console.log("" + i + "" + j);
         };
     }

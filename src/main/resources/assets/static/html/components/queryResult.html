@@ -85,11 +85,19 @@
         </div>
     </div>
 
-
-
-
     <div class="row">
-        <div ng-repeat="change in $ctrl.changes"><span-text spanss="change"></span-text></div>
+
+        <h4 ng-if="$ctrl.changes">Changes</h4>
+
+        <div ng-repeat="change in $ctrl.changes track by $index"
+             ng-if="change">
+            <div class="col-md-1">
+                <button class="btn btn-sm btn-small" ng-click="$ctrl.changes.splice($index, 1)">x</button>
+            </div>
+            <div class="col-md-5"> <span-text spanss="change.original"></span-text> </div>
+            <div class="col-md-5"> <span-text spanss="change.update"></span-text> </div>
+        </div>
+
         <div class="table col-md-12">
             <table class="table table-striped">
                 <thead>
@@ -103,7 +111,7 @@
                         <div>
                             <div ng-if="row[key].type=='spans'">
                                 <div>
-                                    <span-text update-span="$ctrl.updateSpan(row, key, span, i, j)" spanss="row[key]"> </span-text>
+                                    <span-text update-span="$ctrl.updateSpan($parent.$parent.$index, row, key, span, i, j)" spanss="row[key]"> </span-text>
                                 </div>
                             </div>
 
@@ -117,4 +125,5 @@
             </table>
         </div>
     </div>
+
 </div>
