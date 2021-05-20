@@ -40,77 +40,12 @@ public class MicroMacroApplication extends Application<MicroMacroConfiguration> 
 
     @Override
     public void initialize(final Bootstrap<MicroMacroConfiguration> bootstrap) {
-        bootstrap.addBundle(new ConfiguredAssetsBundle("/assets/dist", "/", "index.html"));
-        bootstrap.addBundle(new MultiPartBundle());
+        bootstrap.addBundle(new ConfiguredMicroMacroBundle());
     }
 
     @Override
     public void run(final MicroMacroConfiguration configuration,
                     final Environment environment) throws IOException {
-
-        environment.servlets().setSessionHandler(new SessionHandler());
-
-        environment.jersey().register(new JsonProcessingExceptionMapper(true));
-        environment.jersey().register(GsonMessageBodyHandler.class);
-
-        //old stuff
-//        final PubMatcher pubMatcher = new PubMatcher(false, false);
-//        final PlacesResource places = new PlacesResource(configuration.geoJsonPath, pubMatcher);
-//        environment.jersey().register(places);
-//        final OBResource ob = new OBResource(configuration.sessionsPath, configuration.geoJsonPath,
-//                configuration.obMapPath, configuration.obCacheTable, jdbi,
-//                configuration.placeNerPort, configuration.pubNerPort,
-//                pubMatcher);
-//        environment.jersey().register(ob);
-
-        final JdbiFactory factory = new JdbiFactory();
-        final Jdbi jdbi = factory.build(environment, configuration.getDataSourceFactory(), "postgresql");
-
-        jdbi.setSqlLogger(new SqlLogger() {
-            @Override
-            public void logBeforeExecution(StatementContext context) {
-                LOG.info(context.getRenderedSql());
-            }
-
-            @Override
-            public void logAfterExecution(StatementContext context) {
-                LOG.info("done: " + context.getRenderedSql());
-            }
-        });
-
-        final Method52DAO method52DAO = new Method52DAO(jdbi);
-
-        final Gson gson = GsonBuilderFactory.get()
-                .registerTypeAdapter(GeoMap.class, new GeoMapTypeAdapter())
-                /*.registerTypeAdapterFactory(StreamTypeAdapter.get())*/
-                .create();
-
-        final QueryFactory queryFactory = new QueryFactory(gson);
-        final GeoMapFactory geoMapFactory = new GeoMapFactory(gson);
-        Files.createDirectories(Paths.get("data"));
-
-
-        final DefaultHealthCheck healthCheck = new DefaultHealthCheck();
-        environment.healthChecks().register("default", healthCheck);
-
-        environment.jersey().register(new Method52Resource(method52DAO));
-
-        CachingDAO<String, SqlQuery> cachingDAO = new CachingDAO<>(new BaseDAO<>(jdbi, new DatumStringMapper()), configuration.resultsCachePath);
-
-        DAO<String, SqlQuery> lockingCachingDatumDAO = new LockingDAO<>(cachingDAO);
-
-        environment.jersey().register(new SelectResource((DAO)lockingCachingDatumDAO, method52DAO));
-        environment.jersey().register(new ProximityResource((DAO)lockingCachingDatumDAO, method52DAO));
-
-        environment.jersey().register(new TableResource(method52DAO));
-
-        final WorkspaceFactory workspaceFactory = new WorkspaceFactory(queryFactory, geoMapFactory, configuration.historical);
-
-        final Workspaces workspaces = new Workspaces(configuration.workspaceMapPath, workspaceFactory);
-
-        environment.jersey().register(new WorkspacesResource(workspaces, workspaceFactory));
-
-        environment.jersey().register(new WorkspaceResource(workspaces, queryFactory, cachingDAO));
     }
 
 }
