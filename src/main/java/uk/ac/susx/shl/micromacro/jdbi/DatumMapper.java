@@ -20,6 +20,8 @@ import java.util.logging.Logger;
 public class DatumMapper implements RowMapper<Datum> {
 
 
+    private final Key<Long> GENERAL_POSTGRES_ID = Key.of("general/postgresId", RuntimeType.LONG);
+
     public final Gson gson;
 
     public DatumMapper(KeySet keys) {
@@ -33,7 +35,8 @@ public class DatumMapper implements RowMapper<Datum> {
         long id = rs.getLong(1);
         String json = rs.getString(2);
 
-        Datum datum = gson.fromJson(json, Datum.class);
+        Datum datum = gson.fromJson(json, Datum.class)
+                .with(GENERAL_POSTGRES_ID, id);
 
 //        datum = Util.processLabelDecisions(datum);
 
