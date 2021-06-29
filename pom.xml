@@ -11,7 +11,7 @@
 
     <groupId>uk.ac.susx.shl</groupId>
     <artifactId>micromacro</artifactId>
-    <version>1.2.9-SNAPSHOT</version>
+    <version>1.2.10</version>
     <packaging>jar</packaging>
 
     <name>micromacro</name>
@@ -56,24 +56,24 @@
         </dependencies>
     </dependencyManagement>
 
-    <repositories>
-        <repository>
-            <id>arcgis</id>
-            <url>https://esri.bintray.com/arcgis</url>
-        </repository>
-        <repository>
-            <id>osgeo</id>
-            <name>Open Source Geospatial Foundation Repository</name>
-            <url>http://download.osgeo.org/webdav/geotools/</url>
-        </repository>
-    </repositories>
+<!--    <repositories>-->
+<!--        <repository>-->
+<!--            <id>arcgis</id>-->
+<!--            <url>https://esri.bintray.com/arcgis</url>-->
+<!--        </repository>-->
+<!--        <repository>-->
+<!--            <id>osgeo</id>-->
+<!--            <name>Open Source Geospatial Foundation Repository</name>-->
+<!--            <url>http://download.osgeo.org/webdav/geotools/</url>-->
+<!--        </repository>-->
+<!--    </repositories>-->
 
-    <pluginRepositories>
-        <pluginRepository>
-            <id>arcgis-plugin</id>
-            <url>https://esri.bintray.com/arcgis</url>
-        </pluginRepository>
-    </pluginRepositories>
+<!--    <pluginRepositories>-->
+<!--        <pluginRepository>-->
+<!--            <id>arcgis-plugin</id>-->
+<!--            <url>https://esri.bintray.com/arcgis</url>-->
+<!--        </pluginRepository>-->
+<!--    </pluginRepositories>-->
 
 
 
@@ -157,11 +157,11 @@
             <version>${datum.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>com.esri.arcgisruntime</groupId>
-            <artifactId>arcgis-java</artifactId>
-            <version>${arcgis.version}</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.esri.arcgisruntime</groupId>-->
+<!--            <artifactId>arcgis-java</artifactId>-->
+<!--            <version>${arcgis.version}</version>-->
+<!--        </dependency>-->
 
         <dependency>
             <groupId>me.xdrop</groupId>
@@ -169,53 +169,53 @@
             <version>${fuzzywuzzy.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.geotools</groupId>
-            <artifactId>gt-main</artifactId>
-            <version>${geotools.version}</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.geotools</groupId>-->
+<!--            <artifactId>gt-main</artifactId>-->
+<!--            <version>${geotools.version}</version>-->
+<!--        </dependency>-->
 
-        <dependency>
-            <groupId>org.geotools</groupId>
-            <artifactId>gt-geojson</artifactId>
-            <version>${geotools.version}</version>
-<!--            <exclusions>-->
-<!--                <exclusion>-->
-<!--                    <artifactId>json-simple</artifactId>-->
-<!--                    <groupId>com.googlecode.json-simple</groupId>-->
-<!--                </exclusion>-->
-<!--            </exclusions>-->
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.geotools</groupId>-->
+<!--            <artifactId>gt-geojson</artifactId>-->
+<!--            <version>${geotools.version}</version>-->
+<!--&lt;!&ndash;            <exclusions>&ndash;&gt;-->
+<!--&lt;!&ndash;                <exclusion>&ndash;&gt;-->
+<!--&lt;!&ndash;                    <artifactId>json-simple</artifactId>&ndash;&gt;-->
+<!--&lt;!&ndash;                    <groupId>com.googlecode.json-simple</groupId>&ndash;&gt;-->
+<!--&lt;!&ndash;                </exclusion>&ndash;&gt;-->
+<!--&lt;!&ndash;            </exclusions>&ndash;&gt;-->
+<!--        </dependency>-->
 
-        <dependency>
-            <groupId>org.geotools</groupId>
-            <artifactId>gt-opengis</artifactId>
-            <version>${geotools.version}</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.geotools</groupId>-->
+<!--            <artifactId>gt-opengis</artifactId>-->
+<!--            <version>${geotools.version}</version>-->
+<!--        </dependency>-->
 
-        <dependency>
-            <groupId>org.geotools</groupId>
-            <artifactId>gt-metadata</artifactId>
-            <version>${geotools.version}</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.geotools</groupId>-->
+<!--            <artifactId>gt-metadata</artifactId>-->
+<!--            <version>${geotools.version}</version>-->
+<!--        </dependency>-->
 
-        <dependency>
-            <groupId>org.geotools</groupId>
-            <artifactId>gt-referencing</artifactId>
-            <version>${geotools.version}</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.geotools</groupId>-->
+<!--            <artifactId>gt-referencing</artifactId>-->
+<!--            <version>${geotools.version}</version>-->
+<!--        </dependency>-->
 
-        <dependency>
-            <groupId>org.geotools</groupId>
-            <artifactId>gt-epsg-hsql</artifactId>
-            <version>${geotools.version}</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.geotools</groupId>-->
+<!--            <artifactId>gt-epsg-hsql</artifactId>-->
+<!--            <version>${geotools.version}</version>-->
+<!--        </dependency>-->
 
-        <dependency>
-            <groupId>org.geotools</groupId>
-            <artifactId>gt-epsg-extension</artifactId>
-            <version>${geotools.version}</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.geotools</groupId>-->
+<!--            <artifactId>gt-epsg-extension</artifactId>-->
+<!--            <version>${geotools.version}</version>-->
+<!--        </dependency>-->
 
         <!--<dependency>-->
             <!--<groupId>edu.stanford.nlp</groupId>-->
@@ -335,14 +335,14 @@
                 <version>2.10.3</version>
             </plugin>
             <!--ArcGIS Java Maven Plugin-->
-            <plugin>
-                <groupId>com.esri.arcgisruntime</groupId>
-                <artifactId>arcgis-java-maven-plugin</artifactId>
-                <version>1.0</version>
-                <configuration>
-                    <version>${arcgis.version}</version>
-                </configuration>
-            </plugin>
+<!--            <plugin>-->
+<!--                <groupId>com.esri.arcgisruntime</groupId>-->
+<!--                <artifactId>arcgis-java-maven-plugin</artifactId>-->
+<!--                <version>1.0</version>-->
+<!--                <configuration>-->
+<!--                    <version>${arcgis.version}</version>-->
+<!--                </configuration>-->
+<!--            </plugin>-->
         </plugins>
     </reporting>
 </project>
