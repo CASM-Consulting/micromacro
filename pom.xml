@@ -11,7 +11,7 @@
 
     <groupId>uk.ac.susx.shl</groupId>
     <artifactId>micromacro</artifactId>
-    <version>1.2.10</version>
+    <version>1.2.14</version>
     <packaging>jar</packaging>
 
     <name>micromacro</name>
@@ -74,6 +74,23 @@
 <!--            <url>https://esri.bintray.com/arcgis</url>-->
 <!--        </pluginRepository>-->
 <!--    </pluginRepositories>-->
+
+    <repositories>
+        <repository>
+            <id>osgeo</id>
+            <name>OSGeo Release Repository</name>
+            <url>https://repo.osgeo.org/repository/release/</url>
+            <snapshots><enabled>false</enabled></snapshots>
+            <releases><enabled>true</enabled></releases>
+        </repository>
+        <repository>
+            <id>osgeo-snapshot</id>
+            <name>OSGeo Snapshot Repository</name>
+            <url>https://repo.osgeo.org/repository/snapshot/</url>
+            <snapshots><enabled>true</enabled></snapshots>
+            <releases><enabled>false</enabled></releases>
+        </repository>
+    </repositories>
 
 
 
@@ -175,17 +192,17 @@
 <!--            <version>${geotools.version}</version>-->
 <!--        </dependency>-->
 
-<!--        <dependency>-->
-<!--            <groupId>org.geotools</groupId>-->
-<!--            <artifactId>gt-geojson</artifactId>-->
-<!--            <version>${geotools.version}</version>-->
-<!--&lt;!&ndash;            <exclusions>&ndash;&gt;-->
-<!--&lt;!&ndash;                <exclusion>&ndash;&gt;-->
-<!--&lt;!&ndash;                    <artifactId>json-simple</artifactId>&ndash;&gt;-->
-<!--&lt;!&ndash;                    <groupId>com.googlecode.json-simple</groupId>&ndash;&gt;-->
-<!--&lt;!&ndash;                </exclusion>&ndash;&gt;-->
-<!--&lt;!&ndash;            </exclusions>&ndash;&gt;-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-geojson</artifactId>
+            <version>${geotools.version}</version>
+<!--            <exclusions>-->
+<!--                <exclusion>-->
+<!--                    <artifactId>json-simple</artifactId>-->
+<!--                    <groupId>com.googlecode.json-simple</groupId>-->
+<!--                </exclusion>-->
+<!--            </exclusions>-->
+        </dependency>
 
 <!--        <dependency>-->
 <!--            <groupId>org.geotools</groupId>-->
@@ -305,18 +322,18 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.0.0-M1</version>
-                <executions>
-                    <execution>
-                        <id>attach-javadocs</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+<!--            <plugin>-->
+<!--                <artifactId>maven-javadoc-plugin</artifactId>-->
+<!--                <version>3.0.0-M1</version>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <id>attach-javadocs</id>-->
+<!--                        <goals>-->
+<!--                            <goal>jar</goal>-->
+<!--                        </goals>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
         </plugins>
     </build>
 
