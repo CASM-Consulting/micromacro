@@ -53,24 +53,24 @@ public class BaseDAO<T, Q extends SqlQuery> implements DAO<T,Q> {
 
                 final StatementContext context = ri.getContext();
 
-                try {
-                    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                        try {
-                            context.getConnection().setAutoCommit(true);
-                        } catch (SQLException e) {
-                            System.out.println(e.getMessage());
-                            //pass
-                        }
-                    } ));
-                } catch (IllegalStateException e) {
-                    //shutting down already
-                    try {
-                        context.getConnection().setAutoCommit(true);
-                    } catch (SQLException ee) {
-                        System.out.println(ee.getMessage());
-                        //pass
-                    }
-                }
+//                try {
+//                    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+//                        try {
+//                            context.getConnection().setAutoCommit(true);
+//                        } catch (SQLException e) {
+//                            System.out.println(e.getMessage());
+//                            //pass
+//                        }
+//                    } ));
+//                } catch (IllegalStateException e) {
+//                    //shutting down already
+//                    try {
+//                        context.getConnection().setAutoCommit(true);
+//                    } catch (SQLException ee) {
+//                        System.out.println(ee.getMessage());
+//                        //pass
+//                    }
+//                }
 
                 ri.getContext().addCleanable(() -> context.getConnection().setAutoCommit(true));
 
@@ -101,25 +101,25 @@ public class BaseDAO<T, Q extends SqlQuery> implements DAO<T,Q> {
 
                 final StatementContext context = q.getContext();
 
-                try {
-
-                    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                        try {
-                            context.getConnection().setAutoCommit(true);
-                        } catch (SQLException e) {
-                            System.out.println(e.getMessage());
-                            //pass
-                        }
-                    } ));
-                } catch (IllegalStateException e) {
-                    //shutting down already
-                    try {
-                        context.getConnection().setAutoCommit(true);
-                    } catch (SQLException ee) {
-                        System.out.println(ee.getMessage());
-                        //pass
-                    }
-                }
+//                try {
+//
+//                    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+//                        try {
+//                            context.getConnection().setAutoCommit(true);
+//                        } catch (SQLException e) {
+//                            System.out.println(e.getMessage());
+//                            //pass
+//                        }
+//                    } ));
+//                } catch (IllegalStateException e) {
+//                    //shutting down already
+//                    try {
+//                        context.getConnection().setAutoCommit(true);
+//                    } catch (SQLException ee) {
+//                        System.out.println(ee.getMessage());
+//                        //pass
+//                    }
+//                }
 
                 q.getContext().addCleanable(() -> context.getConnection().setAutoCommit(true));
 
